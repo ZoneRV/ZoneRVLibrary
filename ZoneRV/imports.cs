@@ -7,6 +7,8 @@ global using Microsoft.Extensions.Logging;
 
 global using ZoneRV;
 global using ZoneRV.Models;
+global using ZoneRV.Models.Location;
+global using ZoneRV.Models.Van;
 global using ZoneRV.Models.Enums;
 
 

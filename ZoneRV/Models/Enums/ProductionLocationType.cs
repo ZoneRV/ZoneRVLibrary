@@ -1,9 +1,10 @@
 ﻿namespace ZoneRV.Models.Enums;
 
-public enum ProductionPositionType
+public enum ProductionLocationType
 {
     Prep,
     Subassembly,
+    Module,
     Bay,
     Finishing
 }

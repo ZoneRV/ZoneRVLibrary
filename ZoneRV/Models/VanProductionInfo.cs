@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using ZoneRV.Extensions;
-using ZoneRV.Models.ProductionPosition;
 
 namespace ZoneRV.Models;
 
@@ -20,5 +19,5 @@ public class VanProductionInfo
     public void AddHandoverHistory(DateTimeOffset changeDate, DateTimeOffset handoverDate)
         => _handoverHistory.Add((changeDate, handoverDate));
 
-    public PositionInfo PositionInfo { get; init; } = new PositionInfo();
+    public VanLocationInfo PositionInfo { get; init; } = new VanLocationInfo();
 }
