@@ -19,10 +19,10 @@ public static class Utils
         VanRegex = new Regex(vanRegexPattern, RegexOptions.Compiled);
     }
    
-    /// <param name="input">The string to check for van names.</param>
-    /// <param name="vanType">The model of van found.</param>
-    /// <param name="result">The formatted name of the van.</param>
-    /// <exception cref="ArgumentException">Throws exception if input string contains multiple distinct van names.</exception>
+    /// <exception cref="ArgumentException">
+    ///     Throws exception if input string contains multiple distinct van names.
+    ///     <see cref="GetAllMentionedVans">Use this for strings with multiple vans.</see>
+    /// </exception>
     public static bool TryGetVanName(
         string input, 
         [NotNullWhen(true)] out VanModel? vanType, 

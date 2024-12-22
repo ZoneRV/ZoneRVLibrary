@@ -75,11 +75,12 @@ public class VanNameRegexTests
 
     [Theory]
     [InlineData("zpp100 and zsp500, dont forget exp091", "zpp100", "zsp500", "exp091")]
-    [InlineData("zpp100 and zpp100r, are the same van", "zpp100")]
+    [InlineData("zpp100 and zpp100r, are not the same van", "zpp100", "zpp100r")]
+    [InlineData("zpp110 and zpp110, are the same van", "zpp110")]
     public void ShouldFindMultipleNames(string input, params string[] expectedResults)
     {
         var results = Utils.GetAllMentionedVans(input);
         
-        Assert.Equivalent(expectedResults, results);
+        Assert.Equal(expectedResults, results.ToArray());
     }
 }
