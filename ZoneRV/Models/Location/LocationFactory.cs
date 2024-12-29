@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 
 namespace ZoneRV.Models.Location;
 
+
 public class LocationFactory
 {
     public readonly LocationCollection Locations = new LocationCollection();

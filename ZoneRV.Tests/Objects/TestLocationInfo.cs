@@ -1,7 +1,7 @@
 ﻿using ZoneRV.Models.Enums;
 using ZoneRV.Models.Location;
 
-namespace ZoneRV.Tests.TestObjects;
+namespace ZoneRV.Tests.Objects;
 
 public static class TestLocationInfo
 {

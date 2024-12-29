@@ -1,8 +1,4 @@
-﻿using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using Newtonsoft.Json;
-
-namespace ZoneRV.Models.Location;
+﻿namespace ZoneRV.Models.Location;
 
 [DebuggerDisplay("{ProductionLine} - {LocationName}")]
 public class ProductionLocation : IEquatable<ProductionLocation>, IEqualityComparer<ProductionLocation>, IComparable<ProductionLocation>
@@ -12,6 +8,8 @@ public class ProductionLocation : IEquatable<ProductionLocation>, IEqualityCompa
     public required string LocationName { get; set; }
     
     public required string LocationDescription { get; set; }
+    
+    public string? BayLeaderId { get; set; }
     
     public List<string> InventoryLocations { get; set; } = [];
 

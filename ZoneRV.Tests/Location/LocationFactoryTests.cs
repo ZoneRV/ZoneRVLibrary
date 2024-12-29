@@ -1,6 +1,6 @@
 ﻿using ZoneRV.Models.Enums;
 using ZoneRV.Models.Location;
-using ZoneRV.Tests.TestObjects;
+using ZoneRV.Tests.Objects;
 
 namespace ZoneRV.Tests.Location;
 
