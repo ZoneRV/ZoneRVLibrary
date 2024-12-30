@@ -14,6 +14,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ZoneRV.Services.TrelloProdu
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "ZoneDB", "ZoneDB\ZoneDB.sqlproj", "{DF3C354C-9948-4D9A-9A2B-70EB5CAA56DF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZoneRV.DataAccess", "ZoneRV.DataAccess\ZoneRV.DataAccess.csproj", "{7F97DE6C-5F8A-42C4-9B71-B9964E21AA21}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,6 +40,10 @@ Global
 		{DF3C354C-9948-4D9A-9A2B-70EB5CAA56DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DF3C354C-9948-4D9A-9A2B-70EB5CAA56DF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DF3C354C-9948-4D9A-9A2B-70EB5CAA56DF}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{7F97DE6C-5F8A-42C4-9B71-B9964E21AA21}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F97DE6C-5F8A-42C4-9B71-B9964E21AA21}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F97DE6C-5F8A-42C4-9B71-B9964E21AA21}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F97DE6C-5F8A-42C4-9B71-B9964E21AA21}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
