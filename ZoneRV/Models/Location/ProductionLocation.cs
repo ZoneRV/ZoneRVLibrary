@@ -13,7 +13,7 @@ public class ProductionLocation : IEquatable<ProductionLocation>, IEqualityCompa
     
     public List<string> InventoryLocations { get; set; } = [];
 
-    public decimal LocationOrder
+    [ZoneRVJsonIgnore(JsonIgnoreType.Both)] public decimal LocationOrder
     {
         get => _locationOrder;
 
@@ -27,7 +27,7 @@ public class ProductionLocation : IEquatable<ProductionLocation>, IEqualityCompa
         }
     }
 
-    [JsonIgnore]
+    
     private decimal _locationOrder;
     
     public required ProductionLocationType Type { get; init; }

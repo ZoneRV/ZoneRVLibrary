@@ -4,20 +4,28 @@
 public class Comment
 {
     public required string Id { get; init; }
+
+    public string CardId => Card.Id;
     
-    public required string CardId { get; init; }
+    [ZoneRVJsonIgnore(JsonIgnoreType.Cache)] public required Card Card { get; init; }
+
+    public string BoardId => Van.Id;
     
-    [JsonIgnore] public required IFilterableCard Card { get; init; }
+    [ZoneRVJsonIgnore(JsonIgnoreType.Cache)] public required VanProductionInfo Van { get; init; }
     
-    public required string BoardId { get; init; }
+    public required string AuthorId { get; init; }
     
-    [JsonIgnore] public required VanBoard Van { get; init; }
-    
-    [JsonIgnore] public required string AuthorId { get; init; }
-    
-    public User? Author { get; internal set; }
+    [ZoneRVJsonIgnore(JsonIgnoreType.Cache)] public User? Author { get; internal set; }
     
     public required DateTimeOffset DateCreated { get; init; }
     
     public required string Content { get; set; }
+}
+
+public class CommentInfo
+{
+    public required string Id { get; set; }
+    public required string Content { get; set; }
+    public required string AuthorId { get; set; }
+    public required DateTimeOffset DateCreated { get; set; }
 }

@@ -1,21 +1,18 @@
 ﻿namespace ZoneRV.Models.Van;
 
 [DebuggerDisplay("{Name} - {Parent.Info.Name}")]
-public class YellowCard : IFilterableCard
+public class YellowCard : Card
 {
-    public required string Id { get; init; }
+    public YellowCard(VanProductionInfo van, YellowCardInfo info, AreaOfOrigin areaOfOrigin) : base(van, info, areaOfOrigin)
+    {
+        CreationDate = info.CreationDate;
+    }
     
-    [JsonIgnore] public required string BoardId { get; init; }
-    public required VanProductionInfo Van { get; init; }
-    public required string Name { get; init; }
-    public required string Url { get; init; }
-    public required CardStatus CardStatus { get; set; }
-    public float CompletionRate => CardStatus is Enums.CardStatus.Completed ? 1f : 0f;
-    [JsonIgnore] public DateTimeOffset? CardStatusLastUpdated { get; set; }
-    public required AreaOfOrigin AreaOfOrigin { get; set; }
-    public required DateTimeOffset? CreationDate { get; init; }
-    public List<User> Users { get; } = [];
-    public List<Comment> Comments { get; } = [];
-    public List<Attachment> Attachments { get; } = [];
-    public TimeSpan Age => (CreationDate.HasValue) ? DateTimeOffset.Now - CreationDate.Value : TimeSpan.Zero;
+    public DateTimeOffset? CreationDate { get; init; }
+    [ZoneRVJsonIgnore(JsonIgnoreType.Both)] public TimeSpan Age => (CreationDate.HasValue) ? DateTimeOffset.Now - CreationDate.Value : TimeSpan.Zero;
+}
+
+public class YellowCardInfo : CardInfo
+{
+    public required DateTimeOffset? CreationDate { get; set; }
 }

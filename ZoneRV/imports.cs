@@ -8,6 +8,7 @@ global using Microsoft.Extensions.Logging;
 global using Newtonsoft.Json;
 
 global using ZoneRV;
+global using ZoneRV.Attributes;
 global using ZoneRV.Extensions;
 global using ZoneRV.Models;
 global using ZoneRV.Models.Location;
