@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="5081570e-7f71-4d63-96b8-e93b22528448" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/ZoneRV.Services.TrelloProduction/TrelloService.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ZoneRVDB/Trello/Tables/TrelloAction.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ZoneRVDB/Trello/Tables/VanId.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ZoneRVDB/Trello/Types/TrelloActionUDT.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ZoneRV/Services/Production/IProductionService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/ZoneRV/Services/Production/IProductionService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ZoneRV/ZoneRV.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/ZoneRV/ZoneRV.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ZoneRVLibrary.sln" beforeDir="false" afterPath="$PROJECT_DIR$/ZoneRVLibrary.sln" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 7
+}]]></component>
+  <component name="ProjectId" id="2qvQzmMFNt3XEbbTqIDVckJHrE1" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenDatabaseViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "C:/Users/liamt/RiderProjects/ZoneRVLibrary",
+    "settings.editor.selected.configurable": "preferences.sourceCode.General"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>

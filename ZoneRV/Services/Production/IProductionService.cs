@@ -1,12 +1,18 @@
 ﻿using System.Collections.Concurrent;
-using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Configuration;
 using Serilog;
-using ZoneRV.Models;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace ZoneRV.Services.Production;
 
 public abstract partial class IProductionService
 {
+    public IProductionService(IConfiguration configuration)
+    {
+        Task.Run(async () => await InitialiseService(configuration));
+    }
+    
+    protected abstract Task InitialiseService(IConfiguration configuration);
     protected ConcurrentDictionary<VanProductionInfo, Task<VanProductionInfo>> _currentBoardTasks { get; init; } = [];
 
     protected abstract Task<VanProductionInfo> _loadVanFromSourceAsync(VanProductionInfo info);
