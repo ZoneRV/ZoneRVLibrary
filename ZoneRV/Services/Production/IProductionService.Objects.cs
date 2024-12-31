@@ -4,6 +4,9 @@ namespace ZoneRV.Services.Production;
 
 public abstract partial class IProductionService
 {
+    /// <summary>
+    /// Key is the van name
+    /// </summary>
     protected ConcurrentDictionary<string, VanProductionInfo> Vans { get; init; } = [];
     
     protected ConcurrentDictionary<string, Check> Checks { get; init; } = [];
@@ -21,17 +24,17 @@ public abstract partial class IProductionService
 
         foreach (var commentInfo in info.CommentInfos)
         {
-            CreateComment(van, jobcard, commentInfo);
+            CreateComment(van, commentInfo, jobcard);
         }
 
         foreach (var checklistInfo in info.ChecklistInfos)
         {
-            CreateChecklist(van, jobcard, checklistInfo);
+            CreateChecklist(van, checklistInfo, jobcard);
         }
 
         foreach (var attachmentInfo in info.AttachmentInfos)
         {
-            CreateAttachment(van, jobcard, attachmentInfo);
+            CreateAttachment(van, attachmentInfo, jobcard);
         }
 
         JobCards.TryAdd(info.Id, jobcard);
@@ -40,23 +43,23 @@ public abstract partial class IProductionService
         return jobcard;
     }
 
-     protected RedCard CreateRedCard(VanProductionInfo van, AreaOfOrigin areaOfOrigin, RedCardInfo info)
+     protected RedCard CreateRedCard(VanProductionInfo van, RedCardInfo info, AreaOfOrigin areaOfOrigin)
      {
          var redCard = new RedCard(van, info, areaOfOrigin);
 
         foreach (var commentInfo in info.CommentInfos)
         {
-            CreateComment(van, redCard, commentInfo);
+            CreateComment(van, commentInfo, redCard);
         }
 
         foreach (var checklistInfo in info.ChecklistInfos)
         {
-            CreateChecklist(van, redCard, checklistInfo);
+            CreateChecklist(van, checklistInfo, redCard);
         }
 
         foreach (var attachmentInfo in info.AttachmentInfos)
         {
-            CreateAttachment(van, redCard, attachmentInfo);
+            CreateAttachment(van, attachmentInfo, redCard);
         }
 
         RedCards.TryAdd(info.Id, redCard);
@@ -65,23 +68,23 @@ public abstract partial class IProductionService
         return redCard;
     }
 
-     protected YellowCard CreateYellowCard(VanProductionInfo van, AreaOfOrigin areaOfOrigin, YellowCardInfo info)
+     protected YellowCard CreateYellowCard(VanProductionInfo van, YellowCardInfo info, AreaOfOrigin areaOfOrigin)
      {
          var yellowCard = new YellowCard(van, info, areaOfOrigin);
 
         foreach (var commentInfo in info.CommentInfos)
         {
-            CreateComment(van, yellowCard, commentInfo);
+            CreateComment(van, commentInfo, yellowCard);
         }
 
         foreach (var checklistInfo in info.ChecklistInfos)
         {
-            CreateChecklist(van, yellowCard, checklistInfo);
+            CreateChecklist(van, checklistInfo, yellowCard);
         }
 
         foreach (var attachmentInfo in info.AttachmentInfos)
         {
-            CreateAttachment(van, yellowCard, attachmentInfo);
+            CreateAttachment(van, attachmentInfo, yellowCard);
         }
 
         YellowCards.TryAdd(info.Id, yellowCard);
@@ -90,7 +93,7 @@ public abstract partial class IProductionService
         return yellowCard;
     }
 
-    protected Checklist CreateChecklist(VanProductionInfo van, Card card, ChecklistInfo info)
+    protected Checklist CreateChecklist(VanProductionInfo van, ChecklistInfo info, Card card)
     {
         var checklist = new Checklist()
         {
@@ -103,7 +106,7 @@ public abstract partial class IProductionService
 
         foreach (var checkInfo in info.CheckInfos)
         {
-            CreateCheck(van, checklist, checkInfo);
+            CreateCheck(van, checkInfo, checklist);
         }
         
         Checklists.TryAdd(info.Id, checklist);
@@ -112,7 +115,7 @@ public abstract partial class IProductionService
         return checklist;
     }
     
-    protected Check CreateCheck(VanProductionInfo van, Checklist checklist, CheckInfo info)
+    protected Check CreateCheck(VanProductionInfo van, CheckInfo info, Checklist checklist)
     {
         var check = new Check()
         {
@@ -130,7 +133,7 @@ public abstract partial class IProductionService
         return check;
     }
 
-    protected Comment CreateComment(VanProductionInfo van, Card card, CommentInfo info)
+    protected Comment CreateComment(VanProductionInfo van, CommentInfo info, Card card)
     {
         Users.TryGetValue(info.AuthorId, out var user);
 
@@ -151,7 +154,7 @@ public abstract partial class IProductionService
         return comment;
     }
 
-    protected Attachment CreateAttachment(VanProductionInfo van, Card card, AttachmentInfo info)
+    protected Attachment CreateAttachment(VanProductionInfo van, AttachmentInfo info, Card card)
     {
         var attachment = new Attachment()
         {
