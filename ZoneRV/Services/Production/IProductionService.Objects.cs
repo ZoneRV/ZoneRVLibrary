@@ -1,22 +1,24 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 
 namespace ZoneRV.Services.Production;
 
+[SuppressMessage("ReSharper", "InconsistentNaming")]
 public abstract partial class IProductionService
 {
     /// <summary>
     /// Key is the van name
     /// </summary>
-    protected ConcurrentDictionary<string, VanProductionInfo> Vans { get; init; } = [];
+    protected ConcurrentDictionary<string, VanProductionInfo> Vans { get; } = [];
     
-    protected ConcurrentDictionary<string, Check> Checks { get; init; } = [];
-    protected ConcurrentDictionary<string, Checklist> Checklists { get; init; } = [];
-    protected ConcurrentDictionary<string, JobCard> JobCards { get; init; } = [];
-    protected ConcurrentDictionary<string, RedCard> RedCards { get; init; } = [];
-    protected ConcurrentDictionary<string, YellowCard> YellowCards { get; init; } = [];
-    protected ConcurrentDictionary<string, Comment> Comments { get; init; } = [];
-    protected ConcurrentDictionary<string, Attachment> Attachments { get; init; } = [];
-    protected ConcurrentDictionary<string, User> Users { get; init; } = [];
+    protected ConcurrentDictionary<string, Check> Checks { get; } = [];
+    protected ConcurrentDictionary<string, Checklist> Checklists { get; } = [];
+    protected ConcurrentDictionary<string, JobCard> JobCards { get; } = [];
+    protected ConcurrentDictionary<string, RedCard> RedCards { get; } = [];
+    protected ConcurrentDictionary<string, YellowCard> YellowCards { get; } = [];
+    protected ConcurrentDictionary<string, Comment> Comments { get; } = [];
+    protected ConcurrentDictionary<string, Attachment> Attachments { get; } = [];
+    protected ConcurrentDictionary<string, User> Users { get; } = [];
 
     protected JobCard CreateJobCard(VanProductionInfo van, JobCardInfo info, AreaOfOrigin areaOfOrigin, ProductionLocation location)
     {
@@ -29,7 +31,7 @@ public abstract partial class IProductionService
 
         foreach (var checklistInfo in info.ChecklistInfos)
         {
-            CreateChecklist(van, checklistInfo, jobcard);
+            CreateChecklist(checklistInfo, jobcard);
         }
 
         foreach (var attachmentInfo in info.AttachmentInfos)
@@ -54,7 +56,7 @@ public abstract partial class IProductionService
 
         foreach (var checklistInfo in info.ChecklistInfos)
         {
-            CreateChecklist(van, checklistInfo, redCard);
+            CreateChecklist(checklistInfo, redCard);
         }
 
         foreach (var attachmentInfo in info.AttachmentInfos)
@@ -79,7 +81,7 @@ public abstract partial class IProductionService
 
         foreach (var checklistInfo in info.ChecklistInfos)
         {
-            CreateChecklist(van, checklistInfo, yellowCard);
+            CreateChecklist(checklistInfo, yellowCard);
         }
 
         foreach (var attachmentInfo in info.AttachmentInfos)
@@ -93,11 +95,10 @@ public abstract partial class IProductionService
         return yellowCard;
     }
 
-    protected Checklist CreateChecklist(VanProductionInfo van, ChecklistInfo info, Card card)
+    protected Checklist CreateChecklist(ChecklistInfo info, Card card)
     {
         var checklist = new Checklist()
         {
-            Van = van,
             Card = card,
             Id = info.Id,
             Name = info.Name,
@@ -106,7 +107,7 @@ public abstract partial class IProductionService
 
         foreach (var checkInfo in info.CheckInfos)
         {
-            CreateCheck(van, checkInfo, checklist);
+            CreateCheck(checkInfo, checklist);
         }
         
         Checklists.TryAdd(info.Id, checklist);
@@ -115,11 +116,10 @@ public abstract partial class IProductionService
         return checklist;
     }
     
-    protected Check CreateCheck(VanProductionInfo van, CheckInfo info, Checklist checklist)
+    protected Check CreateCheck(CheckInfo info, Checklist checklist)
     {
         var check = new Check()
         {
-            Van = van,
             Checklist = checklist,
             Name = info.Name,
             Id = info.Id,
@@ -144,8 +144,7 @@ public abstract partial class IProductionService
             Card = card,
             Content = info.Content,
             DateCreated = info.DateCreated,
-            Id = info.Id,
-            Van = van
+            Id = info.Id
         };
 
         Comments.TryAdd(info.Id, comment);
@@ -158,7 +157,6 @@ public abstract partial class IProductionService
     {
         var attachment = new Attachment()
         {
-            Van = van,
             Card = card,
             FileName = info.FileName,
             Id = info.Id,

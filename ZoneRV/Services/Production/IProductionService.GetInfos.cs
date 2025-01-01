@@ -4,6 +4,7 @@ using ZoneRV.Models;
 
 namespace ZoneRV.Services.Production;
 
+[SuppressMessage("ReSharper", "InconsistentNaming")]
 public abstract partial class IProductionService
 {
     bool TryGetInfoByName(string name, [NotNullWhen(true)] out VanProductionInfo? info)

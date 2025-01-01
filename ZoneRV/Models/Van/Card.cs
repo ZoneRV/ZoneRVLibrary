@@ -17,7 +17,7 @@ public abstract class Card
     public string Id { get; init; }
     public string Url { get; init; }
     
-    public string BoardId => Van.Id;
+    public string BoardId => Van.Id!; // Impossible for a van to have cards without an Id
     public VanProductionInfo Van { get; init; }
     
     public AreaOfOrigin AreaOfOrigin { get; set; }

@@ -7,9 +7,6 @@ public class Attachment
     public required string Url { get; set; }
     public required string FileName { get; set; }
 
-    public string BoardId => Van.Id;
-    public required VanProductionInfo Van { get; init; }
-
     public string CardId => Card.Id;
     public required Card Card { get; init; }
 }

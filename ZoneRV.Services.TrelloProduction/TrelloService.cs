@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Configuration;
 using Serilog;
 using TrelloDotNet;
 using TrelloDotNet.Model;
@@ -10,7 +11,9 @@ using TrelloDotNet.Model.Options.GetMemberOptions;
 using TrelloDotNet.Model.Search;
 using ZoneRV.DataAccess.Data;
 using ZoneRV.DataAccess.Models;
+using ZoneRV.Extensions;
 using ZoneRV.Models;
+using ZoneRV.Models.Enums;
 using ZoneRV.Services.Production;
 using TrelloActionData = ZoneRV.DataAccess.Data.TrelloActionData;
 
@@ -25,6 +28,8 @@ public partial class TrelloService : IProductionService
     private TrelloClient TrelloClient { get; init; }
     private string TrelloApiKey { get; }
     private string TrelloUserToken { get; }
+    private string LineMoveBoardId { get; }
+    private string CCDashboardId { get; }
     
     public TrelloService(IConfiguration configuration, VanIdData vanIdData, TrelloActionData trelloActionData) : base(configuration)
     {
@@ -36,6 +41,12 @@ public partial class TrelloService : IProductionService
         
         TrelloUserToken = configuration["TrelloUserToken"] ??
                        throw new ArgumentNullException(nameof(TrelloUserToken), "Trello user token required");
+        
+        LineMoveBoardId = configuration["LineMoveBoardId"] ??
+                          throw new ArgumentNullException(nameof(LineMoveBoardId), "Line move board id required");
+        
+        CCDashboardId = configuration["CCDashboardId"] ??
+                        throw new ArgumentNullException(nameof(CCDashboardId), "CC Dashboard board id required");
         
         var clientOptions = new TrelloClientOptions
         {
@@ -107,7 +118,148 @@ public partial class TrelloService : IProductionService
 
     private async Task LoadBasicProductionInfo()
     {
+        List<Card>         lineMoveBoardCards = await TrelloClient.GetCardsOnBoardAsync(LineMoveBoardId, new GetCardOptions() {IncludeList = true});
+        List<TrelloAction> lineMoveActions    = await TrelloClient.GetActionsOfBoardAsync(LineMoveBoardId, ["updateCard:idList"], 1000);
+        lineMoveActions.AddRange(await TrelloClient.GetActionsOfBoardAsync(LineMoveBoardId, ["updateCard:idList"], 1000, before: lineMoveActions.MinBy(x => x.Date)!.Id));
         
+        List<Card>         ccDashboardCards   = await TrelloClient.GetCardsOnBoardAsync(CCDashboardId, new GetCardOptions());
+
+        var cachedActions = await GetTrelloActions(CCDashboardId);
+
+        List<List>? lists = await TrelloClient.GetListsOnBoardAsync(LineMoveBoardId);
+
+        lineMoveBoardCards = lineMoveBoardCards
+                             .Where(c 
+                                 => Enum.GetNames<VanModel>()
+                                     .Any(vm 
+                                        => c.Name.ToLower().Contains(vm.ToLower()) 
+                                    )).ToList();
+        
+        ccDashboardCards = ccDashboardCards
+                            .Where(c 
+                                => Enum.GetNames<VanModel>()
+                                    .Any(vm 
+                                        => c.Name.ToLower().Contains(vm.ToLower()) 
+                                    )).ToList();
+
+        List<string> tempBlockedNames = [];
+
+        IEnumerable<VanID> storedVanIds = await VanIdData.GetIds();
+        List<VanID> storedVanIdList = storedVanIds.ToList();
+
+        foreach (Card card in lineMoveBoardCards)
+        {
+            
+            if (Utils.TryGetVanName(card.Name, out _, out string? formattedName))
+            {
+                if (tempBlockedNames.Contains(formattedName))
+                    continue;
+
+                if (Vans.ContainsKey(formattedName))
+                {
+                    Vans.TryRemove(formattedName, out _);
+                    tempBlockedNames.Add(formattedName);
+
+                    Log.Logger.Error("{name} found at least twice in line move board. Ignoring both until issue is resolved.", formattedName);
+                    
+                    continue;
+                }
+
+                VanID? vanId = storedVanIdList.SingleOrDefault(x => x.VanName == formattedName);
+                string? idString;
+                string? urlString;
+                
+                if(vanId is not null && vanId.Blocked)
+                    continue;
+
+                if (vanId is null || string.IsNullOrEmpty(vanId.VanId) || string.IsNullOrEmpty(vanId.Url))
+                {
+                    TimeSpan lastUpdated = DateTimeOffset.UtcNow - card.LastActivity.UtcDateTime;
+                    (bool boardfound, VanID? vanId) search = await TrySearchForVanId(formattedName, lastUpdated);
+
+                    if (!search.boardfound || search.vanId is null)
+                        continue;
+
+                    else
+                    {
+                        idString = search.vanId.VanId;
+                        urlString = search.vanId.Url;
+                    }
+                }
+                else
+                {
+                    idString = vanId.VanId;
+                    urlString = vanId.Url;
+                }
+
+                //List<(DateTimeOffset date, IProductionPosition)> positionHistory = lineMoveActions.Where(x => x.Data.Card.Id == card.Id).ToPositionHistory(lists);
+
+                //ProductionVans.Add(formattedName,
+                 //                  new VanProductionInfo(idString, formattedName, urlString, positionHistory));
+                
+                Log.Logger.Debug("New van information added");
+            }
+            else
+            {
+                Log.Logger.Debug("Does not represent a van, ignoring.");
+            }
+        }
+
+        //Log.Logger.Information("{vanCount} Vans added to the production service. Adding handover dates...", ProductionVans.Count);
+
+        foreach (Card card in ccDashboardCards)
+        {
+            
+            if (Utils.TryGetVanName(card.Name, out _, out string? formattedName))
+            {
+                if (!card.Due.HasValue)
+                    continue;
+
+                if (Vans.TryGetValue(formattedName, out VanProductionInfo? value))
+                {
+                    IEnumerable<CachedTrelloAction> actions = cachedActions.Where(x => x.CardId == card.Id && x.DueDate.HasValue);
+
+                    foreach (CachedTrelloAction action in actions.OrderBy(x => x.DateOffset))
+                    {
+                        value.AddHandoverHistory(action.DateOffset, action.DueDate!.Value);
+                    }
+
+                    if (card.Due.HasValue)
+                    {
+                        value.HandoverState =
+                            card.DueComplete ? HandoverState.HandedOver : HandoverState.UnhandedOver;
+                        
+                        var dueUpdatedAction = actions.LastOrDefault(x => x.DueDate.HasValue);
+                        
+                        //if(dueUpdatedAction is not null)
+                            //value.han = dueUpdatedAction.DateOffset;
+                    }
+
+                    Log.Logger.Debug("Added {handover} to {vanName} ({handoverStat})", card.Due.Value.LocalDateTime.Date.ToString("dd/MM/yy"), value.Name, value.HandoverState);
+                }
+            }
+            else
+            {
+                Log.Logger.Debug("Does not represent a van, ignoring.");
+            }
+        }
+
+        Log.Logger.Information("{vanCount} handover dates added", Vans.Count(x => x.Value.HandoverDate.HasValue));
+
+        int gen2PreProductionCount = Vans.Count(x => x.Key.GetModel()!.Value.GetProductionLine() is ProductionLine.Gen2 && x.Value.LocationInfo.CurrentLocation.Type is ProductionLocationType.Prep);
+        int expoPreProductionCount = Vans.Count(x => x.Key.GetModel()!.Value.GetProductionLine() is ProductionLine.Expo && x.Value.LocationInfo.CurrentLocation.Type is ProductionLocationType.Prep);
+
+        int gen2ProductionCount = Vans.Count(x => x.Value.LocationInfo.CurrentLocation.ProductionLine is ProductionLine.Gen2);
+        int expoProductionCount = Vans.Count(x => x.Value.LocationInfo.CurrentLocation.ProductionLine is ProductionLine.Expo);
+
+        int gen2PostProductionCount = Vans.Count(x => x.Key.GetModel()!.Value.GetProductionLine() is ProductionLine.Gen2 && x.Value.LocationInfo.CurrentLocation.Type is ProductionLocationType.Bay or ProductionLocationType.Module);
+        int expoPostProductionCount = Vans.Count(x => x.Key.GetModel()!.Value.GetProductionLine() is ProductionLine.Expo && x.Value.LocationInfo.CurrentLocation.Type is ProductionLocationType.Bay or ProductionLocationType.Module);
+
+        int gen2PostProductionUnhandedOverCount = Vans.Count(x => x.Key.GetModel()!.Value.GetProductionLine() is ProductionLine.Gen2 && x.Value.LocationInfo.CurrentLocation.Type is ProductionLocationType.Finishing);
+        int expoPostProductionUnhandedOverCount = Vans.Count(x => x.Key.GetModel()!.Value.GetProductionLine() is ProductionLine.Expo && x.Value.LocationInfo.CurrentLocation.Type is ProductionLocationType.Finishing);
+        
+        Log.Logger.Information("Gen 2: Pre-Production:{pre} - In Production:{prod} - Post Production:{post} ({yetToHandover} unhanded over)", gen2PreProductionCount, gen2ProductionCount, gen2PostProductionCount, gen2PostProductionUnhandedOverCount);
+        Log.Logger.Information("EXPO: Pre-Production:{pre} - In Production:{prod} - Post Production:{post} ({yetToHandover} unhanded over)", expoPreProductionCount, expoProductionCount, expoPostProductionCount, expoPostProductionUnhandedOverCount);
     }
 
     protected override async Task<VanProductionInfo> _loadVanFromSourceAsync(VanProductionInfo van)
@@ -128,12 +280,6 @@ public partial class TrelloService : IProductionService
                                         CardFieldsType.Closed,
                                         CardFieldsType.ListId,
                                         CardFieldsType.MemberIds)
-        };
-
-        GetActionsOptions getActionsOptions = new GetActionsOptions()
-        {
-            Limit = 1000,
-            Filter = TrelloActionFilters
         };
         
         List<Card> cards;
@@ -165,45 +311,8 @@ public partial class TrelloService : IProductionService
         }
         
         List<CustomField> customFields = await TrelloClient.GetCustomFieldsOnBoardAsync(van.Id);
-        
-        IEnumerable<CachedTrelloAction> cachedActions = await TrelloActionData.GetActions(van.Id);
-        cachedActions = cachedActions.ToList();
-        
-        List<TrelloAction> actionsToCache = [];
 
-        if (cachedActions.Count() == 0)
-            getActionsOptions.Since = cachedActions.Last().ActionId;
-       
-        List<TrelloAction> newActions = await TrelloClient.GetActionsOfBoardAsync(van.Id, getActionsOptions);
-
-        actionsToCache.AddRange(newActions);
-        
-        while (newActions.Count == 1000)
-        {
-            string lastId = newActions.Last().Id;
-            
-            if(!cachedActions.Any())
-            {
-                getActionsOptions.Before = lastId;
-            }
-            
-            else
-            {
-                getActionsOptions.Before = lastId;
-                getActionsOptions.Since = cachedActions.Last().ActionId;
-            }
-            
-            newActions = await TrelloClient.GetActionsOfBoardAsync(van.Id, getActionsOptions);
-            
-            actionsToCache.AddRange(newActions);
-        }
-
-        if (actionsToCache.Count > 0)
-        {
-            var returnedActions = await TrelloActionData.InsertTrelloActions(actionsToCache.ToCachedTrelloActions());
-
-            cachedActions = returnedActions.Concat(cachedActions);
-        }
+        var cachedActions = await GetTrelloActions(van.Id!);
 
         foreach (var card in cards)
         {
@@ -229,6 +338,56 @@ public partial class TrelloService : IProductionService
         }
 
         return van;
+    }
+
+    private async Task<IEnumerable<CachedTrelloAction>> GetTrelloActions(string id)
+    {
+        GetActionsOptions getActionsOptions = new GetActionsOptions()
+        {
+            Limit = 1000,
+            Filter = TrelloActionFilters
+        };
+        
+        IEnumerable<CachedTrelloAction> cachedActions = await TrelloActionData.GetActions(id);
+        cachedActions = cachedActions.ToList();
+        
+        List<TrelloAction> actionsToCache = [];
+
+        if (cachedActions.Count() == 0)
+            getActionsOptions.Since = cachedActions.Last().ActionId;
+       
+        List<TrelloAction> newActions = await TrelloClient.GetActionsOfBoardAsync(id, getActionsOptions);
+
+        actionsToCache.AddRange(newActions);
+        
+        while (newActions.Count == 1000)
+        {
+            string lastId = newActions.Last().Id;
+            
+            if(!cachedActions.Any())
+            {
+                getActionsOptions.Before = lastId;
+            }
+            
+            else
+            {
+                getActionsOptions.Before = lastId;
+                getActionsOptions.Since = cachedActions.Last().ActionId;
+            }
+            
+            newActions = await TrelloClient.GetActionsOfBoardAsync(id, getActionsOptions);
+            
+            actionsToCache.AddRange(newActions);
+        }
+        
+        if (actionsToCache.Count > 0)
+        {
+            var returnedActions = await TrelloActionData.InsertTrelloActions(actionsToCache.ToCachedTrelloActions());
+
+            cachedActions = returnedActions.Concat(cachedActions);
+        }
+
+        return cachedActions;
     }
     
     private async Task<(bool boardfound, VanID? vanId)> TrySearchForVanId(string name, TimeSpan? age = null)

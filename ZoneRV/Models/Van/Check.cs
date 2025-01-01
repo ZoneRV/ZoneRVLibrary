@@ -5,8 +5,6 @@ public class Check
 {
     public required string Id { get; init; }
 
-    public string BoardId => Van.Id;
-    [ZoneRVJsonIgnore(JsonIgnoreType.Cache)] public required VanProductionInfo Van { get; init; }
 
     public string CheckListId => Checklist.Id;
     [ZoneRVJsonIgnore(JsonIgnoreType.Cache)] public required Checklist Checklist { get; init; }

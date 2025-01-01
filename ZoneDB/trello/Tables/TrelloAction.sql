@@ -1,6 +1,7 @@
 CREATE TABLE [trello].[TrelloAction]
 (
-    [ActionId]    NVARCHAR(24)    NOT NULL  PRIMARY KEY UNIQUE,
+    [Id]          INTEGER         NOT NULL PRIMARY KEY IDENTITY,
+    [ActionId]    NVARCHAR(24)    NOT NULL UNIQUE,
     [BoardId]     NVARCHAR(24)    NOT NULL,
     [CardId]      NVARCHAR(24)    NOT NULL,
     [DateOffset]  DATETIMEOFFSET  NOT NULL,

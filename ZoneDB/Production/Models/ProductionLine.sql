@@ -1,0 +1,5 @@
+﻿CREATE TABLE [production].[Line]
+(
+    [Id]    INTEGER       NOT NULL PRIMARY KEY IDENTITY,
+    [Name]  NVARCHAR(24)  NOT NULL UNIQUE
+)

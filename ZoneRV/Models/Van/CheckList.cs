@@ -5,8 +5,6 @@ public class Checklist
 {
     public required string Id { get; init; }
 
-    public string BoardId => Van.Id;
-    [ZoneRVJsonIgnore(JsonIgnoreType.Cache)] public required VanProductionInfo Van { get; init; }
 
     public required string Name { get; set; }
     

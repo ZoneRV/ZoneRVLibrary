@@ -1,16 +1,19 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Configuration;
 using Serilog;
-using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace ZoneRV.Services.Production;
 
+[SuppressMessage("ReSharper", "InconsistentNaming")]
 public abstract partial class IProductionService
 {
     public IProductionService(IConfiguration configuration)
     {
         Task.Run(async () => await InitialiseService(configuration));
     }
+
+    public LocationFactory LocationFactory = new LocationFactory();
     
     protected abstract Task InitialiseService(IConfiguration configuration);
     protected ConcurrentDictionary<VanProductionInfo, Task<VanProductionInfo>> _currentBoardTasks { get; init; } = [];

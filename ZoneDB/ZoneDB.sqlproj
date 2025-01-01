@@ -57,9 +57,11 @@
   <ItemGroup>
     <Folder Include="Properties" />
     <Folder Include="trello" />
-    <Folder Include="trello\Tables" />
     <Folder Include="trello\StoredProcedures" />
     <Folder Include="trello\Types" />
+    <Folder Include="trello\Tables\" />
+    <Folder Include="Production\" />
+    <Folder Include="Production\Models\" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="trello\Tables\TrelloAction.sql" />
@@ -76,6 +78,13 @@
     <Build Include="trello\StoredProcedures\spVanId_Insert.sql" />
     <Build Include="trello\StoredProcedures\spVanId_Update.sql" />
     <Build Include="trello\Types\TrelloActionUDT.sql" />
+    <Build Include="Production\Models\ProductionLine.sql" />
+    <Build Include="Production\Models\ProductionLocation.sql" />
+    <Build Include="Production\Production.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="Production\Models\AreaOfOrigin.sql" />
+    <Build Include="trello\Tables\LocationBayLeaderId.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ZoneDB.publish.xml" />

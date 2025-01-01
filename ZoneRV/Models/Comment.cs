@@ -8,10 +8,6 @@ public class Comment
     public string CardId => Card.Id;
     
     [ZoneRVJsonIgnore(JsonIgnoreType.Cache)] public required Card Card { get; init; }
-
-    public string BoardId => Van.Id;
-    
-    [ZoneRVJsonIgnore(JsonIgnoreType.Cache)] public required VanProductionInfo Van { get; init; }
     
     public required string AuthorId { get; init; }
     
