@@ -19,12 +19,13 @@ public class VanProductionInfo : IEqualityComparer<VanProductionInfo>
 
     public double CompletionRate => Cards.Any() ? Cards.Average(x => x.GetCompletionRate()) : 0;
     
-    public VanModel VanModel => Name.GetModel() ?? throw new ArgumentException("Name does not contain a van model", nameof(Name));
+    public required VanModel VanModel { get; init; }
     
     private List<(DateTimeOffset ChangeDate, DateTimeOffset HandoverDate)> _handoverHistory = []; 
     public DateTimeOffset? HandoverDate => _handoverHistory.Count > 0 ? _handoverHistory.MaxBy(x => x.ChangeDate).HandoverDate : null;
     public TimeSpan? TimeToHandover => HandoverDate.HasValue ? HandoverDate.Value - DateTimeOffset.Now : null;
     public HandoverState HandoverState { get; set; } = HandoverState.Unknown;
+    public DateTimeOffset? HandoverStateLastUpdated { get; set; }
     
     public void AddHandoverHistory(DateTimeOffset changeDate, DateTimeOffset handoverDate)
         => _handoverHistory.Add((changeDate, handoverDate));

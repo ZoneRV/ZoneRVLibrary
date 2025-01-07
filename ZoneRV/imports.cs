@@ -11,9 +11,12 @@ global using ZoneRV;
 global using ZoneRV.Attributes;
 global using ZoneRV.Extensions;
 global using ZoneRV.Models;
+global using ZoneRV.Models.DB;
 global using ZoneRV.Models.Location;
 global using ZoneRV.Models.Van;
 global using ZoneRV.Models.Enums;
+global using ZoneRV.Services;
+global using ZoneRV.Services.DB;
 
 
 

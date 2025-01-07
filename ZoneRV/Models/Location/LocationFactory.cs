@@ -1,13 +1,32 @@
 ﻿using System.Collections;
 using System.Linq.Expressions;
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 
 namespace ZoneRV.Models.Location;
 
 
 public class LocationFactory
 {
-    public readonly LocationCollection Locations = new LocationCollection();
+    public required LocationCollection Locations { get; init; }
+
+    public IReadOnlyList<string> IgnoredListNames
+    {
+        get => _ignoredListNames.AsReadOnly();
+        init => _ignoredListNames = value.ToList();
+    }
+        
+    private List<string> _ignoredListNames = [];
+
+    public ProductionLocation? GetLocationFromCustomName(ProductionLine line, string name)
+    {
+        if (_ignoredListNames.Contains(name))
+            return null;
+        
+        return Locations.First(x => x.ProductionLine is not null && 
+                                       x.ProductionLine.Id == line.Id && 
+                                       x.CustomNames.Contains(name)); 
+    }
     
     /// <summary>
     /// Default location for new vans
@@ -50,6 +69,7 @@ public class LocationFactory
             
             if (Locations.Any(x =>
                     x.Type == type && 
+                    x.ProductionLine is not null &&
                     x.ProductionLine == productionLine && 
                     x.LocationOrder == locationOrder))
                 throw new ArgumentException("Multiple bays cannot have the same location order", nameof(locationOrder));
@@ -107,23 +127,14 @@ public class LocationFactory
             productionLine, null, inventoryLocations);
     }
 
-    public ProductionLocation CreateGen2BayLocation(
+    public ProductionLocation CreateBayLocation(
         string locationName, 
         string locationDescription, 
+        ProductionLine productionLine,
         int bayNumber, 
         IEnumerable<string>? inventoryLocations = null)
     {
         return CreateLocation(locationName, locationDescription, bayNumber, ProductionLocationType.Bay,
-            ProductionLine.Gen2, bayNumber, inventoryLocations);
-    }
-
-    public ProductionLocation CreateExpoBayLocation(
-        string locationName, 
-        string locationDescription, 
-        int bayNumber, 
-        IEnumerable<string>? inventoryLocations = null)
-    {
-        return CreateLocation(locationName, locationDescription, bayNumber, ProductionLocationType.Bay,
-            ProductionLine.Expo, bayNumber, inventoryLocations);
+            productionLine, bayNumber, inventoryLocations);
     }
 }

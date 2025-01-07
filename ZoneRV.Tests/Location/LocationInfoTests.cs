@@ -29,7 +29,7 @@ public class LocationInfoTests
         // Cant add move with already existing date
         Assert.Throws<ArgumentException>(
             "date",
-            () => TestLocationInfo.HalfGen2Info.AddPositionChange(TestLocationInfo.HalfGen2Info.PositionHistory.First().moveDate,
+            () => TestLocationInfo.HalfGen2Info.AddPositionChange(TestLocationInfo.HalfGen2Info.LocationHistory.First().moveDate,
                 TestLocations.LocationFactory.Locations.Last(x => x.ProductionLine == ProductionLine.Gen2 && x.Type == ProductionLocationType.Bay)));
     }
 }

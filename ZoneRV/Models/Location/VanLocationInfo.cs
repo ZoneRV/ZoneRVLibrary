@@ -6,14 +6,15 @@ namespace ZoneRV.Models.Location;
 [DebuggerDisplay("{CurrentLocation}")]
 public class VanLocationInfo
 {
-    private List<(DateTimeOffset moveDate, ProductionLocation location)> _positionHistory = [];
+    private List<(DateTimeOffset moveDate, ProductionLocation location)> _locationHistory = [];
 
     public ProductionLocation CurrentLocation =>
-        _positionHistory.Count == 0 ? LocationFactory.PreProduction : _positionHistory.MaxBy(x => x.moveDate).location;
+        _locationHistory.Count == 0 ? LocationFactory.PreProduction : _locationHistory.MaxBy(x => x.moveDate).location;
     
-    public IReadOnlyList<(DateTimeOffset moveDate, ProductionLocation location)> PositionHistory
+    public IReadOnlyList<(DateTimeOffset moveDate, ProductionLocation location)> LocationHistory
     {
-        get => _positionHistory.AsReadOnly();
+        get => _locationHistory.AsReadOnly();
+        init => _locationHistory = value.ToList();
     }
 
     /// <exception cref="ArgumentException">Location info already contains location.</exception>
@@ -24,7 +25,7 @@ public class VanLocationInfo
     {
         foreach (var change in changes)
         {
-            if (_positionHistory.Any(x => x.location == change.location))
+            if (_locationHistory.Any(x => x.location == change.location))
                 throw new ArgumentException("Location already exists", nameof(change.location));
 
             if (change.location.Type != ProductionLocationType.Bay && change.location != LocationFactory.PreProduction &&
@@ -33,12 +34,12 @@ public class VanLocationInfo
                     nameof(change.location.Type));
 
             if (change.location.ProductionLine is not null &&
-                _positionHistory.Any(x =>
+                _locationHistory.Any(x =>
                     x.location.ProductionLine is not null && x.location.ProductionLine != change.location.ProductionLine))
                 throw new ArgumentException("Location information cannot contain multiple production lines",
                     nameof(change.location.ProductionLine));
 
-            if (_positionHistory.Any(x => x.moveDate == change.date))
+            if (_locationHistory.Any(x => x.moveDate == change.date))
                 throw new ArgumentException(
                     $"Location information already contains a location move for {change.date}", nameof(change.date));
         }
@@ -50,8 +51,8 @@ public class VanLocationInfo
     {
         if (CheckPositionChangesValid([(date, location)]))
         {
-            _positionHistory.Add((date, location));
-            _positionHistory = _positionHistory.OrderBy(x => x.moveDate).ToList();
+            _locationHistory.Add((date, location));
+            _locationHistory = _locationHistory.OrderBy(x => x.moveDate).ToList();
         }
     }
     
@@ -59,27 +60,27 @@ public class VanLocationInfo
     {
         if (CheckPositionChangesValid(changes))
         {
-            _positionHistory.AddRange(changes);
-            _positionHistory = _positionHistory.OrderBy(x => x.moveDate).ToList();
+            _locationHistory.AddRange(changes);
+            _locationHistory = _locationHistory.OrderBy(x => x.moveDate).ToList();
         }
     }
 
     public ProductionLocation GetPositionFromDate(DateTimeOffset date)
     {
-        if (_positionHistory.Count == 0 || date < _positionHistory.First().moveDate)
+        if (_locationHistory.Count == 0 || date < _locationHistory.First().moveDate)
             return LocationFactory.PreProduction;
 
-        return _positionHistory.SkipWhile(x => date < x.moveDate).First().location;
+        return _locationHistory.SkipWhile(x => date < x.moveDate).First().location;
     }
 
     public (DateTimeOffset start, DateTimeOffset? end)? GetDateRange(ProductionLocation position)
     {
-        if (_positionHistory.All(x => x.location != position))
+        if (_locationHistory.All(x => x.location != position))
             return null;
 
         (DateTimeOffset start, DateTimeOffset? end) result;
         
-        var remainingPos = _positionHistory.SkipWhile(x => x.location < position).ToList();
+        var remainingPos = _locationHistory.SkipWhile(x => x.location < position).ToList();
 
         result.start = remainingPos.First().moveDate;
 
@@ -94,9 +95,9 @@ public class VanLocationInfo
         
     public bool InProductionBeforeDate(DateTimeOffset end)
     {
-        if (_positionHistory.All(x => x.location != LocationFactory.PostProduction))
+        if (_locationHistory.All(x => x.location != LocationFactory.PostProduction))
             return false;
 
-        return _positionHistory.First(x => x.location == LocationFactory.PostProduction).moveDate < end;
+        return _locationHistory.First(x => x.location == LocationFactory.PostProduction).moveDate < end;
     }
 }

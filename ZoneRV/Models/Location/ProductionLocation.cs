@@ -12,6 +12,7 @@ public class ProductionLocation : IEquatable<ProductionLocation>, IEqualityCompa
     public string? BayLeaderId { get; set; }
     
     public List<string> InventoryLocations { get; set; } = [];
+    public List<string> CustomNames { get; set; } = [];
 
     [ZoneRVJsonIgnore(JsonIgnoreType.Both)] public decimal LocationOrder
     {
@@ -70,7 +71,9 @@ public class ProductionLocation : IEquatable<ProductionLocation>, IEqualityCompa
         if (ReferenceEquals(this, other)) 
             return true;
         
-        return ProductionLine == other.ProductionLine && 
+        return (ProductionLine is null && other.ProductionLine is null) ||
+               (ProductionLine is not null && other.ProductionLine is not null) &&
+               ProductionLine == other.ProductionLine && 
                LocationName == other.LocationName && 
                LocationDescription == other.LocationDescription && 
                InventoryLocations.Equals(other.InventoryLocations) && 
@@ -113,7 +116,7 @@ public class ProductionLocation : IEquatable<ProductionLocation>, IEqualityCompa
 
     public override int GetHashCode()
     {
-        return HashCode.Combine((ProductionLine is null ? -1 : (int)ProductionLine), LocationName, LocationOrder, (int)Type);
+        return HashCode.Combine((ProductionLine is null ? -1 : ProductionLine.Id), LocationName, LocationOrder, (int)Type);
     }
 
     public int GetHashCode(ProductionLocation obj)

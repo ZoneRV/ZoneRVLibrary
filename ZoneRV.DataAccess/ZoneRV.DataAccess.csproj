@@ -17,4 +17,14 @@
       <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\ZoneRV\ZoneRV.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Data\" />
+      <Folder Include="DbAccess\" />
+      <Folder Include="Models\Enums\" />
+    </ItemGroup>
+
 </Project>

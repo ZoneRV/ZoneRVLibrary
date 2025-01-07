@@ -1,13 +1,12 @@
 ﻿using Serilog;
 using TrelloDotNet.Model;
 using TrelloDotNet.Model.Actions;
-using ZoneRV.DataAccess.Models;
 using ZoneRV.Models;
+using ZoneRV.Models.DB;
 using ZoneRV.Models.Enums;
 using ZoneRV.Models.Location;
 using ZoneRV.Models.Van;
 using Attachment = TrelloDotNet.Model.Attachment;
-using Card = ZoneRV.Models.Van.Card;
 using Checklist = TrelloDotNet.Model.Checklist;
 
 namespace ZoneRV.Services.TrelloProduction;
@@ -317,13 +316,8 @@ public static class TrelloUtils
                 return RedFlagIssue.Unspecified;
         }
     }
-
+    
     internal static AreaOfOrigin ToAreaOfOrigin(TrelloDotNet.Model.Card card, IEnumerable<CustomField> customFields)
-    {
-        throw new NotImplementedException();
-    }
-
-    internal static ProductionLocation GetProductionLocation()
     {
         throw new NotImplementedException();
     }

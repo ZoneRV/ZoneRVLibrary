@@ -13,10 +13,12 @@ public class LocationCollection : IEnumerable<ProductionLocation>
     IEnumerator IEnumerable.GetEnumerator()
         => GetEnumerator();
     
-    public LocationCollection()
+    public LocationCollection(IEnumerable<ProductionLocation> initialLocations)
     {
         _locations.Add(LocationFactory.PreProduction);
         _locations.Add(LocationFactory.PostProduction);
+        
+        _locations.AddRange(initialLocations);
     }
 
     internal void Add(ProductionLocation newLocation)
@@ -26,6 +28,6 @@ public class LocationCollection : IEnumerable<ProductionLocation>
 
     public ProductionLocation? GetBay(ProductionLine line, int bayNumber)
     {
-        return _locations.SingleOrDefault(x => x.ProductionLine == line && x.BayNumber == bayNumber);
+        return _locations.SingleOrDefault(x => x.ProductionLine is not null && x.ProductionLine == line && x.BayNumber == bayNumber);
     }
 }

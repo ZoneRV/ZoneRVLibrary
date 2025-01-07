@@ -1,5 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Serilog;
 using TrelloDotNet;
 using TrelloDotNet.Model;
@@ -10,10 +10,10 @@ using TrelloDotNet.Model.Options.GetCardOptions;
 using TrelloDotNet.Model.Options.GetMemberOptions;
 using TrelloDotNet.Model.Search;
 using ZoneRV.DataAccess.Data;
-using ZoneRV.DataAccess.Models;
-using ZoneRV.Extensions;
 using ZoneRV.Models;
+using ZoneRV.Models.DB;
 using ZoneRV.Models.Enums;
+using ZoneRV.Models.Location;
 using ZoneRV.Services.Production;
 using TrelloActionData = ZoneRV.DataAccess.Data.TrelloActionData;
 
@@ -21,17 +21,20 @@ namespace ZoneRV.Services.TrelloProduction;
 
 public partial class TrelloService : IProductionService
 {
-    public VanIdData VanIdData { get; set; } 
-    public TrelloActionData TrelloActionData { get; set; } 
+    public VanIdData VanIdData { get; } 
+    public TrelloActionData TrelloActionData { get; } 
+    
+    public override LocationFactory LocationFactory { get; init; }
+    
     public static List<string> TrelloActionFilters => ["commentCard", "updateCustomFieldItem", "createCard", "updateCheckItemStateOnCard"];
     
-    private TrelloClient TrelloClient { get; init; }
+    private TrelloClient TrelloClient { get; }
     private string TrelloApiKey { get; }
     private string TrelloUserToken { get; }
     private string LineMoveBoardId { get; }
     private string CCDashboardId { get; }
     
-    public TrelloService(IConfiguration configuration, VanIdData vanIdData, TrelloActionData trelloActionData) : base(configuration)
+    public TrelloService(IConfiguration configuration, ProductionDataService productionDataService, LocationData locationData, VanIdData vanIdData, TrelloActionData trelloActionData) : base(configuration, productionDataService, locationData)
     {
         VanIdData = vanIdData;
         TrelloActionData = trelloActionData;
@@ -47,6 +50,14 @@ public partial class TrelloService : IProductionService
         
         CCDashboardId = configuration["CCDashboardId"] ??
                         throw new ArgumentNullException(nameof(CCDashboardId), "CC Dashboard board id required");
+
+        var locations = locationData.GetLocations(CustomNameSource.Trello).Result; // TODO: Fix this madness
+
+        LocationFactory = new LocationFactory
+        {
+            Locations = new LocationCollection(locations),
+            IgnoredListNames = [] // TODO: fillout
+        };
         
         var clientOptions = new TrelloClientOptions
         {
@@ -75,7 +86,7 @@ public partial class TrelloService : IProductionService
         }
 
         var organisations = await TrelloClient.GetOrganizationsForMemberAsync(member.Id);
-
+        
         await LoadUsers(organisations);
 
         await LoadBasicProductionInfo();
@@ -130,14 +141,14 @@ public partial class TrelloService : IProductionService
 
         lineMoveBoardCards = lineMoveBoardCards
                              .Where(c 
-                                 => Enum.GetNames<VanModel>()
+                                 => ModelPrefixes
                                      .Any(vm 
                                         => c.Name.ToLower().Contains(vm.ToLower()) 
                                     )).ToList();
         
         ccDashboardCards = ccDashboardCards
                             .Where(c 
-                                => Enum.GetNames<VanModel>()
+                                => ModelPrefixes
                                     .Any(vm 
                                         => c.Name.ToLower().Contains(vm.ToLower()) 
                                     )).ToList();
@@ -150,7 +161,7 @@ public partial class TrelloService : IProductionService
         foreach (Card card in lineMoveBoardCards)
         {
             
-            if (Utils.TryGetVanName(card.Name, out _, out string? formattedName))
+            if (TryGetVanName(card.Name, out var model, out string? formattedName))
             {
                 if (tempBlockedNames.Contains(formattedName))
                     continue;
@@ -192,10 +203,45 @@ public partial class TrelloService : IProductionService
                     urlString = vanId.Url;
                 }
 
-                //List<(DateTimeOffset date, IProductionPosition)> positionHistory = lineMoveActions.Where(x => x.Data.Card.Id == card.Id).ToPositionHistory(lists);
+                List<(DateTimeOffset moveDate, ProductionLocation location)> locationHistory = [];
+                
+                foreach (var moveAction in lineMoveActions)
+                {
+                    List list;
 
-                //ProductionVans.Add(formattedName,
-                 //                  new VanProductionInfo(idString, formattedName, urlString, positionHistory));
+                    if (lists.Count(x => x.Id == moveAction.Data.ListAfter.Id) == 1)
+                        list = lists.Where(x => x.Id == moveAction.Data.ListAfter.Id).Single();
+
+                    else
+                        continue;
+
+                    string listName = list.Name;
+
+                    if (listName == "SCHEDULED VANS (50x)" || listName == "SCHEDULED EXPO VANS")
+                    {
+                        locationHistory.Add((moveAction.Date, LocationFactory.PreProduction));
+                        continue;
+                    }
+
+                    var location = LocationFactory.GetLocationFromCustomName(model.ProductionLine, listName);
+                    
+                    if(location is null)
+                        continue;
+                    
+                    locationHistory.Add((moveAction.Date, location));
+                }
+
+                Vans.TryAdd(formattedName, new VanProductionInfo()
+                {
+                    Name = formattedName, 
+                    VanModel = model, 
+                    Url = urlString, 
+                    Id = idString,
+                    LocationInfo = new VanLocationInfo()
+                    {
+                        LocationHistory = locationHistory
+                    }
+                });
                 
                 Log.Logger.Debug("New van information added");
             }
@@ -205,12 +251,12 @@ public partial class TrelloService : IProductionService
             }
         }
 
-        //Log.Logger.Information("{vanCount} Vans added to the production service. Adding handover dates...", ProductionVans.Count);
+        Log.Logger.Information("{vanCount} Vans added to the production service. Adding handover dates...", Vans.Count);
 
         foreach (Card card in ccDashboardCards)
         {
             
-            if (Utils.TryGetVanName(card.Name, out _, out string? formattedName))
+            if (TryGetVanName(card.Name, out _, out string? formattedName))
             {
                 if (!card.Due.HasValue)
                     continue;
@@ -231,8 +277,8 @@ public partial class TrelloService : IProductionService
                         
                         var dueUpdatedAction = actions.LastOrDefault(x => x.DueDate.HasValue);
                         
-                        //if(dueUpdatedAction is not null)
-                            //value.han = dueUpdatedAction.DateOffset;
+                        if(dueUpdatedAction is not null)
+                            value.HandoverStateLastUpdated = dueUpdatedAction.DateOffset;
                     }
 
                     Log.Logger.Debug("Added {handover} to {vanName} ({handoverStat})", card.Due.Value.LocalDateTime.Date.ToString("dd/MM/yy"), value.Name, value.HandoverState);
@@ -246,20 +292,21 @@ public partial class TrelloService : IProductionService
 
         Log.Logger.Information("{vanCount} handover dates added", Vans.Count(x => x.Value.HandoverDate.HasValue));
 
-        int gen2PreProductionCount = Vans.Count(x => x.Key.GetModel()!.Value.GetProductionLine() is ProductionLine.Gen2 && x.Value.LocationInfo.CurrentLocation.Type is ProductionLocationType.Prep);
-        int expoPreProductionCount = Vans.Count(x => x.Key.GetModel()!.Value.GetProductionLine() is ProductionLine.Expo && x.Value.LocationInfo.CurrentLocation.Type is ProductionLocationType.Prep);
-
-        int gen2ProductionCount = Vans.Count(x => x.Value.LocationInfo.CurrentLocation.ProductionLine is ProductionLine.Gen2);
-        int expoProductionCount = Vans.Count(x => x.Value.LocationInfo.CurrentLocation.ProductionLine is ProductionLine.Expo);
-
-        int gen2PostProductionCount = Vans.Count(x => x.Key.GetModel()!.Value.GetProductionLine() is ProductionLine.Gen2 && x.Value.LocationInfo.CurrentLocation.Type is ProductionLocationType.Bay or ProductionLocationType.Module);
-        int expoPostProductionCount = Vans.Count(x => x.Key.GetModel()!.Value.GetProductionLine() is ProductionLine.Expo && x.Value.LocationInfo.CurrentLocation.Type is ProductionLocationType.Bay or ProductionLocationType.Module);
-
-        int gen2PostProductionUnhandedOverCount = Vans.Count(x => x.Key.GetModel()!.Value.GetProductionLine() is ProductionLine.Gen2 && x.Value.LocationInfo.CurrentLocation.Type is ProductionLocationType.Finishing);
-        int expoPostProductionUnhandedOverCount = Vans.Count(x => x.Key.GetModel()!.Value.GetProductionLine() is ProductionLine.Expo && x.Value.LocationInfo.CurrentLocation.Type is ProductionLocationType.Finishing);
-        
-        Log.Logger.Information("Gen 2: Pre-Production:{pre} - In Production:{prod} - Post Production:{post} ({yetToHandover} unhanded over)", gen2PreProductionCount, gen2ProductionCount, gen2PostProductionCount, gen2PostProductionUnhandedOverCount);
-        Log.Logger.Information("EXPO: Pre-Production:{pre} - In Production:{prod} - Post Production:{post} ({yetToHandover} unhanded over)", expoPreProductionCount, expoProductionCount, expoPostProductionCount, expoPostProductionUnhandedOverCount);
+        foreach (var productionLine in ProductionLines)
+        {
+            var vansInLine = Vans.Where(x => x.Value.VanModel.ProductionLine == productionLine).Select(x => x.Value).ToList();
+                
+            int prepCount = vansInLine.Count(x =>
+                x.LocationInfo.CurrentLocation.Type is ProductionLocationType.Prep);
+                
+            int prodCount = vansInLine.Count(x =>
+                x.LocationInfo.CurrentLocation.Type is ProductionLocationType.Bay or ProductionLocationType.Module or ProductionLocationType.Subassembly);
+                
+            int finishingCount = vansInLine.Count(x =>
+                x.LocationInfo.CurrentLocation.Type is ProductionLocationType.Finishing && x.HandoverState is not HandoverState.HandedOver);
+            
+            Log.Logger.Information("{line}: Prep: {prepCount} - In Production: {prodCount} - In Finishing: {finishingCount}", productionLine.Name, prepCount, prodCount, finishingCount);
+        }
     }
 
     protected override async Task<VanProductionInfo> _loadVanFromSourceAsync(VanProductionInfo van)
@@ -324,7 +371,9 @@ public partial class TrelloService : IProductionService
             switch (cardType)
             {
                 case CardType.JobCard:
-                    CreateJobCard(van, card.ToJobCardInfo(cardActions, cardFields), TrelloUtils.ToAreaOfOrigin(card, cardFields), TrelloUtils.GetProductionLocation());
+                    var position = LocationFactory.GetLocationFromCustomName(van.VanModel.ProductionLine, card.List.Name);
+                    if(position is not null)
+                        CreateJobCard(van, card.ToJobCardInfo(cardActions, cardFields), TrelloUtils.ToAreaOfOrigin(card, cardFields), position);
                     break;
             
                 case CardType.RedCard:
