@@ -10,7 +10,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ZoneRV.Tests", "ZoneRV.Test
 		{092A3C64-AD98-445F-BF3F-2A310A31E703} = {092A3C64-AD98-445F-BF3F-2A310A31E703}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ZoneRV.Services.TrelloProduction", "ZoneRV.Services.TrelloProduction\ZoneRV.Services.TrelloProduction.csproj", "{CC3883BF-6878-45CA-A987-2929B3AD4911}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ZoneRV.Services.Trello", "ZoneRV.Services.Trello\ZoneRV.Services.Trello.csproj", "{CC3883BF-6878-45CA-A987-2929B3AD4911}"
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "ZoneDB", "ZoneDB\ZoneDB.sqlproj", "{DF3C354C-9948-4D9A-9A2B-70EB5CAA56DF}"
 EndProject

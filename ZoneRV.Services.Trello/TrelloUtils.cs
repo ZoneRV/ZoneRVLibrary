@@ -2,14 +2,13 @@
 using TrelloDotNet.Model;
 using TrelloDotNet.Model.Actions;
 using ZoneRV.Models;
-using ZoneRV.Models.DB;
 using ZoneRV.Models.Enums;
-using ZoneRV.Models.Location;
 using ZoneRV.Models.Van;
+using ZoneRV.Services.Trello.Models;
 using Attachment = TrelloDotNet.Model.Attachment;
 using Checklist = TrelloDotNet.Model.Checklist;
 
-namespace ZoneRV.Services.TrelloProduction;
+namespace ZoneRV.Services.Trello;
 
 public static class TrelloUtils
 {
@@ -238,7 +237,7 @@ public static class TrelloUtils
             return CardStatus.NotStarted;
 
         string fieldValue = desiredField.Options.Single(x => x.Id == desiredFieldItem.ValueId).Value.Text;
-        customFieldActions = customFieldActions.Where(x => new string(x.ActionId.SkipLast(3).ToArray()) == new string (desiredFieldItem.Id.SkipLast(3).ToArray()));
+        customFieldActions = customFieldActions.Where(x => new string(x.ActionId.SkipLast(3).ToArray()) == new string (desiredFieldItem.Id.SkipLast(3).ToArray())); // TODO: really need to fix this
 
         if(customFieldActions.Count() > 0)
             dateLastUpdated = customFieldActions.OrderBy(x => x.DateOffset).Last().DateOffset;

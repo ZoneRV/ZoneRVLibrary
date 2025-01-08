@@ -1,7 +1,7 @@
-﻿using ZoneRV.Models.DB;
-using ZoneRV.Services.DB;
+﻿using ZoneRV.Services.DB;
+using ZoneRV.Services.Trello.Models;
 
-namespace ZoneRV.DataAccess.Data;
+namespace ZoneRV.Services.Trello.DB;
 
 public class VanIdData
 {
@@ -12,20 +12,20 @@ public class VanIdData
         _db = db;
     }
 
-    public Task<IEnumerable<VanID>> GetIds()
-        => _db.LoadData<VanID, dynamic>("dbo.spVanId_GetAll", new { });
+    public Task<IEnumerable<VanId>> GetIds()
+        => _db.LoadData<VanId, dynamic>("dbo.spVanId_GetAll", new { });
 
-    public async Task<VanID?> GetId(string vanName)
+    public async Task<VanId?> GetId(string vanName)
     {
-        var results = await _db.LoadData<VanID, dynamic>("dbo.spVanId_get", new { VanName = vanName });
+        var results = await _db.LoadData<VanId, dynamic>("dbo.spVanId_get", new { VanName = vanName });
 
         return results.FirstOrDefault();
     }
 
-    public async Task InsertVanId(VanID vanId)
+    public async Task InsertVanId(VanId vanId)
         => await _db.SaveData("dbo.spVanId_Insert", vanId);
 
-    public async Task UpdateVanId(VanID vanId)
+    public async Task UpdateVanId(VanId vanId)
         => await _db.SaveData("dbo.spVanId_Update", vanId);
 
     public async Task DeleteVanId(string vanName)

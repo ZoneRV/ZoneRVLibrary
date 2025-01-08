@@ -1,4 +1,4 @@
-﻿namespace ZoneRV.Models.DB;
+﻿namespace ZoneRV.Services.Trello.Models;
 
 public class CachedTrelloAction
 {
