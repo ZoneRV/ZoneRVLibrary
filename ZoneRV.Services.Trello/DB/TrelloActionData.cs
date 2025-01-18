@@ -1,9 +1,9 @@
 ﻿using System.Data;
 using Dapper;
-using ZoneRV.Models.DB;
 using ZoneRV.Services.DB;
+using ZoneRV.Services.Trello.Models;
 
-namespace ZoneRV.DataAccess.Data;
+namespace ZoneRV.Services.Trello.DB;
 
 public class TrelloActionData
 {

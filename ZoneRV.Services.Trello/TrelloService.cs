@@ -8,17 +8,18 @@ using TrelloDotNet.Model.Options.GetActionsOptions;
 using TrelloDotNet.Model.Options.GetCardOptions;
 using TrelloDotNet.Model.Options.GetMemberOptions;
 using TrelloDotNet.Model.Search;
-using ZoneRV.DataAccess.Data;
 using ZoneRV.Models;
 using ZoneRV.Models.DB;
 using ZoneRV.Models.Enums;
 using ZoneRV.Models.Location;
 using ZoneRV.Services.Production;
-using TrelloActionData = ZoneRV.DataAccess.Data.TrelloActionData;
+using ZoneRV.Services.Trello.DB;
+using ZoneRV.Services.Trello.Models;
+using TrelloActionData = ZoneRV.Services.Trello.DB.TrelloActionData;
 
-namespace ZoneRV.Services.TrelloProduction;
+namespace ZoneRV.Services.Trello;
 
-public partial class TrelloService : IProductionService
+public class TrelloService : IProductionService
 {
     public VanIdData VanIdData { get; } 
     public TrelloActionData TrelloActionData { get; } 
@@ -27,11 +28,11 @@ public partial class TrelloService : IProductionService
     
     public static List<string> TrelloActionFilters => ["commentCard", "updateCustomFieldItem", "createCard", "updateCheckItemStateOnCard"];
     
-    private TrelloClient TrelloClient { get; }
-    private string TrelloApiKey { get; }
-    private string TrelloUserToken { get; }
-    private string LineMoveBoardId { get; }
-    private string CCDashboardId { get; }
+    private TrelloClient TrelloClient     { get; }
+    private string       TrelloApiKey     { get; }
+    private string       TrelloUserToken  { get; }
+    private string       LineMoveBoardId  { get; }
+    private string       ProHoDashboardId { get; }
     
     public TrelloService(IConfiguration configuration, ProductionDataService productionDataService, LocationData locationData, VanIdData vanIdData, TrelloActionData trelloActionData) : base(configuration, productionDataService, locationData)
     {
@@ -47,15 +48,15 @@ public partial class TrelloService : IProductionService
         LineMoveBoardId = configuration["LineMoveBoardId"] ??
                           throw new ArgumentNullException(nameof(LineMoveBoardId), "Line move board id required");
         
-        CCDashboardId = configuration["CCDashboardId"] ??
-                        throw new ArgumentNullException(nameof(CCDashboardId), "CC Dashboard board id required");
+        ProHoDashboardId = configuration["ProHoDashboardId"] ??
+                        throw new ArgumentNullException(nameof(ProHoDashboardId), "ProHo Dashboard board id required");
 
         var locations = locationData.GetLocations(CustomNameSource.Trello).Result; // TODO: Fix this madness
 
         LocationFactory = new LocationFactory
         {
             Locations = new LocationCollection(locations),
-            IgnoredListNames = [] // TODO: fillout
+            IgnoredListNames = [] // TODO: fill out
         };
         
         var clientOptions = new TrelloClientOptions
@@ -129,12 +130,11 @@ public partial class TrelloService : IProductionService
     private async Task LoadBasicProductionInfo()
     {
         List<Card>         lineMoveBoardCards = await TrelloClient.GetCardsOnBoardAsync(LineMoveBoardId, new GetCardOptions() {IncludeList = true});
-        List<TrelloAction> lineMoveActions    = await TrelloClient.GetActionsOfBoardAsync(LineMoveBoardId, ["updateCard:idList"], 1000);
-        lineMoveActions.AddRange(await TrelloClient.GetActionsOfBoardAsync(LineMoveBoardId, ["updateCard:idList"], 1000, before: lineMoveActions.MinBy(x => x.Date)!.Id));
+        List<TrelloAction> lineMoveActions    = await GetTrelloActions(LineMoveBoardId, ["updateCard:idList"]);
         
-        List<Card>         ccDashboardCards   = await TrelloClient.GetCardsOnBoardAsync(CCDashboardId, new GetCardOptions());
+        List<Card>         ccDashboardCards   = await TrelloClient.GetCardsOnBoardAsync(ProHoDashboardId, new GetCardOptions());
 
-        var cachedActions = await GetTrelloActions(CCDashboardId);
+        var cachedActions = await GetTrelloActionsWithCache(ProHoDashboardId);
 
         List<List>? lists = await TrelloClient.GetListsOnBoardAsync(LineMoveBoardId);
         List<string> modelPrefixes = ProductionLines.SelectMany(x => x.Models.Select(y => y.Prefix.ToLower())).ToList();
@@ -155,8 +155,8 @@ public partial class TrelloService : IProductionService
 
         List<string> tempBlockedNames = [];
 
-        IEnumerable<VanID> storedVanIds = await VanIdData.GetIds();
-        List<VanID> storedVanIdList = storedVanIds.ToList();
+        IEnumerable<VanId> storedVanIds = await VanIdData.GetIds();
+        List<VanId> storedVanIdList = storedVanIds.ToList();
 
         foreach (Card card in lineMoveBoardCards)
         {
@@ -176,30 +176,30 @@ public partial class TrelloService : IProductionService
                     continue;
                 }
 
-                VanID? vanId = storedVanIdList.SingleOrDefault(x => x.VanName == formattedName);
+                VanId? vanId = storedVanIdList.SingleOrDefault(x => x.VanName == formattedName);
                 string? idString;
                 string? urlString;
                 
                 if(vanId is not null && vanId.Blocked)
                     continue;
 
-                if (vanId is null || string.IsNullOrEmpty(vanId.VanId) || string.IsNullOrEmpty(vanId.Url))
+                if (vanId is null || string.IsNullOrEmpty(vanId.Id) || string.IsNullOrEmpty(vanId.Url))
                 {
                     TimeSpan lastUpdated = DateTimeOffset.UtcNow - card.LastActivity.UtcDateTime;
-                    (bool boardfound, VanID? vanId) search = await TrySearchForVanId(formattedName, lastUpdated);
+                    (bool boardfound, VanId? vanId) search = await TrySearchForVanId(formattedName, lastUpdated);
 
                     if (!search.boardfound || search.vanId is null)
                         continue;
 
                     else
                     {
-                        idString = search.vanId.VanId;
+                        idString = search.vanId.Id;
                         urlString = search.vanId.Url;
                     }
                 }
                 else
                 {
-                    idString = vanId.VanId;
+                    idString = vanId.Id;
                     urlString = vanId.Url;
                 }
 
@@ -210,7 +210,7 @@ public partial class TrelloService : IProductionService
                     List list;
 
                     if (lists.Count(x => x.Id == moveAction.Data.ListAfter.Id) == 1)
-                        list = lists.Where(x => x.Id == moveAction.Data.ListAfter.Id).Single();
+                        list = lists.Single(x => x.Id == moveAction.Data.ListAfter.Id);
 
                     else
                         continue;
@@ -263,7 +263,7 @@ public partial class TrelloService : IProductionService
 
                 if (Vans.TryGetValue(formattedName, out VanProductionInfo? value))
                 {
-                    IEnumerable<CachedTrelloAction> actions = cachedActions.Where(x => x.CardId == card.Id && x.DueDate.HasValue);
+                    List<CachedTrelloAction> actions = cachedActions.Where(x => x.CardId == card.Id && x.DueDate.HasValue).ToList();
 
                     foreach (CachedTrelloAction action in actions.OrderBy(x => x.DateOffset))
                     {
@@ -342,14 +342,14 @@ public partial class TrelloService : IProductionService
 
                 await VanIdData.DeleteVanId(van.Name);
 
-                (bool boardfound, VanID? vanId) newId = await TrySearchForVanId(van.Name);
+                (bool boardfound, VanId? vanId) newId = await TrySearchForVanId(van.Name);
 
-                if (!newId.boardfound || newId.vanId is null || string.IsNullOrEmpty(newId.vanId.VanId) || string.IsNullOrEmpty(newId.vanId.Url))
+                if (!newId.boardfound || newId.vanId is null || string.IsNullOrEmpty(newId.vanId.Id) || string.IsNullOrEmpty(newId.vanId.Url))
                     throw new Exception("Board could not be found");
                 
-                van.Id = newId.vanId.VanId;
+                van.Id = newId.vanId.Id;
                 van.Url = newId.vanId.Url;
-                cards = await TrelloClient.GetCardsOnBoardAsync(newId.vanId.VanId, getCardOptions);
+                cards = await TrelloClient.GetCardsOnBoardAsync(newId.vanId.Id, getCardOptions);
             }
             else
             {
@@ -359,7 +359,7 @@ public partial class TrelloService : IProductionService
         
         List<CustomField> customFields = await TrelloClient.GetCustomFieldsOnBoardAsync(van.Id);
 
-        var cachedActions = await GetTrelloActions(van.Id!);
+        var cachedActions = await GetTrelloActionsWithCache(van.Id!);
 
         foreach (var card in cards)
         {
@@ -389,7 +389,7 @@ public partial class TrelloService : IProductionService
         return van;
     }
 
-    private async Task<IEnumerable<CachedTrelloAction>> GetTrelloActions(string id, List<string>? actionFilters = null)
+    private async Task<List<CachedTrelloAction>> GetTrelloActionsWithCache(string id, List<string>? actionFilters = null)
     {
         GetActionsOptions getActionsOptions = new GetActionsOptions()
         {
@@ -402,7 +402,7 @@ public partial class TrelloService : IProductionService
         
         List<TrelloAction> actionsToCache = [];
 
-        if (cachedActions.Count() == 0)
+        if (!cachedActions.Any())
             getActionsOptions.Since = cachedActions.Last().ActionId;
        
         List<TrelloAction> newActions = await TrelloClient.GetActionsOfBoardAsync(id, getActionsOptions);
@@ -436,19 +436,47 @@ public partial class TrelloService : IProductionService
             cachedActions = returnedActions.Concat(cachedActions);
         }
 
-        return cachedActions;
+        return cachedActions.ToList();
+    }
+
+    private async Task<List<TrelloAction>> GetTrelloActions(string id, List<string>? filteredActions = null)
+    {
+        GetActionsOptions getActionsOptions = new GetActionsOptions()
+        {
+            Limit = 1000,
+            Filter = filteredActions ?? TrelloActionFilters
+        };
+        
+        List<TrelloAction> actions = [];
+       
+        List<TrelloAction> newActions = await TrelloClient.GetActionsOfBoardAsync(id, getActionsOptions);
+
+        actions.AddRange(newActions);
+        
+        while (newActions.Count == 1000)
+        {
+            string lastId = newActions.Last().Id;
+            
+            getActionsOptions.Before = lastId;
+            
+            newActions = await TrelloClient.GetActionsOfBoardAsync(id, getActionsOptions);
+            
+            actions.AddRange(newActions);
+        }
+
+        return actions;
     }
     
-    private async Task<(bool boardfound, VanID? vanId)> TrySearchForVanId(string name, TimeSpan? age = null)
+    private async Task<(bool boardfound, VanId? vanId)> TrySearchForVanId(string name, TimeSpan? age = null)
     {
         if (TrelloClient is null)
             throw new Exception("Trello Client has not been initialized.");
 
-        VanID? vanId = await VanIdData.GetId(name);
+        VanId? vanId = await VanIdData.GetId(name);
 
         if (vanId is null)
         {
-            vanId = new VanID(name);
+            vanId = new VanId(name);
             await VanIdData.InsertVanId(vanId);
         }
         else
@@ -456,14 +484,14 @@ public partial class TrelloService : IProductionService
             if (vanId.Blocked)
                 return (false, null);
 
-            if (!string.IsNullOrEmpty(vanId.VanId) && !string.IsNullOrEmpty(vanId.Url))
+            if (!string.IsNullOrEmpty(vanId.Id) && !string.IsNullOrEmpty(vanId.Url))
                 return (true, null);
         }
 
         SearchRequest searchRequest = new SearchRequest(name)
                                       {
                                           SearchCards = false,
-                                          BoardFields = new SearchRequestBoardFields("name", "closed", "url", "shorturl")
+                                          BoardFields = new SearchRequestBoardFields("name", "closed", "url", "shortUrl")
                                       };
 
         SearchResult searchResults = await TrelloClient.SearchAsync(searchRequest);
@@ -493,7 +521,7 @@ public partial class TrelloService : IProductionService
             return (false, null);
         }
 
-        vanId.VanId = results.First().Id;
+        vanId.Id = results.First().Id;
         vanId.Url = results.First().Url;
         
         await VanIdData.UpdateVanId(vanId);
