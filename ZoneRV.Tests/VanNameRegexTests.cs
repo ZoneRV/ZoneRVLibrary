@@ -14,7 +14,10 @@ public class VanNameRegexTests
     
     [Theory]
     [InlineData("ZpP-145", "zpp", "zpp145")]
+    [InlineData("ZpP145-", "zpp", "zpp145")]
     [InlineData("ZpP.145", "zpp", "zpp145")]
+    [InlineData("ZpP:145", "zpp", "zpp145")]
+    [InlineData(":ZpP145:", "zpp", "zpp145")]
     [InlineData("ZpP 145", "zpp", "zpp145")]
     [InlineData(" ZpP145 ", "zpp", "zpp145")]
     [InlineData("(exp010)", "exp", "exp010")]

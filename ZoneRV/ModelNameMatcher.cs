@@ -14,7 +14,7 @@ public class ModelNameMatcher
         Models = models.ToList();
                 
         string vanRegexPattern 
-            = @"(?:\b(?=\w)|\()(" + string.Join('|', Models.Select(x => x.Prefix.ToLower()))  + @")[-.\s]?(" + string.Join('|', NumberFormats) + @")(?:\b(?<=\w)|\))";
+            = @"(?:\b(?=\w)|\(|-|:)(" + string.Join('|', Models.Select(x => x.Prefix.ToLower()))  + @")[-.\s-:]?(" + string.Join('|', NumberFormats) + @")(?:\b(?<=\w)|\)|-|:)";
         
         VanRegex = new Regex(vanRegexPattern, RegexOptions.Compiled);
     }
