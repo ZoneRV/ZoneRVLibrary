@@ -1,66 +1,35 @@
-using System.Diagnostics.Contracts;
-using System.Text.RegularExpressions;
 using ZoneRV.Models;
-using ZoneRV.Models.Enums;
+using ZoneRV.Tests.Objects;
 
 namespace ZoneRV.Tests;
 
 public class VanNameRegexTests
 {
-    [Fact]
-    public void AllModelsReturnVanName()
-    {
-        List<(VanModel model, string input, string output)> vanNames 
-            = Enum.GetValues<VanModel>().Select(x => 
-                (
-                    x, 
-                    $"{x}100".ToLower(), 
-                    $"{x}100".ToLower()
-                ) 
-            ).ToList();
+    private ModelNameMatcher _nameMatcher;
 
-        foreach (var name in vanNames)
-        {
-            ShouldReturnVanName(name.input, name.model, name.output);
-        }
-    }
-    
-    [Fact]
-    public void AllNumberFormatsReturnVanName()
+    public VanNameRegexTests()
     {
-        List<(VanModel model, string input, string output)> vanNames 
-            = Utils.NumberFormats.Select(x => 
-                (
-                    VanModel.Zpp, 
-                    $"zpp{Regex.Replace(x, @"\\d", "5")}".ToLower(), 
-                    $"zpp{Regex.Replace(x, @"\\d", "5")}".ToLower()
-                ) 
-            ).ToList();
-
-        foreach (var name in vanNames)
-        {
-            ShouldReturnVanName(name.input, name.model, name.output);
-        }
+        _nameMatcher = new ModelNameMatcher(ProductionTestData.VanModels);
     }
     
     [Theory]
-    [InlineData("ZpP-145", VanModel.Zpp, "zpp145")]
-    [InlineData("ZpP.145", VanModel.Zpp, "zpp145")]
-    [InlineData("ZpP 145", VanModel.Zpp, "zpp145")]
-    [InlineData(" ZpP145 ", VanModel.Zpp, "zpp145")]
-    [InlineData("(exp010)", VanModel.Exp, "exp010")]
-    [InlineData("(exp010", VanModel.Exp, "exp010")]
-    [InlineData("exp010)", VanModel.Exp, "exp010")]
-    [InlineData("zss100 and zss100 should still return zss100", VanModel.Zss, "zss100")]
-    [InlineData("this is zpp100r, so amazing we just had to build it twice", VanModel.Zpp, "zpp100r")]
-    public void ShouldReturnVanName(string input, VanModel model, string expectedVanName)
+    [InlineData("ZpP-145", "zpp", "zpp145")]
+    [InlineData("ZpP.145", "zpp", "zpp145")]
+    [InlineData("ZpP 145", "zpp", "zpp145")]
+    [InlineData(" ZpP145 ", "zpp", "zpp145")]
+    [InlineData("(exp010)", "exp", "exp010")]
+    [InlineData("(exp010", "exp", "exp010")]
+    [InlineData("exp010)", "exp", "exp010")]
+    [InlineData("zss100 and zss100 should still return zss100", "zss", "zss100")]
+    [InlineData("this is zpp100r, so amazing we just had to build it twice", "zpp", "zpp100r")]
+    public void ShouldReturnVanName(string input, string modelPrefix, string expectedVanName)
     {
-        var pass = Utils.TryGetVanName(input, out VanModel? vanModel, out string? vanNameResult);
+        var pass = _nameMatcher.TryGetVanName(input, out VanModel? vanModel, out string? vanNameResult);
         
         Assert.True(pass);
         
         Assert.NotNull(vanModel);
-        Assert.Equal(model, vanModel);
+        Assert.Equal(modelPrefix, vanModel.Prefix);
         
         Assert.NotNull(vanNameResult);
         Assert.Equal(expectedVanName, vanNameResult.ToLower());
@@ -70,7 +39,7 @@ public class VanNameRegexTests
     [InlineData("zsp100 and zpp401")]
     public void ShouldThrow(string input)
     {
-        Assert.Throws<ArgumentException>(() => Utils.TryGetVanName(input, out _, out _));
+        Assert.Throws<ArgumentException>(() => _nameMatcher.TryGetVanName(input, out _, out _));
     }
 
     [Theory]
@@ -79,7 +48,7 @@ public class VanNameRegexTests
     [InlineData("zpp110 and zpp110, are the same van", "zpp110")]
     public void ShouldFindMultipleNames(string input, params string[] expectedResults)
     {
-        var results = Utils.GetAllMentionedVans(input);
+        var results = _nameMatcher.GetAllMentionedVans(input);
         
         Assert.Equal(expectedResults, results.ToArray());
     }

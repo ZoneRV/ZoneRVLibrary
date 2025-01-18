@@ -1,35 +1,37 @@
 ﻿namespace ZoneRV.Models.Location;
 
-[DebuggerDisplay("{ProductionLine} - {LocationName}")]
+[DebuggerDisplay("{ProductionLine} - {Name}")]
 public class ProductionLocation : IEquatable<ProductionLocation>, IEqualityComparer<ProductionLocation>, IComparable<ProductionLocation>
 {
+    public int Id { get; init; }
+    
     public ProductionLine? ProductionLine { get; init; }
     
-    public required string LocationName { get; set; }
+    public required string Name { get; set; }
     
-    public required string LocationDescription { get; set; }
+    public required string Description { get; set; }
     
     public string? BayLeaderId { get; set; }
     
     public List<string> InventoryLocations { get; set; } = [];
     public List<string> CustomNames { get; set; } = [];
 
-    [ZoneRVJsonIgnore(JsonIgnoreType.Both)] public decimal LocationOrder
+    [ZoneRVJsonIgnore(JsonIgnoreType.Both)] public decimal Order
     {
-        get => _locationOrder;
+        get => _order;
 
         internal set
         {
             if (Type == ProductionLocationType.Bay)
-                _locationOrder = (int)value;
+                _order = (int)value;
 
             else
-                _locationOrder = value;
+                _order = value;
         }
     }
 
     
-    private decimal _locationOrder;
+    private decimal _order;
     
     public required ProductionLocationType Type { get; init; }
     
@@ -45,12 +47,12 @@ public class ProductionLocation : IEquatable<ProductionLocation>, IEqualityCompa
 
     public static bool operator <(ProductionLocation first, ProductionLocation second)
     {
-        return first.LocationOrder < second.LocationOrder;
+        return first.Order < second.Order;
     }
 
     public static bool operator >(ProductionLocation first, ProductionLocation second)
     {
-        return first.LocationOrder > second.LocationOrder;
+        return first.Order > second.Order;
     }
 
     public static bool operator ==(ProductionLocation first, ProductionLocation second)
@@ -74,10 +76,10 @@ public class ProductionLocation : IEquatable<ProductionLocation>, IEqualityCompa
         return (ProductionLine is null && other.ProductionLine is null) ||
                (ProductionLine is not null && other.ProductionLine is not null) &&
                ProductionLine == other.ProductionLine && 
-               LocationName == other.LocationName && 
-               LocationDescription == other.LocationDescription && 
+               Name == other.Name && 
+               Description == other.Description && 
                InventoryLocations.Equals(other.InventoryLocations) && 
-               LocationOrder == other.LocationOrder && 
+               Order == other.Order && 
                Type == other.Type;
     }
 
@@ -85,10 +87,10 @@ public class ProductionLocation : IEquatable<ProductionLocation>, IEqualityCompa
     {
         ArgumentNullException.ThrowIfNull(other);
         
-        if(LocationOrder < other.LocationOrder)
+        if(Order < other.Order)
             return -1;
         
-        if(LocationOrder > other.LocationOrder)
+        if(Order > other.Order)
             return 1;
 
         if(Type < other.Type)
@@ -116,7 +118,7 @@ public class ProductionLocation : IEquatable<ProductionLocation>, IEqualityCompa
 
     public override int GetHashCode()
     {
-        return HashCode.Combine((ProductionLine is null ? -1 : ProductionLine.Id), LocationName, LocationOrder, (int)Type);
+        return HashCode.Combine((ProductionLine is null ? -1 : ProductionLine.Id), Name, Order, (int)Type);
     }
 
     public int GetHashCode(ProductionLocation obj)

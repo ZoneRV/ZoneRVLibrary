@@ -1,0 +1,385 @@
+﻿using System.ComponentModel.DataAnnotations;
+using ZoneRV.Models;
+using ZoneRV.Models.Enums;
+using ZoneRV.Models.Location;
+
+namespace ZoneRV.Tests.Objects;
+
+public static class ProductionTestData
+{
+    public static List<ProductionLine> ProductionLines => [Gen2, Expo];
+    public static List<VanModel> VanModels => ProductionLines.SelectMany(x => x.Models).ToList();
+
+    public static readonly ProductionLine Gen2;
+    public static readonly ProductionLine Expo;
+
+    public static VanModel Zsp;
+    public static VanModel Zpp;
+    public static VanModel Zss;
+    public static VanModel Exp;
+    
+    public static LocationFactory LocationFactory;
+
+    public static ProductionLocation G2Chassis;
+    public static ProductionLocation ExpoChassis;
+    
+    public static ProductionLocation Subs;
+    public static ProductionLocation Cabs;
+    
+    public static ProductionLocation G2WallRoof;
+    public static ProductionLocation ExpoWallRoof;
+    
+    public static ProductionLocation G2Bay1;
+    public static ProductionLocation G2Bay2;
+    public static ProductionLocation G2Bay3;
+    public static ProductionLocation G2Bay4;
+    public static ProductionLocation G2Bay5;
+    public static ProductionLocation G2Bay6;
+    public static ProductionLocation G2Bay7;
+
+    public static ProductionLocation ExpoBay1;
+    public static ProductionLocation ExpoBay2;
+    public static ProductionLocation ExpoBay3;
+    public static ProductionLocation ExpoBay4;
+    public static ProductionLocation ExpoBay5;
+
+    static ProductionTestData()
+    {
+#region Production Lines and Models
+        int expoId = IdUtils.ProductionLineId;
+        Expo = new ProductionLine()
+            {
+                Id = expoId, 
+                Name = "Expedition", 
+                Models = []
+            };
+
+        Exp = new VanModel()
+            {
+                Id = IdUtils.ModelId,
+                Name = "Expo",
+                Description = "expo van",
+                LineId = expoId,
+                Prefix = "exp",
+                ProductionLine = Expo
+            };
+        
+        Expo.Models.Add(Exp);
+        
+        int gen2Id = IdUtils.ProductionLineId;
+        Gen2 = new ProductionLine()
+            {
+                Id = IdUtils.ProductionLineId, 
+                Name = "Gen 2", 
+                Models = []
+            };
+
+        Zsp = new VanModel()
+        {
+            Id = IdUtils.ModelId,
+            Name = "Sojourn",
+            Description = "21\"",
+            LineId = gen2Id,
+            Prefix = "zsp",
+            ProductionLine = Gen2
+        };
+        
+        Zpp = new VanModel()
+        {
+            Id = IdUtils.ModelId,
+            Name = "Peregrine",
+            Description = "19\"",
+            LineId = gen2Id,
+            Prefix = "zpp",
+            ProductionLine = Gen2
+        };
+        
+        Zss = new VanModel()
+        {
+            Id = IdUtils.ModelId,
+            Name = "Summit",
+            Description = "The big boy",
+            LineId = gen2Id,
+            Prefix = "zss",
+            ProductionLine = Gen2
+        };
+        
+        Gen2.Models = [Zsp, Zpp, Zss];
+#endregion
+
+#region Line Locations
+        G2Chassis = new ProductionLocation()
+        {
+            Id = IdUtils.LocationId,
+            Order = 0,
+            ProductionLine = Gen2,
+            Name = "Gen2 chassis",
+            Description = "Chassis are built here",
+            Type = ProductionLocationType.Module,
+            CustomNames = ["chassis"],
+            InventoryLocations = []
+        };
+
+        ExpoChassis = new ProductionLocation()
+        {
+            Id = IdUtils.LocationId,
+            Order = 0,
+            ProductionLine = Expo,
+            Name = "Expo chassis",
+            Description = "Chassis are built here",
+            Type = ProductionLocationType.Module,
+            CustomNames = ["chassis"],
+            InventoryLocations = []
+        };
+
+        Subs = new ProductionLocation()
+        {
+            Id = IdUtils.LocationId,
+            Order = 0.25M,
+            Name = "Sub Assembly",
+            Description = "Stuffs are built here",
+            Type = ProductionLocationType.Subassembly,
+            CustomNames = ["subs"],
+            InventoryLocations = []
+        };
+
+        Cabs = new ProductionLocation()
+        {
+            Id = IdUtils.LocationId,
+            Order = 0.5M,
+            Name = "Cabinetry",
+            Description = "Cabs are built here",
+            Type = ProductionLocationType.Module,
+            CustomNames = ["cabs"],
+            InventoryLocations = []
+        };
+
+        G2WallRoof = new ProductionLocation()
+        {
+            Id = IdUtils.LocationId,
+            ProductionLine = Gen2,
+            Order = 3.5M,
+            Name = "Wall/Mod",
+            Description = "Walls are built here",
+            Type = ProductionLocationType.Module,
+            CustomNames = ["wallroof"],
+            InventoryLocations = []
+        };
+
+        ExpoWallRoof = new ProductionLocation()
+        {
+            Id = IdUtils.LocationId,
+            ProductionLine = Expo,
+            Order = 2.5M,
+            Name = "Wall/Mod",
+            Description = "Walls are built here",
+            Type = ProductionLocationType.Module,
+            CustomNames = ["wallroof"],
+            InventoryLocations = []
+        };
+
+        G2Bay1 = new ProductionLocation()
+        {
+            Id = IdUtils.LocationId,
+            ProductionLine = Gen2,
+            Order = 1M,
+            BayNumber = 1,
+            Name = "Bay 1",
+            Description = "Bay 1 of Gen 2",
+            Type = ProductionLocationType.Bay,
+            CustomNames = ["bay1"],
+            InventoryLocations = []
+        };
+
+        G2Bay2 = new ProductionLocation()
+        {
+            Id = IdUtils.LocationId,
+            ProductionLine = Gen2,
+            Order = 2M,
+            BayNumber = 2,
+            Name = "Bay 2",
+            Description = "Bay 2 of Gen 2",
+            Type = ProductionLocationType.Bay,
+            CustomNames = ["bay2"],
+            InventoryLocations = []
+        };
+
+        G2Bay3 = new ProductionLocation()
+        {
+            Id = IdUtils.LocationId,
+            ProductionLine = Gen2,
+            Order = 3M,
+            BayNumber = 3,
+            Name = "Bay 3",
+            Description = "Bay 3 of Gen 2",
+            Type = ProductionLocationType.Bay,
+            CustomNames = ["bay3"],
+            InventoryLocations = []
+        };
+
+        G2Bay4 = new ProductionLocation()
+        {
+            Id = IdUtils.LocationId,
+            ProductionLine = Gen2,
+            Order = 4M,
+            BayNumber = 4,
+            Name = "Bay 4",
+            Description = "Bay 4 of Gen 2",
+            Type = ProductionLocationType.Bay,
+            CustomNames = ["bay4"],
+            InventoryLocations = []
+        };
+
+        G2Bay5 = new ProductionLocation()
+        {
+            Id = IdUtils.LocationId,
+            ProductionLine = Gen2,
+            Order = 5M,
+            BayNumber = 5,
+            Name = "Bay 5",
+            Description = "Bay 5 of Gen 2",
+            Type = ProductionLocationType.Bay,
+            CustomNames = ["bay5"],
+            InventoryLocations = []
+        };
+
+        G2Bay6 = new ProductionLocation()
+        {
+            Id = IdUtils.LocationId,
+            ProductionLine = Gen2,
+            Order = 6M,
+            BayNumber = 6,
+            Name = "Bay 6",
+            Description = "Bay 6 of Gen 2",
+            Type = ProductionLocationType.Bay,
+            CustomNames = ["bay6"],
+            InventoryLocations = []
+        };
+
+        G2Bay7 = new ProductionLocation()
+        {
+            Id = IdUtils.LocationId,
+            ProductionLine = Gen2,
+            Order = 7M,
+            BayNumber = 7,
+            Name = "Bay 7",
+            Description = "Bay 7 of Gen 2",
+            Type = ProductionLocationType.Bay,
+            CustomNames = ["bay7"],
+            InventoryLocations = []
+        };
+
+        ExpoBay1 = new ProductionLocation()
+        {
+            Id = IdUtils.LocationId,
+            ProductionLine = Expo,
+            Order = 1M,
+            BayNumber = 1,
+            Name = "Bay 1",
+            Description = "Bay 1 of Expo",
+            Type = ProductionLocationType.Bay,
+            CustomNames = ["bay1"],
+            InventoryLocations = []
+        };
+
+        ExpoBay2 = new ProductionLocation()
+        {
+            Id = IdUtils.LocationId,
+            ProductionLine = Expo,
+            Order = 2M,
+            BayNumber = 2,
+            Name = "Bay 2",
+            Description = "Bay 2 of Expo",
+            Type = ProductionLocationType.Bay,
+            CustomNames = ["bay2"],
+            InventoryLocations = []
+        };
+
+        ExpoBay3 = new ProductionLocation()
+        {
+            Id = IdUtils.LocationId,
+            ProductionLine = Expo,
+            Order = 3M,
+            BayNumber = 3,
+            Name = "Bay 3",
+            Description = "Bay 3 of Expo",
+            Type = ProductionLocationType.Bay,
+            CustomNames = ["bay3"],
+            InventoryLocations = []
+        };
+
+        ExpoBay4 = new ProductionLocation()
+        {
+            Id = IdUtils.LocationId,
+            ProductionLine = Expo,
+            Order = 4M,
+            BayNumber = 4,
+            Name = "Bay 4",
+            Description = "Bay 4 of Expo",
+            Type = ProductionLocationType.Bay,
+            CustomNames = ["bay4"],
+            InventoryLocations = []
+        };
+
+        ExpoBay5 = new ProductionLocation()
+        {
+            Id = IdUtils.LocationId,
+            ProductionLine = Expo,
+            Order = 5M,
+            BayNumber = 5,
+            Name = "Bay 5",
+            Description = "Bay 5 of Expo",
+            Type = ProductionLocationType.Bay,
+            CustomNames = ["bay5"],
+            InventoryLocations = []
+        };
+        
+        LocationFactory = new LocationFactory()
+        {
+            IgnoredListNames = ["ignored"],
+            Locations = new LocationCollection
+            ([
+                ExpoChassis,
+                G2Chassis,
+                Subs,
+                Cabs,
+                G2Bay1,
+                G2Bay2,
+                G2Bay3,
+                G2Bay4,
+                G2Bay5,
+                G2Bay6,
+                G2Bay7,
+                ExpoBay1,
+                ExpoBay2,
+                ExpoBay3,
+                ExpoBay4,
+                ExpoBay5
+            ])
+        };
+#endregion
+    }
+    
+    static readonly DateTimeOffset currentTime = DateTimeOffset.Now;
+
+    /// <param name="percentage">Value from 0.0 to 1.0</param>
+    public static VanLocationInfo GetLocationInfo(ProductionLine line, [Range(0f, 1f)] float percentage)
+    {
+        VanLocationInfo results = new VanLocationInfo();
+        
+        var positions = LocationFactory.Locations.Where(x 
+            =>  x.ProductionLine is not null && 
+                x.ProductionLine == line && 
+                x.Type == ProductionLocationType.Bay).ToList();
+        
+        positions.AddRange([LocationFactory.PreProduction, LocationFactory.PostProduction]);
+        positions = positions.OrderBy(x => x.Order).ToList();
+
+        for (int i = 0; i < (float)positions.Count * percentage; i++)
+        {
+            results.AddPositionChange(currentTime - TimeSpan.FromDays(i), positions.ElementAt(i));
+        }
+
+        return results;
+    }
+}

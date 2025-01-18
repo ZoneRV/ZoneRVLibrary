@@ -6,54 +6,41 @@ namespace ZoneRV.Tests.Location;
 
 public class LocationsTests
 {
-    private ProductionLocation _g2B1 = TestLocations.LocationFactory.Locations.GetBay(ProductionLine.Gen2, 1)!;
-    private ProductionLocation _g2B2 = TestLocations.LocationFactory.Locations.GetBay(ProductionLine.Gen2, 2)!;
-    private ProductionLocation _g2B3 = TestLocations.LocationFactory.Locations.GetBay(ProductionLine.Gen2, 3)!;
-    private ProductionLocation _g2B4 = TestLocations.LocationFactory.Locations.GetBay(ProductionLine.Gen2, 4)!;
-    private ProductionLocation _g2B5 = TestLocations.LocationFactory.Locations.GetBay(ProductionLine.Gen2, 5)!;
-    private ProductionLocation _g2B6 = TestLocations.LocationFactory.Locations.GetBay(ProductionLine.Gen2, 6)!;
-    private ProductionLocation _g2B7 = TestLocations.LocationFactory.Locations.GetBay(ProductionLine.Gen2, 7)!;
-    
-    private ProductionLocation _expoB1 = TestLocations.LocationFactory.Locations.GetBay(ProductionLine.Expo, 1)!;
-    private ProductionLocation _expoB2 = TestLocations.LocationFactory.Locations.GetBay(ProductionLine.Expo, 2)!;
-    private ProductionLocation _expoB3 = TestLocations.LocationFactory.Locations.GetBay(ProductionLine.Expo, 3)!;
-    private ProductionLocation _expoB4 = TestLocations.LocationFactory.Locations.GetBay(ProductionLine.Expo, 4)!;
-    private ProductionLocation _expoB5 = TestLocations.LocationFactory.Locations.GetBay(ProductionLine.Expo, 5)!;
     
     [Fact]
     public void PositionOperatorTests()
     {
-        Assert.True(_g2B1 < _g2B2);
-        Assert.True(_g2B4 > _g2B2);
+        Assert.True(ProductionTestData.G2Bay1 < ProductionTestData.G2Bay2);
+        Assert.True(ProductionTestData.G2Bay4 > ProductionTestData.G2Bay2);
         
-        Assert.True(_g2B1 == _g2B1);
+        Assert.True(ProductionTestData.G2Bay1 == ProductionTestData.G2Bay1);
         
-        Assert.True(_g2B1 != _g2B2);
-        Assert.True(_g2B1 != _expoB1);
+        Assert.True(ProductionTestData.G2Bay1 != ProductionTestData.ExpoBay1);
+        Assert.True(ProductionTestData.G2Bay1 != ProductionTestData.ExpoBay1);
         
-        Assert.False(_g2B1 > _g2B2);
-        Assert.False(_g2B4 < _g2B2);
+        Assert.False(ProductionTestData.G2Bay1 > ProductionTestData.G2Bay2);
+        Assert.False(ProductionTestData.G2Bay4 < ProductionTestData.G2Bay2);
         
-        Assert.False(_g2B1 != _g2B1);
+        Assert.False(ProductionTestData.G2Bay1 != ProductionTestData.G2Bay1);
         
-        Assert.False(_g2B1 == _g2B2);
-        Assert.False(_g2B1 == _expoB1);
+        Assert.False(ProductionTestData.G2Bay1 == ProductionTestData.G2Bay2);
+        Assert.False(ProductionTestData.G2Bay1 == ProductionTestData.ExpoBay1);
     }
 
     [Fact]
     public void PositionEqualityTests()
     {
-        Assert.Equal(_g2B1, _g2B1);
-        Assert.Equal(_expoB3, _expoB3);
+        Assert.Equal(ProductionTestData.G2Bay1, ProductionTestData.G2Bay1);
+        Assert.Equal(ProductionTestData.ExpoBay3, ProductionTestData.ExpoBay3);
         
-        Assert.NotEqual(_expoB3, _expoB2);
-        Assert.NotEqual(_expoB3, _g2B3);
+        Assert.NotEqual(ProductionTestData.ExpoBay3, ProductionTestData.ExpoBay2);
+        Assert.NotEqual(ProductionTestData.ExpoBay3, ProductionTestData.G2Bay3);
     }
 
     [Fact]
     public void AllHashesUnique()
     {
-        var hashes = TestLocations.LocationFactory.Locations.Select(x => x.GetHashCode()).ToList();
+        var hashes = ProductionTestData.LocationFactory.Locations.Select(x => x.GetHashCode()).ToList();
         
         Assert.Equal(hashes.Count, hashes.Distinct().Count());
     }

@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using Serilog;
 using TrelloDotNet;
 using TrelloDotNet.Model;
@@ -24,7 +23,7 @@ public partial class TrelloService : IProductionService
     public VanIdData VanIdData { get; } 
     public TrelloActionData TrelloActionData { get; } 
     
-    public override LocationFactory LocationFactory { get; init; }
+    public sealed override LocationFactory LocationFactory { get; init; }
     
     public static List<string> TrelloActionFilters => ["commentCard", "updateCustomFieldItem", "createCard", "updateCheckItemStateOnCard"];
     
@@ -138,17 +137,18 @@ public partial class TrelloService : IProductionService
         var cachedActions = await GetTrelloActions(CCDashboardId);
 
         List<List>? lists = await TrelloClient.GetListsOnBoardAsync(LineMoveBoardId);
+        List<string> modelPrefixes = ProductionLines.SelectMany(x => x.Models.Select(y => y.Prefix.ToLower())).ToList();
 
         lineMoveBoardCards = lineMoveBoardCards
                              .Where(c 
-                                 => ModelPrefixes
+                                 => modelPrefixes
                                      .Any(vm 
                                         => c.Name.ToLower().Contains(vm.ToLower()) 
                                     )).ToList();
         
         ccDashboardCards = ccDashboardCards
                             .Where(c 
-                                => ModelPrefixes
+                                => modelPrefixes
                                     .Any(vm 
                                         => c.Name.ToLower().Contains(vm.ToLower()) 
                                     )).ToList();
@@ -161,7 +161,7 @@ public partial class TrelloService : IProductionService
         foreach (Card card in lineMoveBoardCards)
         {
             
-            if (TryGetVanName(card.Name, out var model, out string? formattedName))
+            if (ModelNameMatcher.TryGetVanName(card.Name, out var model, out string? formattedName))
             {
                 if (tempBlockedNames.Contains(formattedName))
                     continue;
@@ -256,7 +256,7 @@ public partial class TrelloService : IProductionService
         foreach (Card card in ccDashboardCards)
         {
             
-            if (TryGetVanName(card.Name, out _, out string? formattedName))
+            if (ModelNameMatcher.TryGetVanName(card.Name, out _, out string? formattedName))
             {
                 if (!card.Due.HasValue)
                     continue;
@@ -389,12 +389,12 @@ public partial class TrelloService : IProductionService
         return van;
     }
 
-    private async Task<IEnumerable<CachedTrelloAction>> GetTrelloActions(string id)
+    private async Task<IEnumerable<CachedTrelloAction>> GetTrelloActions(string id, List<string>? actionFilters = null)
     {
         GetActionsOptions getActionsOptions = new GetActionsOptions()
         {
             Limit = 1000,
-            Filter = TrelloActionFilters
+            Filter = actionFilters ?? TrelloActionFilters
         };
         
         IEnumerable<CachedTrelloAction> cachedActions = await TrelloActionData.GetActions(id);

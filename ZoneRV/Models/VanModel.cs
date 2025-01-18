@@ -1,4 +1,4 @@
-﻿namespace ZoneRV.Models.Enums;
+﻿namespace ZoneRV.Models;
 
 public class VanModel
 {
@@ -8,6 +8,4 @@ public class VanModel
     public required string Name { get; set; }
     public required string? Description { get; set; }
     public required string Prefix { get; set; }
-    
-    
 }

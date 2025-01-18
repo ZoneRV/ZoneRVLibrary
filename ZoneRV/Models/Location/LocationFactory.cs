@@ -18,14 +18,15 @@ public class LocationFactory
         
     private List<string> _ignoredListNames = [];
 
-    public ProductionLocation? GetLocationFromCustomName(ProductionLine line, string name)
+    public ProductionLocation? GetLocationFromCustomName(ProductionLine? line, string name)
     {
         if (_ignoredListNames.Contains(name))
             return null;
         
-        return Locations.First(x => x.ProductionLine is not null && 
-                                       x.ProductionLine.Id == line.Id && 
-                                       x.CustomNames.Contains(name)); 
+        return Locations.First(x => 
+            (x.ProductionLine is not null && line is null) || 
+            (x.ProductionLine is not null && line is not null && x.ProductionLine.Id == line.Id) && 
+            x.CustomNames.Contains(name));
     }
     
     /// <summary>
@@ -33,9 +34,9 @@ public class LocationFactory
     /// </summary>
     public static readonly ProductionLocation PreProduction = new ProductionLocation()
     {
-        LocationName = "Pre Production",
-        LocationDescription = "Production has not yet started",
-        LocationOrder = decimal.MinValue,
+        Name = "Pre Production",
+        Description = "Production has not yet started",
+        Order = decimal.MinValue,
         Type = ProductionLocationType.Prep
     };
 
@@ -44,9 +45,9 @@ public class LocationFactory
     /// </summary>
     public static readonly ProductionLocation PostProduction = new ProductionLocation()
     {
-        LocationName = "Post Production",
-        LocationDescription = "Production has finished",
-        LocationOrder = decimal.MaxValue,
+        Name = "Post Production",
+        Description = "Production has finished",
+        Order = decimal.MaxValue,
         Type = ProductionLocationType.Finishing
     };
 
@@ -71,7 +72,7 @@ public class LocationFactory
                     x.Type == type && 
                     x.ProductionLine is not null &&
                     x.ProductionLine == productionLine && 
-                    x.LocationOrder == locationOrder))
+                    x.Order == locationOrder))
                 throw new ArgumentException("Multiple bays cannot have the same location order", nameof(locationOrder));
             
             if(bayNumber is null)
@@ -80,9 +81,9 @@ public class LocationFactory
         
         ProductionLocation newLocation = new ProductionLocation()
         {
-            LocationName = locationName,
-            LocationDescription = locationDescription,
-            LocationOrder = locationOrder,
+            Name = locationName,
+            Description = locationDescription,
+            Order = locationOrder,
             Type = type,
             ProductionLine = productionLine,
             BayNumber = bayNumber,

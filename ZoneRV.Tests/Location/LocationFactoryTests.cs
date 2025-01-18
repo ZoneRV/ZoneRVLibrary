@@ -8,18 +8,27 @@ public class LocationFactoryTests
 {
     [Theory]
     [InlineData("a", "a", -10, ProductionLocationType.Bay, null, 5, null)]
-    [InlineData("a", "a", -10, ProductionLocationType.Bay, ProductionLine.Gen2, null, null)]
+    [InlineData("a", "a", -10, ProductionLocationType.Bay, true, null, null)]
     public void LocationCreationThrowsNull(
         string locationName, 
         string locationDescription, 
         decimal locationOrder, 
         ProductionLocationType type, 
-        ProductionLine? productionLine = null, 
+        bool? isGen2 = null, 
         int? bayNumber = null, 
         IEnumerable<string>? inventoryLocations = null)
     {
-        Assert.Throws<ArgumentNullException>(() => TestLocations.LocationFactory.CreateLocation(locationName, locationDescription, locationOrder, type,
-            productionLine, bayNumber, inventoryLocations));
+        Assert.Throws<ArgumentNullException>(() 
+            => ProductionTestData.LocationFactory.CreateLocation(
+                locationName,
+                locationDescription, 
+                locationOrder, 
+                type,
+                isGen2.HasValue ? 
+                    (isGen2.Value ? ProductionTestData.Gen2 : ProductionTestData.Expo) : 
+                    null, 
+                bayNumber,
+                inventoryLocations));
     }
     
     [Theory]
@@ -30,8 +39,8 @@ public class LocationFactoryTests
         int bayNumber, 
         IEnumerable<string>? inventoryLocations = null)
     {
-        Assert.Throws<ArgumentException>(() => TestLocations.LocationFactory.CreateGen2BayLocation(locationName, locationDescription, bayNumber, inventoryLocations));
+        Assert.Throws<ArgumentException>(() => ProductionTestData.LocationFactory.CreateBayLocation(locationName, locationDescription, ProductionTestData.Gen2, bayNumber, inventoryLocations));
         
-        Assert.Throws<ArgumentException>(() => TestLocations.LocationFactory.CreateExpoBayLocation(locationName, locationDescription, bayNumber, inventoryLocations));
+        Assert.Throws<ArgumentException>(() => ProductionTestData.LocationFactory.CreateBayLocation(locationName, locationDescription, ProductionTestData.Gen2, bayNumber, inventoryLocations));
     }
 }

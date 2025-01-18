@@ -34,8 +34,8 @@ public class VanLocationInfo
                     nameof(change.location.Type));
 
             if (change.location.ProductionLine is not null &&
-                _locationHistory.Any(x =>
-                    x.location.ProductionLine is not null && x.location.ProductionLine != change.location.ProductionLine))
+                _locationHistory.Where(x => x.location.ProductionLine is not null)
+                    .Any(x => x.location.ProductionLine != change.location.ProductionLine))
                 throw new ArgumentException("Location information cannot contain multiple production lines",
                     nameof(change.location.ProductionLine));
 

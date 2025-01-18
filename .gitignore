@@ -4,6 +4,9 @@ obj/
 riderModule.iml
 /_ReSharper.Caches/
 /ZoneDB/ZoneDB.publish.xml
+/.idea/dataSources
+/.idea/dataSources.xml
+/.idea/dataSources.local.xml
 
 # User-specific files
 *.rsuser

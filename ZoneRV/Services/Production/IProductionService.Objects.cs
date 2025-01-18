@@ -34,9 +34,9 @@ public abstract partial class IProductionService
             CreateChecklist(checklistInfo, jobcard);
         }
 
-        foreach (var attachmentInfo in info.AttachmentInfos)
+        foreach (var attachment in info.AttachmentInfos)
         {
-            CreateAttachment(van, attachmentInfo, jobcard);
+            CreateAttachment(van, attachment, jobcard);
         }
 
         JobCards.TryAdd(info.Id, jobcard);
