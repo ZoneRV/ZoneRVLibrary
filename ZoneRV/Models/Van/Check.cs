@@ -1,6 +1,6 @@
 ﻿namespace ZoneRV.Models.Van;
 
-[DebuggerDisplay("{Name}")]
+[DebuggerDisplay("{Name} Completed:{IsChecked}")]
 public class Check
 {
     public required string Id { get; init; }
@@ -32,6 +32,7 @@ public class Check
     }
 }
 
+[DebuggerDisplay("{Name} Completed:{IsChecked}")]
 public class CheckInfo
 {
     public required string Id { get; set; }

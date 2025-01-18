@@ -15,6 +15,7 @@ public class RedCard : Card
     [ZoneRVJsonIgnore(JsonIgnoreType.Both)] public TimeSpan Age => CreationDate.HasValue ? DateTimeOffset.Now - CreationDate.Value : TimeSpan.Zero;
 }
 
+[DebuggerDisplay("{Name}")]
 public class RedCardInfo : CardInfo
 {
     public required RedFlagIssue? RedFlagIssue { get; set; }

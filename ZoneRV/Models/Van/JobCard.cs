@@ -42,6 +42,7 @@ public class JobCard : Card
 
 }
 
+[DebuggerDisplay("{Name}")]
 public class JobCardInfo : CardInfo
 {
     public required TimeSpan TaskTime { get; init; }

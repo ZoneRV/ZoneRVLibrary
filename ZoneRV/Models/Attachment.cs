@@ -11,7 +11,7 @@ public class Attachment
     public required Card Card { get; init; }
 }
 
-
+[DebuggerDisplay("{FileName}:{Id} - {Url}")]
 public class AttachmentInfo
 {
     public required string Id { get; init; }

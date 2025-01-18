@@ -1,5 +1,6 @@
 ﻿namespace ZoneRV.Models;
 
+[DebuggerDisplay("{Name} - {ProductionLine.Name}")]
 public class VanModel
 {
     public required int Id { get; set; }

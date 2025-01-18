@@ -12,6 +12,7 @@ public class YellowCard : Card
     [ZoneRVJsonIgnore(JsonIgnoreType.Both)] public TimeSpan Age => (CreationDate.HasValue) ? DateTimeOffset.Now - CreationDate.Value : TimeSpan.Zero;
 }
 
+[DebuggerDisplay("{Name}")]
 public class YellowCardInfo : CardInfo
 {
     public required DateTimeOffset? CreationDate { get; set; }

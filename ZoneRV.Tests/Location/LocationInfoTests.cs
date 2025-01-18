@@ -6,28 +6,40 @@ namespace ZoneRV.Tests.Location;
 
 public class LocationInfoTests
 {
+    VanLocationInfo fullHistory => ProductionTestData.GetLocationInfo(ProductionTestData.Gen2, 1);
+    VanLocationInfo halfHistory => ProductionTestData.GetLocationInfo(ProductionTestData.Gen2, .5f);
+
     [Fact]
-    public void AddLocationChangesThrows()
+    public void CannotAddLocationThatExistAlready()
     {
-        var fullHistory = ProductionTestData.GetLocationInfo(ProductionTestData.Gen2, 1);
-        var halfHistory = ProductionTestData.GetLocationInfo(ProductionTestData.Gen2, .5f);
-        
         // Location Exists
         Assert.Throws<ArgumentException>(
             "location",
             () => fullHistory.AddPositionChange(DateTimeOffset.MaxValue, LocationFactory.PreProduction));
-        
+    }
+
+    [Fact]
+    public void CannotNonBayLocation()
+    {
         // Cant add Non bays (unless pre or post-production)
         Assert.Throws<ArgumentException>(
             "Type",
             () =>fullHistory.AddPositionChange(DateTimeOffset.MaxValue, ProductionTestData.LocationFactory.Locations.First(x => x.Type == ProductionLocationType.Module)));
-        
+    }
+
+    [Fact]
+    public void CannotBayFromDifferentLine()
+    {
         // Cant add different production lines
         Assert.Throws<ArgumentException>(
             "ProductionLine",
             () => fullHistory.AddPositionChange(DateTimeOffset.MaxValue,
                 ProductionTestData.LocationFactory.Locations.First(x => x.ProductionLine == ProductionTestData.Expo && x.Type == ProductionLocationType.Bay)));
-
+    }
+    
+    [Fact]
+    public void CannotAddMoveWithExistingDate()
+    {
         // Cant add move with already existing date
         Assert.Throws<ArgumentException>(
             "date",

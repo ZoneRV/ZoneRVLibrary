@@ -18,6 +18,7 @@ public class Comment
     public required string Content { get; set; }
 }
 
+[DebuggerDisplay("{Content} - AuthorId:{AuthorId}")]
 public class CommentInfo
 {
     public required string Id { get; set; }

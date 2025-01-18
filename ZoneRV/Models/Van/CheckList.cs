@@ -20,6 +20,7 @@ public class Checklist
     [ZoneRVJsonIgnore(JsonIgnoreType.Both)] public float CompletionRate => Checks.Count > 0 ? CompletedChecks / (float)Checks.Count : 0f;
 }
 
+[DebuggerDisplay("{Name}")]
 public class ChecklistInfo
 {
     public required string Id { get; set; }
