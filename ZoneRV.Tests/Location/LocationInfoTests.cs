@@ -43,7 +43,7 @@ public class LocationInfoTests
         // Cant add move with already existing date
         Assert.Throws<ArgumentException>(
             "date",
-            () => halfHistory.AddPositionChange(halfHistory.LocationHistory.Min(x => x.moveDate),
-                ProductionTestData.LocationFactory.Locations.Where(x => x.ProductionLine == ProductionTestData.Gen2 && x.Type == ProductionLocationType.Bay).MaxBy(x => x.Order)));
+            () => halfHistory.AddPositionChange(halfHistory.LocationHistory.MinBy(x => x.moveDate).moveDate,
+                new ProductionLocation(){BayNumber = 8, Order = 8, Name = "fail", Description = "made to fail", Type = ProductionLocationType.Bay, ProductionLine = ProductionTestData.Gen2}));
     }
 }

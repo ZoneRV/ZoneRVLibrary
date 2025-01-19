@@ -28,6 +28,9 @@ public class LocationFactory
             (x.ProductionLine is not null && line is not null && x.ProductionLine.Id == line.Id) && 
             x.CustomNames.Contains(name));
     }
+
+    public IEnumerable<ProductionLocation> GetAllLocationsFromLine(ProductionLine? line)
+        => Locations.Where(x => x.ProductionLine == line);
     
     /// <summary>
     /// Default location for new vans
@@ -121,7 +124,7 @@ public class LocationFactory
         string locationName, 
         string locationDescription, 
         decimal locationOrder, 
-        ProductionLine? productionLine, 
+        ProductionLine? productionLine = null, 
         IEnumerable<string>? inventoryLocations = null)
     {
         return CreateLocation(locationName, locationDescription, locationOrder, ProductionLocationType.Module,

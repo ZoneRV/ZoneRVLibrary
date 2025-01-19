@@ -9,31 +9,36 @@ namespace ZoneRV.Services.Production;
 [SuppressMessage("ReSharper", "InconsistentNaming")]
 public abstract partial class IProductionService
 {
-    public List<ProductionLine> ProductionLines { get; init; } = [];
+    public List<ProductionLine> ProductionLines { get; init; }
     public ModelNameMatcher ModelNameMatcher { get; init; }
+
+    public IConfiguration Configuration { get; set; }
     
     public abstract LocationFactory LocationFactory { get; init; }
-
-    public ProductionDataService ProductionData { get; }
-    public LocationData LocationData { get; } 
     
-    
-    public IProductionService(IConfiguration configuration, ProductionDataService productionDataService, LocationData locationData)
+    public IProductionService(IConfiguration configuration, ProductionDataService productionDataService)
     {
-        ProductionData = productionDataService;
-        LocationData = locationData;
+        Configuration = configuration;
         
         var lines = Task.Run(async () => await productionDataService.GetProductionLines()).Result;
         ProductionLines = lines.ToList();
 
         var models = ProductionLines.SelectMany(x => x.Models).ToList();
         ModelNameMatcher = new ModelNameMatcher(models);
-        
-        Task.Run(async () => await InitialiseService(configuration));
     }
     
-    protected abstract Task InitialiseService(IConfiguration configuration);
-    protected ConcurrentDictionary<VanProductionInfo, Task<VanProductionInfo>> _currentBoardTasks { get; init; } = [];
+    public IProductionService(IConfiguration configuration, IEnumerable<ProductionLine> productionLines)
+    {
+        Configuration = configuration;
+
+        ProductionLines = productionLines.ToList();
+
+        var models = ProductionLines.SelectMany(x => x.Models).ToList();
+        ModelNameMatcher = new ModelNameMatcher(models);
+    }
+    
+    public abstract Task InitialiseService();
+    private ConcurrentDictionary<VanProductionInfo, Task<VanProductionInfo>> _currentBoardTasks { get; init; } = [];
 
     protected abstract Task<VanProductionInfo> _loadVanFromSourceAsync(VanProductionInfo info);
 
@@ -56,6 +61,8 @@ public abstract partial class IProductionService
 
             await newTask.WaitAsync(CancellationToken.None);
 
+            info.ProducitionInfoLoaded = true;
+
             await Task.Delay(100); // TODO: fix so delay isn't needed
 
             _currentBoardTasks.TryRemove(info, out _);
@@ -64,7 +71,7 @@ public abstract partial class IProductionService
         }
     }
 
-    public int MaxDegreeOfParallelism { get; protected set; }
+    public abstract int MaxDegreeOfParallelism { get; protected set; }
     public async Task<IEnumerable<VanProductionInfo>> GetVanBoardsAsync(IEnumerable<VanProductionInfo> infos, CancellationToken cancellationToken = default)
     {
         ConcurrentBag<VanProductionInfo> boards = [];

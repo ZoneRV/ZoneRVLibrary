@@ -33,8 +33,10 @@ public class TrelloService : IProductionService
     private string       TrelloUserToken  { get; }
     private string       LineMoveBoardId  { get; }
     private string       ProHoDashboardId { get; }
+
+    public override int MaxDegreeOfParallelism { get; protected set; } = 3;
     
-    public TrelloService(IConfiguration configuration, ProductionDataService productionDataService, LocationData locationData, VanIdData vanIdData, TrelloActionData trelloActionData) : base(configuration, productionDataService, locationData)
+    public TrelloService(IConfiguration configuration, ProductionDataService productionDataService, LocationData locationData, VanIdData vanIdData, TrelloActionData trelloActionData) : base(configuration, productionDataService)
     {
         VanIdData = vanIdData;
         TrelloActionData = trelloActionData;
@@ -69,7 +71,7 @@ public class TrelloService : IProductionService
         TrelloClient = new TrelloClient(TrelloApiKey, TrelloUserToken, clientOptions);
     }
 
-    protected override async Task InitialiseService(IConfiguration configuration)
+    public override async Task InitialiseService()
     {
         Member member;
 
@@ -388,6 +390,7 @@ public class TrelloService : IProductionService
 
         return van;
     }
+
 
     private async Task<List<CachedTrelloAction>> GetTrelloActionsWithCache(string id, List<string>? actionFilters = null)
     {

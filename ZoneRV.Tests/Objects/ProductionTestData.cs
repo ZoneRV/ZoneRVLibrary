@@ -341,6 +341,8 @@ public static class ProductionTestData
             ([
                 ExpoChassis,
                 G2Chassis,
+                G2WallRoof,
+                ExpoWallRoof,
                 Subs,
                 Cabs,
                 G2Bay1,
@@ -373,7 +375,7 @@ public static class ProductionTestData
                 x.Type == ProductionLocationType.Bay).ToList();
         
         positions.AddRange([LocationFactory.PreProduction, LocationFactory.PostProduction]);
-        positions = positions.OrderBy(x => x.Order).ToList();
+        positions = positions.OrderByDescending(x => x.Order).ToList();
 
         for (int i = 0; i < (float)positions.Count * percentage; i++)
         {
