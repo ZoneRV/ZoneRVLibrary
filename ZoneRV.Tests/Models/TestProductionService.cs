@@ -9,96 +9,94 @@ namespace ZoneRV.Tests.Models;
 
 public class TestProductionService : IProductionService
 {
-    private readonly int _boardCount;
-    private readonly int _boardsHandedover;
-    private readonly int _boardsHandoverOverDue;
-    private readonly int _boardsInCarPark;
-
     private readonly DateTimeOffset _startTime = DateTimeOffset.Now;
 
-    private readonly TimeOnly _firstLineMove;
-    private readonly TimeOnly _secondLineMove;
+    public List<TestProductionLineSettings> LineSettings { get; set; }
     
     public TimeSpan LoadTimeForBoard { get; set; }
-
     public override int MaxDegreeOfParallelism { get; protected set; } = 5;
 
-    public TestProductionService(IConfiguration configuration, IEnumerable<ProductionLine> productionLines, int boardCount, int boardsHandedover, int boardsHandoverOverDue, int boardsInCarPark, TimeOnly firstLineMove, TimeOnly secondLineMove, TimeSpan? loadTimeForBoard = null) : base(configuration, productionLines)
+    public TestProductionService(IConfiguration configuration, List<TestProductionLineSettings> lineSettings, TimeSpan? loadTimeForBoard = null) : base(configuration, lineSettings.Select(x => x.ProductionLine))
     {
         LoadTimeForBoard = loadTimeForBoard ?? TimeSpan.Zero;
 
-        _boardCount = boardCount;
-        _boardsHandedover = boardsHandedover;
-        _boardsHandoverOverDue = boardsHandoverOverDue;
-        _boardsInCarPark = boardsInCarPark;
-
-        _firstLineMove = firstLineMove;
-        _secondLineMove = secondLineMove;
+        LineSettings = lineSettings.ToList();
     }
 
     public sealed override LocationFactory LocationFactory { get => ProductionTestData.LocationFactory; init => _ = value; }
     
+    
     public override Task InitialiseService()
     {
-        var models = ProductionLines.SelectMany(x => x.Models).ToList();
-        
-        for (int i = 0; i < _boardCount + 1; i++)
+        foreach (var line in LineSettings)
         {
-            var vanModel = models.ElementAt(i % models.Count);
-            var vanName = vanModel.Prefix + (i + 1).ToString("000");
-
-            var locationInfo = new VanLocationInfo();
-            
-            var van = new VanProductionInfo()
+            for (int i = 0; i < line.BoardCount; i++)
             {
-                Name = vanName,
-                VanModel = vanModel,
-                Url = $"https://www.google.com/search?q=fun+facts+about+the+number+{i}",
-                Id = i.ToString(),
-                LocationInfo = locationInfo
-            };
-            
-            DateTimeOffset handover = _startTime.LocalDateTime.Date - TimeSpan.FromDays((_boardsHandedover + _boardsHandoverOverDue - i) / 2) + (i % 2 == 0 ? _firstLineMove.ToTimeSpan() : _secondLineMove.ToTimeSpan());
-            DateTimeOffset? handoverStateUpdated = null;
-            HandoverState handoverState = HandoverState.UnhandedOver;
-            
-            van.AddHandoverHistory(handover - TimeSpan.FromDays(30), handover);
-            
-            if (i < _boardsHandedover)
-            {
-                handoverState = HandoverState.HandedOver;
-                handoverStateUpdated = handover + TimeSpan.FromHours(1);
-            }
+                var model = line.ProductionLine.Models.ElementAt(i % line.ProductionLine.Models.Count);
+                var name  = model.Prefix.ToUpper() + (i + 1).ToString("000");
                 
-            if (i % 3 == 0)
-            {
-                van.AddHandoverHistory(_startTime - TimeSpan.FromDays(2), handover + TimeSpan.FromMinutes(15));
-            }
-
-            van.HandoverState = handoverState;
-            van.HandoverStateLastUpdated = handoverStateUpdated;
+                var locationInfo = new VanLocationInfo();
             
-            van.LocationInfo.AddPositionChange(handover - TimeSpan.FromDays(60), LocationFactory.PreProduction);
-            var allLocations = LocationFactory.GetAllLocationsFromLine(vanModel.ProductionLine).Where(x => x.Type == ProductionLocationType.Bay).ToList();
-
-            var locations = allLocations.Take(_boardsInCarPark + _boardsHandedover + _boardsHandoverOverDue - 2 - i).ToList();
-            
-            if(locations.Any())
-            {
-                int moves = Math.Abs(_boardsInCarPark + _boardsHandedover + _boardsHandoverOverDue - i);
-                
-                if (allLocations.Count == locations.Count)
-                    van.LocationInfo.AddPositionChange(_startTime.LocalDateTime.Date - TimeSpan.FromDays(moves / 2) + (moves % 2 == 1 ? _firstLineMove.ToTimeSpan() : _secondLineMove.ToTimeSpan()), LocationFactory.PostProduction);
-
-                foreach (var location in locations.OrderByDescending(x => x.Order))
+                var van = new VanProductionInfo()
                 {
-                    moves++;
-                    van.LocationInfo.AddPositionChange(_startTime.LocalDateTime.Date - TimeSpan.FromDays(moves / 2) + (moves % 2 == 1 ? _firstLineMove.ToTimeSpan() : _secondLineMove.ToTimeSpan()), location);
+                    Name = name,
+                    VanModel = model,
+                    Url = $"https://www.google.com/search?q=fun+facts+about+the+number+{i}",
+                    Id = name.GetHashCode().ToString(),
+                    LocationInfo = locationInfo
+                };
+                
+                DateTimeOffset  handover             = _startTime.LocalDateTime.Date - TimeSpan.FromDays((line.BoardsHandedOver + line.BoardsHandoverOverDue - i) / line.MoveTimes.Length) + line.MoveTimes[i % line.MoveTimes.Length].ToTimeSpan();
+                DateTimeOffset? handoverStateUpdated = null;
+                HandoverState   handoverState        = HandoverState.UnhandedOver;
+                
+                van.AddHandoverHistory(handover - TimeSpan.FromDays(30), handover);
+                
+                if (i < line.BoardsHandedOver)
+                {
+                    handoverState = HandoverState.HandedOver;
+                    handoverStateUpdated = handover + TimeSpan.FromHours(1);
                 }
+                    
+                if (i % 3 == 0)
+                {
+                    van.AddHandoverHistory(_startTime - TimeSpan.FromDays(2), handover + TimeSpan.FromMinutes(15));
+                }
+
+                van.HandoverState = handoverState;
+                van.HandoverStateLastUpdated = handoverStateUpdated;
+                
+                van.LocationInfo.AddPositionChange(handover - TimeSpan.FromDays(60), LocationFactory.PreProduction);
+                var allLocations = LocationFactory.GetAllLocationsFromLine(model.ProductionLine).Where(x => x.Type == ProductionLocationType.Bay).ToList();
+
+                List<ProductionLocation> locations;
+                int moves = line.BoardsInCarPark + line.BoardsHandedOver + line.BoardsHandoverOverDue - i;
+
+                if (moves > 0)
+                    locations = allLocations.ToList();
+                else
+                    locations = allLocations.Skip(-moves).ToList();
+                
+                if(locations.Any())
+                {
+                    if (moves > 0)
+                        van.LocationInfo.AddPositionChange(_startTime.LocalDateTime.Date + TimeSpan.FromDays(moves / line.MoveTimes.Length) + line.MoveTimes[Math.Abs(moves) % line.MoveTimes.Length].ToTimeSpan(), LocationFactory.PostProduction);
+
+                    foreach (var location in locations.OrderByDescending(x => x.Order))
+                    {
+                        if (moves == 0) // Account for zero and -2 both adding positions on same time
+                            moves--;
+                        
+                        moves--;
+                        van.LocationInfo.AddPositionChange(_startTime.LocalDateTime.Date + TimeSpan.FromDays(moves / line.MoveTimes.Length) + line.MoveTimes[Math.Abs(moves) % line.MoveTimes.Length].ToTimeSpan(), location);
+                    }
+                }
+                
+                Vans.TryAdd(name.ToLower(), van);
             }
-            
-            Vans.TryAdd(vanName, van);
         }
+        
+        //TODO: Assert some basic facts to make sure everything is fine
         
         return Task.CompletedTask;
     }
