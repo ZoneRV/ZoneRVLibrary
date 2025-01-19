@@ -10,9 +10,9 @@ public class ProductionService
     private IProductionService _productionService;
     
     private readonly int _boardCount = 100;
-    private readonly int _boardsHandedover = 10;
+    private readonly int _boardsHandedover = 20;
     private readonly int _boardsHandoverOverDue = 10;
-    private readonly int _boardsInCarPark = 20;
+    private readonly int _boardsInCarPark = 10;
     
     private readonly TimeOnly _firstLineMove = new TimeOnly(10, 0);
     private readonly TimeOnly _secondLineMove = new TimeOnly(13, 0);
