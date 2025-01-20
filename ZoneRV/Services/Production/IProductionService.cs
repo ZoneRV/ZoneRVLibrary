@@ -9,12 +9,13 @@ namespace ZoneRV.Services.Production;
 [SuppressMessage("ReSharper", "InconsistentNaming")]
 public abstract partial class IProductionService
 {
-    public List<ProductionLine> ProductionLines { get; init; }
-    public ModelNameMatcher ModelNameMatcher { get; init; }
+    public          List<ProductionLine> ProductionLines  { get; init; }
+    public          ModelNameMatcher     ModelNameMatcher { get; init; }
+    public abstract LocationFactory      LocationFactory  { get; init; }
 
-    public IConfiguration Configuration { get; set; }
+    public IConfiguration Configuration   { get; set; }
+    public bool           WebhooksEnabled { get; set; }
     
-    public abstract LocationFactory LocationFactory { get; init; }
     
     public IProductionService(IConfiguration configuration, ProductionDataService productionDataService)
     {

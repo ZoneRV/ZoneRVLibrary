@@ -8,6 +8,10 @@ riderModule.iml
 /.idea/dataSources.xml
 /.idea/dataSources.local.xml
 
+
+/ZoneRV.Api/appsettings.json
+/ZoneRV.Api/appsettings.Development.json
+
 # User-specific files
 *.rsuser
 *.suo
