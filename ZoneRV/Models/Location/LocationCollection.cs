@@ -28,6 +28,6 @@ public class LocationCollection : IEnumerable<ProductionLocation>
 
     public ProductionLocation? GetBay(ProductionLine line, int bayNumber)
     {
-        return _locations.SingleOrDefault(x => x.ProductionLine is not null && x.ProductionLine == line && x.BayNumber == bayNumber);
+        return _locations.SingleOrDefault(x => x.Line is not null && x.Line == line && x.BayNumber == bayNumber);
     }
 }

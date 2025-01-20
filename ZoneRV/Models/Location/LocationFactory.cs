@@ -24,13 +24,13 @@ public class LocationFactory
             return null;
         
         return Locations.First(x => 
-            (x.ProductionLine is not null && line is null) || 
-            (x.ProductionLine is not null && line is not null && x.ProductionLine.Id == line.Id) && 
-            x.CustomNames.Contains(name));
+            (x.Line is not null && line is null) || 
+            (x.Line is not null && line is not null && x.Line.Id == line.Id) && 
+            x.CustomLocationNames.Any(l => l.CustomName == name));
     }
 
     public IEnumerable<ProductionLocation> GetAllLocationsFromLine(ProductionLine? line)
-        => Locations.Where(x => x.ProductionLine == line);
+        => Locations.Where(x => x.Line == line);
     
     /// <summary>
     /// Default location for new vans
@@ -61,7 +61,7 @@ public class LocationFactory
         ProductionLocationType type, 
         ProductionLine? productionLine = null, 
         int? bayNumber = null, 
-        IEnumerable<string>? inventoryLocations = null)
+        IEnumerable<LocationInventoryName>? inventoryLocations = null)
     {
         if (type == ProductionLocationType.Bay)
         {
@@ -73,8 +73,8 @@ public class LocationFactory
             
             if (Locations.Any(x =>
                     x.Type == type && 
-                    x.ProductionLine is not null &&
-                    x.ProductionLine == productionLine && 
+                    x.Line is not null &&
+                    x.Line == productionLine && 
                     x.Order == locationOrder))
                 throw new ArgumentException("Multiple bays cannot have the same location order", nameof(locationOrder));
             
@@ -88,7 +88,7 @@ public class LocationFactory
             Description = locationDescription,
             Order = locationOrder,
             Type = type,
-            ProductionLine = productionLine,
+            Line = productionLine,
             BayNumber = bayNumber,
             InventoryLocations = inventoryLocations is null ? [] : inventoryLocations.ToList()
         };
@@ -99,44 +99,44 @@ public class LocationFactory
     }
 
     public ProductionLocation CreatePrepLocation(
-        string locationName, 
-        string locationDescription, 
-        decimal locationOrder, 
-        ProductionLine? productionLine = null, 
-        IEnumerable<string>? inventoryLocations = null)
+        string                              locationName, 
+        string                              locationDescription, 
+        decimal                             locationOrder, 
+        ProductionLine?                     productionLine     = null, 
+        IEnumerable<LocationInventoryName>? inventoryLocations = null)
     {
         return CreateLocation(locationName, locationDescription, locationOrder, ProductionLocationType.Prep,
             productionLine, null, inventoryLocations);
     }
 
     public ProductionLocation CreateSubassemblyLocation(
-        string locationName, 
-        string locationDescription, 
-        decimal locationOrder, 
-        ProductionLine? productionLine = null, 
-        IEnumerable<string>? inventoryLocations = null)
+        string                              locationName, 
+        string                              locationDescription, 
+        decimal                             locationOrder, 
+        ProductionLine?                     productionLine     = null, 
+        IEnumerable<LocationInventoryName>? inventoryLocations = null)
     {
         return CreateLocation(locationName, locationDescription, locationOrder, ProductionLocationType.Subassembly,
             productionLine, null, inventoryLocations);
     }
 
     public ProductionLocation CreateModuleLocation(
-        string locationName, 
-        string locationDescription, 
-        decimal locationOrder, 
-        ProductionLine? productionLine = null, 
-        IEnumerable<string>? inventoryLocations = null)
+        string                              locationName, 
+        string                              locationDescription, 
+        decimal                             locationOrder, 
+        ProductionLine?                     productionLine     = null, 
+        IEnumerable<LocationInventoryName>? inventoryLocations = null)
     {
         return CreateLocation(locationName, locationDescription, locationOrder, ProductionLocationType.Module,
             productionLine, null, inventoryLocations);
     }
 
     public ProductionLocation CreateBayLocation(
-        string locationName, 
-        string locationDescription, 
-        ProductionLine productionLine,
-        int bayNumber, 
-        IEnumerable<string>? inventoryLocations = null)
+        string                              locationName, 
+        string                              locationDescription, 
+        ProductionLine                      productionLine,
+        int                                 bayNumber, 
+        IEnumerable<LocationInventoryName>? inventoryLocations = null)
     {
         return CreateLocation(locationName, locationDescription, bayNumber, ProductionLocationType.Bay,
             productionLine, bayNumber, inventoryLocations);

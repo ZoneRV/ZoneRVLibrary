@@ -34,7 +34,7 @@ public class LocationInfoTests
         Assert.Throws<ArgumentException>(
             "ProductionLine",
             () => fullHistory.AddPositionChange(DateTimeOffset.MaxValue,
-                ProductionTestData.LocationFactory.Locations.First(x => x.ProductionLine == ProductionTestData.Expo && x.Type == ProductionLocationType.Bay)));
+                ProductionTestData.LocationFactory.Locations.First(x => x.Line == ProductionTestData.Expo && x.Type == ProductionLocationType.Bay)));
     }
     
     [Fact]
@@ -44,6 +44,6 @@ public class LocationInfoTests
         Assert.Throws<ArgumentException>(
             "date",
             () => halfHistory.AddPositionChange(halfHistory.LocationHistory.MinBy(x => x.moveDate).moveDate,
-                new ProductionLocation(){BayNumber = 8, Order = 8, Name = "fail", Description = "made to fail", Type = ProductionLocationType.Bay, ProductionLine = ProductionTestData.Gen2}));
+                new ProductionLocation(){BayNumber = 8, Order = 8, Name = "fail", Description = "made to fail", Type = ProductionLocationType.Bay, Line = ProductionTestData.Gen2}));
     }
 }

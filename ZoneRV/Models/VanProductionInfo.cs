@@ -19,7 +19,7 @@ public class VanProductionInfo : IEqualityComparer<VanProductionInfo>
 
     public double CompletionRate => Cards.Any() ? Cards.Average(x => x.GetCompletionRate()) : 0;
     
-    public required VanModel VanModel { get; init; }
+    public required Model VanModel { get; init; }
     
     private List<(DateTimeOffset ChangeDate, DateTimeOffset HandoverDate)> _handoverHistory = []; 
     public DateTimeOffset? HandoverDate => _handoverHistory.Count > 0 ? _handoverHistory.MaxBy(x => x.ChangeDate).HandoverDate : null;

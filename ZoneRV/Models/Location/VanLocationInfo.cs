@@ -33,11 +33,11 @@ public class VanLocationInfo
                 throw new ArgumentException("Non bay locations Cannot be added as a location change.",
                     nameof(change.location.Type));
 
-            if (change.location.ProductionLine is not null &&
-                _locationHistory.Where(x => x.location.ProductionLine is not null)
-                    .Any(x => x.location.ProductionLine != change.location.ProductionLine))
+            if (change.location.Line is not null &&
+                _locationHistory.Where(x => x.location.Line is not null)
+                    .Any(x => x.location.Line != change.location.Line))
                 throw new ArgumentException("Location information cannot contain multiple production lines",
-                    nameof(change.location.ProductionLine));
+                    nameof(change.location.Line));
 
             if (_locationHistory.Any(x => x.moveDate == change.date))
                 throw new ArgumentException(

@@ -1,20 +1,22 @@
-﻿namespace ZoneRV.Models.Location;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-[DebuggerDisplay("{ProductionLine} - {Name}")]
+namespace ZoneRV.Models.Location;
+
+[DebuggerDisplay("{Line} - {Name}")]
+[Table("Location")]
 public class ProductionLocation : IEquatable<ProductionLocation>, IEqualityComparer<ProductionLocation>, IComparable<ProductionLocation>
 {
-    public int Id { get; init; }
+    [Key, Required] public int Id { get; init; }
     
-    public ProductionLine? ProductionLine { get; init; }
+    public virtual ProductionLine? Line { get; init; }
     
-    public required string Name { get; set; }
+    [MaxLength(128)] public required string Name { get; set; }
     
-    public required string Description { get; set; }
-    
-    public string? BayLeaderId { get; set; }
-    
-    public List<string> InventoryLocations { get; set; } = [];
-    public List<string> CustomNames { get; set; } = [];
+    [MaxLength(1024)] public required string Description { get; set; }
+
+    public virtual ICollection<LocationInventoryName> InventoryLocations { get; set; } = default!;
+    public virtual ICollection<LocationCustomName>    CustomLocationNames    { get; set; } = default!;
 
     [ZoneRVJsonIgnore(JsonIgnoreType.Both)] public decimal Order
     {
@@ -73,9 +75,9 @@ public class ProductionLocation : IEquatable<ProductionLocation>, IEqualityCompa
         if (ReferenceEquals(this, other)) 
             return true;
         
-        return (ProductionLine is null && other.ProductionLine is null) ||
-               (ProductionLine is not null && other.ProductionLine is not null) &&
-               ProductionLine == other.ProductionLine && 
+        return (Line is null && other.Line is null) ||
+               (Line is not null && other.Line is not null) &&
+               Line == other.Line && 
                Name == other.Name && 
                Description == other.Description && 
                InventoryLocations.Equals(other.InventoryLocations) && 
@@ -118,7 +120,7 @@ public class ProductionLocation : IEquatable<ProductionLocation>, IEqualityCompa
 
     public override int GetHashCode()
     {
-        return HashCode.Combine((ProductionLine is null ? -1 : ProductionLine.Id), Name, Order, (int)Type);
+        return HashCode.Combine((Line is null ? -1 : Line.Id), Name, Order, (int)Type);
     }
 
     public int GetHashCode(ProductionLocation obj)

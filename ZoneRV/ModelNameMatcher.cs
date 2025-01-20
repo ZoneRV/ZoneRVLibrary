@@ -7,9 +7,9 @@ public class ModelNameMatcher
 {
     private Regex VanRegex { get; init; }
     public readonly IReadOnlyList<string> NumberFormats = [@"\d\d\dr", @"\d\d\d", @"sr\d"];
-    public List<VanModel> Models;
+    public List<Model> Models;
     
-    public ModelNameMatcher(IEnumerable<VanModel> models)
+    public ModelNameMatcher(IEnumerable<Model> models)
     {
         Models = models.ToList();
                 
@@ -25,7 +25,7 @@ public class ModelNameMatcher
     /// </exception>
     public bool TryGetVanName(
         string input,
-        [NotNullWhen(true)] out VanModel? vanType, 
+        [NotNullWhen(true)] out Model? vanType, 
         [NotNullWhen(true)] out string? result)
     {
         input = input.ToLower();

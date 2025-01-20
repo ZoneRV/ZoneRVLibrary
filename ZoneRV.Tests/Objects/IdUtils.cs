@@ -34,4 +34,15 @@ public static class IdUtils
             return _locationId;
         }
     }
+    
+    private static int _locationNameId = 0;
+    
+    public static int LocationNameId
+    {
+        get
+        {
+            _locationNameId++;
+            return _locationNameId;
+        }
+    }
 }

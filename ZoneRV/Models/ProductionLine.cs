@@ -6,7 +6,7 @@ public class ProductionLine
     public required int Id { get; set; }
     public required string Name { get; set; }
 
-    public List<VanModel> Models { get; set; } = [];
+    public List<Model> Models { get; set; } = [];
 
     public static bool operator ==(ProductionLine? first, ProductionLine? second)
         => (first is null && second is null) || 
