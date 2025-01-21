@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ZoneRV\ZoneRV.csproj" />
-	  <PackageReference Include="FishbowlSQL" Version="0.1.1-preview4" />
+	  <PackageReference Include="FishbowlSQL" Version="0.1.1-preview5" />
 	  <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
