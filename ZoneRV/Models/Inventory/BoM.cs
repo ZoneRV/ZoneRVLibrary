@@ -3,16 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FishbowlSQL.Models;
 
 namespace ZoneRV.Models.Inventory
 {
     /// <summary>
-    /// build of materials
+    /// bill of materials
     /// </summary>
     public class BoM
     {
 
-        public List<Item> Items { get; } = new();
+        public List<Item> Items { get; set; } = new();
+
 
     }
 }

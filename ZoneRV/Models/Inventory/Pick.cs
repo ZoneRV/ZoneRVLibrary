@@ -9,14 +9,11 @@ namespace ZoneRV.Models.Inventory
 {
     public class Pick
     {
-        public string BoM {get; set; } = string.Empty;
+        public required string BoM {get; set; }
 
-        public List<Item> ConsumedItems { get; } = new();
+        public required List<Item> ConsumedItems { get; set; }
 
-        public Pick(FishbowlSQL.Models.P) 
-        {
-            
-        }
+
 
     }
  }

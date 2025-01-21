@@ -3,18 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FishbowlSQL.Models;
 
 namespace ZoneRV.Models.Inventory
 {
     public class Item
     {
-        public string Nmae { get; set; } = string.Empty;
+        public required string Name { get; set; } 
 
-        public int Stock { get; set; }
+//TODO        public required int Stock { get; set; }
 
-        public string Category { get; set; } = string.Empty;
+        public required string Category { get; set; }
 
-        public string Description { get; set; } = string.Empty;
+        public required string Description { get; set; }
 
     }
 }
