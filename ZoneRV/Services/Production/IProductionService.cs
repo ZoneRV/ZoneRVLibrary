@@ -1,28 +1,37 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using ZoneRV.DBContexts;
 
 namespace ZoneRV.Services.Production;
 
 [SuppressMessage("ReSharper", "InconsistentNaming")]
 public abstract partial class IProductionService
 {
-    public          List<ProductionLine> ProductionLines  { get; init; }
-    public          ModelNameMatcher     ModelNameMatcher { get; init; }
-    public abstract LocationFactory      LocationFactory  { get; init; }
+    public           List<ProductionLine> ProductionLines  { get; init; }
+    public           ModelNameMatcher     ModelNameMatcher { get; init; }
+    public abstract  LocationFactory      LocationFactory  { get; init; }
 
-    public IConfiguration Configuration   { get; set; }
-    public bool           WebhooksEnabled { get; set; }
+    public             IConfiguration Configuration    { get; set; }
+    public             bool           WebhooksEnabled  { get; set; }
+    protected abstract string         LocationTypeName { get; }
     
     
-    public IProductionService(IConfiguration configuration, ProductionDataService productionDataService)
+    public IProductionService(IServiceScopeFactory scopeFactory, IConfiguration configuration)
     {
         Configuration = configuration;
-        
-        var lines = Task.Run(async () => await productionDataService.GetProductionLines()).Result;
-        ProductionLines = lines.ToList();
+        using (var scope = scopeFactory.CreateScope())
+        {
+            var productionContext = scope.ServiceProvider.GetRequiredService<ProductionContext>();
+
+
+            ProductionLines = productionContext.Lines
+                                               .Include(l => l.Models).ToList();
+        }
 
         var models = ProductionLines.SelectMany(x => x.Models).ToList();
         ModelNameMatcher = new ModelNameMatcher(models);

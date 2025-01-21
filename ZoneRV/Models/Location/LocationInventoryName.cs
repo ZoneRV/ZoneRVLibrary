@@ -9,10 +9,10 @@ public class LocationInventoryName
     [Key, Required]
     public int Id { get; set; }
     
-    [Required]
+    [Required, MaxLength(24)]
     public required string ServiceType { get; set; }
     
-    [Required]
+    [Required, MaxLength(128)]
     public required string CustomName { get; set; }
     
     public required ProductionLine Line { get; set; }

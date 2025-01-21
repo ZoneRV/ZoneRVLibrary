@@ -9,4 +9,14 @@ public class ProductionContext : DbContext
     public DbSet<ProductionLine> Lines { get; set; }
     public DbSet<ProductionLocation> Locations { get; set; }
     public DbSet<Model> Models { get; set; }
+
+    public ProductionContext(DbContextOptions<ProductionContext> options) : base(options)
+    {
+    }
+    
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        //Configure default schema
+        modelBuilder.HasDefaultSchema("production");
+    }
 }

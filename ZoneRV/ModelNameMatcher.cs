@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
+using Serilog;
 
 namespace ZoneRV;
 
@@ -23,7 +24,7 @@ public class ModelNameMatcher
     ///     Throws exception if input string contains multiple distinct van names.
     ///     <see cref="GetAllMentionedVans">Use this for strings with multiple vans.</see>
     /// </exception>
-    public bool TryGetVanName(
+    public bool TryGetSingleVanName(
         string input,
         [NotNullWhen(true)] out Model? vanType, 
         [NotNullWhen(true)] out string? result)
@@ -41,7 +42,8 @@ public class ModelNameMatcher
 
         if (matches.Count > 1 && matches.DistinctBy(x => string.Join(null, x.Groups.Values.Skip(1))).Count() != 1)
         {
-            throw new ArgumentException($"Van name \"{input}\" contains multiple van names", nameof(input));
+            Log.Logger.Warning("Van name {input} contains multiple van names", input);
+            return false;
         }
         
         result = string.Join(null, matches[0].Groups.Values.Skip(1));

@@ -15,8 +15,8 @@ public class ProductionLocation : IEquatable<ProductionLocation>, IEqualityCompa
     
     [MaxLength(1024)] public required string Description { get; set; }
 
-    public virtual ICollection<LocationInventoryName> InventoryLocations { get; set; } = default!;
-    public virtual ICollection<LocationCustomName>    CustomLocationNames    { get; set; } = default!;
+    public virtual ICollection<LocationInventoryName> InventoryLocations  { get; set; } = default!;
+    public virtual ICollection<LocationCustomName>    CustomLocationNames { get; set; } = default!;
 
     [ZoneRVJsonIgnore(JsonIgnoreType.Both)] public decimal Order
     {

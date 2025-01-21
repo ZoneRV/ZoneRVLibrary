@@ -27,7 +27,7 @@ public class VanNameRegexTests
     [InlineData("this is zpp100r, so amazing we just had to build it twice", "zpp", "zpp100r")]
     public void ShouldReturnVanName(string input, string modelPrefix, string expectedVanName)
     {
-        var pass = _nameMatcher.TryGetVanName(input, out Model? vanModel, out string? vanNameResult);
+        var pass = _nameMatcher.TryGetSingleVanName(input, out Model? vanModel, out string? vanNameResult);
         
         Assert.True(pass);
         
@@ -42,7 +42,7 @@ public class VanNameRegexTests
     [InlineData("zsp100 and zpp401")]
     public void ShouldThrow(string input)
     {
-        Assert.Throws<ArgumentException>(() => _nameMatcher.TryGetVanName(input, out _, out _));
+        Assert.Throws<ArgumentException>(() => _nameMatcher.TryGetSingleVanName(input, out _, out _));
     }
 
     [Theory]

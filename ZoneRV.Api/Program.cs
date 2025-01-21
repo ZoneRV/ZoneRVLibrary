@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Abstractions;
 using Microsoft.Identity.Web.Resource;
@@ -9,6 +10,7 @@ using Serilog.Core;
 using Serilog.Sinks.SystemConsole.Themes;
 using ZoneRV.Api;
 using ZoneRV.Api.Controllers;
+using ZoneRV.DBContexts;
 using ZoneRV.Services;
 using ZoneRV.Services.DB;
 using ZoneRV.Services.Production;
@@ -26,7 +28,7 @@ try
            .CreateLogger();
 
     builder.Services.AddSerilog();
-    Log.Logger.Information("test {env}", Environment.UserName);
+    Log.Logger.Information("Starting Api", Environment.UserName);
 
     // Add services to the container.
     builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -38,9 +40,13 @@ try
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
 
-    builder.Services.AddTransient<SqlDataAccess, MsSqlDataAccess>();
-    builder.Services.AddTransient<ProductionDataService>();
-    builder.Services.AddZoneService();
+    builder.Services.AddDbContext<ProductionContext>
+    ((_, options ) =>
+        options
+           .UseSqlServer(builder.Configuration.GetConnectionString("MySqlConnectionsString"))
+           .LogTo(Log.Logger.Debug, LogLevel.Information));
+
+    builder.Services.AddZoneService(builder.Configuration);
 
     var app = builder.Build();
     

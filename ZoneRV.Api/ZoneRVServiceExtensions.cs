@@ -1,4 +1,7 @@
-﻿using ZoneRV.Services;
+﻿using Microsoft.EntityFrameworkCore;
+using Serilog;
+using TrelloDotNet.AutomationEngine.Model;
+using ZoneRV.Services;
 using ZoneRV.Services.Production;
 using ZoneRV.Services.Trello;
 using ZoneRV.Services.Trello.DB;
@@ -7,11 +10,14 @@ namespace ZoneRV.Api;
 
 public static class ZoneRVServiceExtensions
 {
-    public static IServiceCollection AddZoneService(this IServiceCollection services)
+    public static IServiceCollection AddZoneService(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddTransient<LocationData>();
-        services.AddTransient<VanIdData>();
-        services.AddTransient<TrelloActionData>();
+        services.AddDbContext<TrelloContext>(
+            (_, options ) =>
+                 options
+                    .UseSqlServer(configuration.GetConnectionString("MySqlConnectionsString"))
+                    .LogTo(Log.Logger.Debug, LogLevel.Information));
+        
         services.AddSingleton<IProductionService, TrelloService>();
 
         return services;

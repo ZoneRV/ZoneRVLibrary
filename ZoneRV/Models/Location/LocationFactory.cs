@@ -23,7 +23,7 @@ public class LocationFactory
         if (_ignoredListNames.Contains(name))
             return null;
         
-        return Locations.First(x => 
+        return Locations.FirstOrDefault(x => 
             (x.Line is not null && line is null) || 
             (x.Line is not null && line is not null && x.Line.Id == line.Id) && 
             x.CustomLocationNames.Any(l => l.CustomName == name));

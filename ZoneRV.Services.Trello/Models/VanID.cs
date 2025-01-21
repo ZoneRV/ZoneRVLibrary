@@ -1,22 +1,13 @@
-﻿namespace ZoneRV.Services.Trello.Models;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
+
+namespace ZoneRV.Services.Trello.Models;
 
 public class VanId
 {
-    public VanId(string name)
-    {
-        VanName = name;
-    }
-
-    public VanId(string name, bool blocked = false, string? id = null, string? url = null)
-    {
-        VanName = name;
-        Id = id;
-        Url = url;
-        Blocked = blocked;
-    }
     
-    public string? Id { get; set; }
-    public string VanName { get; init; }
-    public bool Blocked { get; set; } = false;
-    public string? Url { get; set; }
+    [MaxLength(24)]                public          string? Id      { get; set; }
+    [Key, Required, MaxLength(24)] public required string  VanName { get; init; }
+                                   public          bool    Blocked { get; set; } = false;
+    [MaxLength(1024)]              public          string? Url     { get; set; }
 }

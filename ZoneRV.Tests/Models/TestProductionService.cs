@@ -13,8 +13,9 @@ public class TestProductionService : IProductionService
 
     public List<TestProductionLineSettings> LineSettings { get; set; }
     
-    public TimeSpan LoadTimeForBoard { get; set; }
-    public override int MaxDegreeOfParallelism { get; protected set; } = 5;
+    public             TimeSpan LoadTimeForBoard       { get; set; }
+    public override    int      MaxDegreeOfParallelism { get; protected set; } = 5;
+    protected override string   LocationTypeName       { get => "test"; }
 
     public TestProductionService(IConfiguration configuration, List<TestProductionLineSettings> lineSettings, TimeSpan? loadTimeForBoard = null) : base(configuration, lineSettings.Select(x => x.ProductionLine))
     {
