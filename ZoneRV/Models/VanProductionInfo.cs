@@ -1,4 +1,7 @@
-﻿namespace ZoneRV.Models;
+﻿using System.Web;
+using ZoneRV.Models.Inventory;
+
+namespace ZoneRV.Models;
 
 [DebuggerDisplay("{Name} - {Id}")]
 public class VanProductionInfo : IEqualityComparer<VanProductionInfo>
@@ -31,6 +34,10 @@ public class VanProductionInfo : IEqualityComparer<VanProductionInfo>
         => _handoverHistory.Add((changeDate, handoverDate));
 
     public VanLocationInfo LocationInfo { get; init; } = new VanLocationInfo();
+
+    // new dictionary to map locations to a list of Picks
+    private readonly Dictionary<string, List<Pick>> _locationPicks = new();
+    public IReadOnlyDictionary<string, List<Pick>> LocationPicks => _locationPicks;
 
     public bool Equals(VanProductionInfo? x, VanProductionInfo? y)
     {
