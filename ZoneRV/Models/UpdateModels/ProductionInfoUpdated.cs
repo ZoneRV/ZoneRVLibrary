@@ -1,4 +1,4 @@
-﻿namespace ZoneRV.Models.UpdateModes;
+﻿namespace ZoneRV.Models.UpdateModels;
 
 public class ProductionInfoUpdated
 {

@@ -152,7 +152,7 @@ public class TrelloService : IProductionService
         
         List<Card>         prohoCards   = await TrelloClient.GetCardsOnBoardAsync(ProHoDashboardId, new GetCardOptions());
 
-        var prohoCachedActions = await GetTrelloActionsWithCache(ProHoDashboardId, ["updateCard:idList"]);
+        var prohoCachedActions = await GetTrelloActionsWithCache(ProHoDashboardId, ["updateCard"]);
 
         List<List>? lists = await TrelloClient.GetListsOnBoardAsync(LineMoveBoardId);
         List<string> modelPrefixes = ProductionLines.SelectMany(x => x.Models.Select(y => y.Prefix.ToLower())).ToList();
@@ -338,7 +338,7 @@ public class TrelloService : IProductionService
             var vansInLine = Vans.Where(x => x.Value.VanModel.ProductionLine == productionLine).Select(x => x.Value).ToList();
                 
             int prepCount = vansInLine.Count(x =>
-                x.LocationInfo.CurrentLocation.Type is ProductionLocationType.Prep);
+                x.LocationInfo.CurrentLocation.Type is ProductionLocationType.Prep && x.HandoverState is HandoverState.HandedOver);
                 
             int prodCount = vansInLine.Count(x =>
                 x.LocationInfo.CurrentLocation.Type is ProductionLocationType.Bay or ProductionLocationType.Module or ProductionLocationType.Subassembly);
@@ -346,11 +346,11 @@ public class TrelloService : IProductionService
             int finishingCount = vansInLine.Count(x =>
                 x.LocationInfo.CurrentLocation.Type is ProductionLocationType.Finishing && x.HandoverState is not HandoverState.HandedOver);
             
+            int handoverDueCount = vansInLine.Count(x =>
+                x.HandoverDate < DateTimeOffset.Now && x.HandoverState is HandoverState.UnhandedOver);
+            
             int handedOverCount = vansInLine.Count(x =>
                 x.HandoverState is HandoverState.HandedOver);
-            
-            int handoverDueCount = vansInLine.Count(x =>
-                x.HandoverDate > DateTimeOffset.Now && x.HandoverState is HandoverState.UnhandedOver);
             
             Log.Logger.Information("{line}: Prep: {prepCount} - In Production: {prodCount} - In Finishing: {finishingCount} - Over Due: {overdueCount} - Handed Over: {handoverCount}",
                                    productionLine.Name, prepCount, prodCount, finishingCount, handoverDueCount ,handedOverCount);
