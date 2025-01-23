@@ -40,9 +40,9 @@ public class VanNameRegexTests
     
     [Theory]
     [InlineData("zsp100 and zpp401")]
-    public void ShouldThrow(string input)
+    public void ShouldReturnFalse(string input)
     {
-        Assert.Throws<ArgumentException>(() => _nameMatcher.TryGetSingleVanName(input, out _, out _));
+        Assert.False(_nameMatcher.TryGetSingleVanName(input, out _, out _));
     }
 
     [Theory]

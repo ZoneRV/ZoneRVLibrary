@@ -32,7 +32,7 @@ public class LocationInfoTests
     {
         // Cant add different production lines
         Assert.Throws<ArgumentException>(
-            "ProductionLine",
+            "Line",
             () => fullHistory.AddPositionChange(DateTimeOffset.MaxValue,
                 ProductionTestData.LocationFactory.Locations.First(x => x.Line == ProductionTestData.Expo && x.Type == ProductionLocationType.Bay)));
     }

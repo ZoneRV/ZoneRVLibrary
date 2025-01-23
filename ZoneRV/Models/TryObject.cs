@@ -2,6 +2,7 @@
 
 namespace ZoneRV.Models;
 
+[DebuggerDisplay("{Success} - {Object}")]
 public class TryObject<T> : Tuple<bool, T?>
 {
     [MemberNotNullWhen(returnValue: true, member: nameof(Object))]
