@@ -28,5 +28,5 @@ public class Model
     
     
     
-    public required ProductionLine ProductionLine { get; set; }
+    [ForeignKey("LineId")] public required ProductionLine ProductionLine { get; set; }
 }

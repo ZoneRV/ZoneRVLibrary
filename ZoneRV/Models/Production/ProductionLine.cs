@@ -15,6 +15,8 @@ public class ProductionLine
 
     public List<Model> Models { get; set; } = [];
 
+    public List<AreaOfOrigin> AreaOfOrigins { get; set; } = [];
+
     public static bool operator ==(ProductionLine? first, ProductionLine? second)
         => (first is null && second is null) || 
            first is not null && 

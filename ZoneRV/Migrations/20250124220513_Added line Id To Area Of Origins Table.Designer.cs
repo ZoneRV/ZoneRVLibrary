@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ZoneRV.DBContexts;
 
@@ -10,9 +11,11 @@ using ZoneRV.DBContexts;
 namespace ZoneRV.Migrations
 {
     [DbContext(typeof(ProductionContext))]
-    partial class ProductionContextModelSnapshot : ModelSnapshot
+    [Migration("20250124220513_Added line Id To Area Of Origins Table")]
+    partial class AddedlineIdToAreaOfOriginsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

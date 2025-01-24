@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ZoneRV.Models.Location;
 
@@ -23,5 +24,5 @@ public class LocationCustomName
     [Required, MaxLength(128)]
     public required string CustomName { get; set; }
     
-    public required ProductionLine Line { get; set; }
+    [ForeignKey("LocationId")] public required Location Location { get; set; }
 }

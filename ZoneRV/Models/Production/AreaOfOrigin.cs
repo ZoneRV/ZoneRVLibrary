@@ -10,6 +10,8 @@ namespace ZoneRV.Models.Production;
 [Table("AreaOfOrigin")]
 public class AreaOfOrigin
 {
-    [Key, Required] public required int Id { get; set; }
-    [MaxLength(24)] public required string Name { get; set; }
+    [Key, Required]        public required int    Id   { get; set; }
+    [MaxLength(24)]        public required string Name { get; set; }
+    
+    [ForeignKey("LineId")] public ProductionLine? Line { get; set; }
 }

@@ -108,6 +108,9 @@ public static class ProductionTestData
 #endregion
 
 #region Line Locations
+
+        
+        
         G2Chassis = new ZoneRV.Models.Location.Location()
         {
             Id                  = IdUtils.LocationId,
@@ -116,9 +119,16 @@ public static class ProductionTestData
             Name                = "Gen2 chassis",
             Description         = "Chassis are built here",
             Type                = ProductionLocationType.Module,
-            CustomLocationNames = [new LocationCustomName(){ Id = IdUtils.LocationNameId, Line = Gen2, ServiceType = "test", CustomName = "chassis"}],
+            CustomLocationNames = [],
             InventoryLocations  = []
         };
+        
+        var g2ChassisCustomName = new LocationCustomName()
+        {
+            Id = IdUtils.LocationNameId, Location = G2Chassis, ServiceType = "test", CustomName = "chassis"
+        };
+        
+        G2Chassis.CustomLocationNames.Add(g2ChassisCustomName);
 
         ExpoChassis = new ZoneRV.Models.Location.Location()
         {
@@ -128,9 +138,15 @@ public static class ProductionTestData
             Name                = "Expo chassis",
             Description         = "Chassis are built here",
             Type                = ProductionLocationType.Module,
-            CustomLocationNames = [new LocationCustomName(){ Id = IdUtils.LocationNameId, Line = Expo, ServiceType = "test", CustomName = "chassis"}],
+            CustomLocationNames = [],
             InventoryLocations  = []
         };
+
+        var expoChassisCustomName = new LocationCustomName()
+        {
+            Id = IdUtils.LocationNameId, Location = ExpoChassis, ServiceType = "test", CustomName = "chassis"
+        };
+        ExpoChassis.CustomLocationNames.Add(expoChassisCustomName);
 
         Subs = new ZoneRV.Models.Location.Location()
         {
@@ -139,9 +155,15 @@ public static class ProductionTestData
             Name                = "Sub Assembly",
             Description         = "Stuffs are built here",
             Type                = ProductionLocationType.Subassembly,
-            CustomLocationNames = [new LocationCustomName(){ Id = IdUtils.LocationNameId, Line = Gen2, ServiceType = "test", CustomName = "subs"}],
+            CustomLocationNames = [],
             InventoryLocations  = []
         };
+
+        var subsCustomName = new LocationCustomName()
+        {
+            Id = IdUtils.LocationNameId, Location = Subs, ServiceType = "test", CustomName = "subs"
+        };
+        Subs.CustomLocationNames.Add(subsCustomName);
 
         Cabs = new ZoneRV.Models.Location.Location()
         {
@@ -150,9 +172,15 @@ public static class ProductionTestData
             Name                = "Cabinetry",
             Description         = "Cabs are built here",
             Type                = ProductionLocationType.Module,
-            CustomLocationNames = [new LocationCustomName(){ Id = IdUtils.LocationNameId, Line = Gen2, ServiceType = "test", CustomName = "cabs"}],
+            CustomLocationNames = [],
             InventoryLocations  = []
         };
+
+        var cabsCustomName = new LocationCustomName()
+        {
+            Id = IdUtils.LocationNameId, Location = Cabs, ServiceType = "test", CustomName = "cabs"
+        };
+        Cabs.CustomLocationNames.Add(cabsCustomName);
 
         G2WallRoof = new ZoneRV.Models.Location.Location()
         {
@@ -162,9 +190,15 @@ public static class ProductionTestData
             Name                = "Wall/Mod",
             Description         = "Walls are built here",
             Type                = ProductionLocationType.Module,
-            CustomLocationNames = [new LocationCustomName(){ Id = IdUtils.LocationNameId, Line = Gen2, ServiceType = "test", CustomName = "wallroof"}],
+            CustomLocationNames = [],
             InventoryLocations  = []
         };
+
+        var g2WallRoofCustomName = new LocationCustomName()
+        {
+            Id = IdUtils.LocationNameId, Location = G2WallRoof, ServiceType = "test", CustomName = "wallroof"
+        };
+        G2WallRoof.CustomLocationNames.Add(g2WallRoofCustomName);
 
         ExpoWallRoof = new ZoneRV.Models.Location.Location()
         {
@@ -174,9 +208,15 @@ public static class ProductionTestData
             Name                = "Wall/Mod",
             Description         = "Walls are built here",
             Type                = ProductionLocationType.Module,
-            CustomLocationNames = [new LocationCustomName(){ Id = IdUtils.LocationNameId, Line = Expo, ServiceType = "test", CustomName = "wallroof"}],
+            CustomLocationNames = [],
             InventoryLocations  = []
         };
+
+        var expoWallRoofCustomName = new LocationCustomName()
+        {
+            Id = IdUtils.LocationNameId, Location = ExpoWallRoof, ServiceType = "test", CustomName = "wallroof"
+        };
+        ExpoWallRoof.CustomLocationNames.Add(expoWallRoofCustomName);
 
         G2Bay1 = new ZoneRV.Models.Location.Location()
         {
@@ -187,9 +227,15 @@ public static class ProductionTestData
             Name                = "Bay 1",
             Description         = "Bay 1 of Gen 2",
             Type                = ProductionLocationType.Bay,
-            CustomLocationNames = [new LocationCustomName(){ Id = IdUtils.LocationNameId, Line = Gen2, ServiceType = "test", CustomName = "bay1"}],
+            CustomLocationNames = [],
             InventoryLocations  = []
         };
+        
+        var g2Bay1CustomName = new LocationCustomName()
+        {
+            Id = IdUtils.LocationNameId, Location = G2Bay1, ServiceType = "test", CustomName = "bay1"
+        };
+        G2Bay1.CustomLocationNames.Add(g2Bay1CustomName);
 
         G2Bay2 = new ZoneRV.Models.Location.Location()
         {
@@ -200,9 +246,15 @@ public static class ProductionTestData
             Name                = "Bay 2",
             Description         = "Bay 2 of Gen 2",
             Type                = ProductionLocationType.Bay,
-            CustomLocationNames = [new LocationCustomName(){ Id = IdUtils.LocationNameId, Line = Gen2, ServiceType = "test", CustomName = "bay2"}],
+            CustomLocationNames = [],
             InventoryLocations  = []
         };
+        
+        var g2Bay2CustomName = new LocationCustomName()
+        {
+            Id = IdUtils.LocationNameId, Location = G2Bay2, ServiceType = "test", CustomName = "bay2"
+        };
+        G2Bay2.CustomLocationNames.Add(g2Bay2CustomName);
 
         G2Bay3 = new ZoneRV.Models.Location.Location()
         {
@@ -213,9 +265,15 @@ public static class ProductionTestData
             Name                = "Bay 3",
             Description         = "Bay 3 of Gen 2",
             Type                = ProductionLocationType.Bay,
-            CustomLocationNames = [new LocationCustomName(){ Id = IdUtils.LocationNameId, Line = Gen2, ServiceType = "test", CustomName = "bay3"}],
+            CustomLocationNames = [],
             InventoryLocations  = []
         };
+        
+        var g2Bay3CustomName = new LocationCustomName()
+        {
+            Id = IdUtils.LocationNameId, Location = G2Bay3, ServiceType = "test", CustomName = "bay3"
+        };
+        G2Bay3.CustomLocationNames.Add(g2Bay3CustomName);
 
         G2Bay4 = new ZoneRV.Models.Location.Location()
         {
@@ -226,9 +284,15 @@ public static class ProductionTestData
             Name                = "Bay 4",
             Description         = "Bay 4 of Gen 2",
             Type                = ProductionLocationType.Bay,
-            CustomLocationNames = [new LocationCustomName(){ Id = IdUtils.LocationNameId, Line = Gen2, ServiceType = "test", CustomName = "bay4"}],
+            CustomLocationNames = [],
             InventoryLocations  = []
         };
+        
+        var g2Bay4CustomName = new LocationCustomName()
+        {
+            Id = IdUtils.LocationNameId, Location = G2Bay4, ServiceType = "test", CustomName = "bay4"
+        };
+        G2Bay4.CustomLocationNames.Add(g2Bay4CustomName);
 
         G2Bay5 = new ZoneRV.Models.Location.Location()
         {
@@ -239,9 +303,15 @@ public static class ProductionTestData
             Name                = "Bay 5",
             Description         = "Bay 5 of Gen 2",
             Type                = ProductionLocationType.Bay,
-            CustomLocationNames = [new LocationCustomName(){ Id = IdUtils.LocationNameId, Line = Gen2, ServiceType = "test", CustomName = "bay5"}],
+            CustomLocationNames = [],
             InventoryLocations  = []
         };
+        
+        var g2Bay5CustomName = new LocationCustomName()
+        {
+            Id = IdUtils.LocationNameId, Location = G2Bay5, ServiceType = "test", CustomName = "bay5"
+        };
+        G2Bay5.CustomLocationNames.Add(g2Bay5CustomName);
 
         G2Bay6 = new ZoneRV.Models.Location.Location()
         {
@@ -252,9 +322,15 @@ public static class ProductionTestData
             Name                = "Bay 6",
             Description         = "Bay 6 of Gen 2",
             Type                = ProductionLocationType.Bay,
-            CustomLocationNames = [new LocationCustomName(){ Id = IdUtils.LocationNameId, Line = Gen2, ServiceType = "test", CustomName = "bay6"}],
+            CustomLocationNames = [],
             InventoryLocations  = []
         };
+        
+        var g2Bay6CustomName = new LocationCustomName()
+        {
+            Id = IdUtils.LocationNameId, Location = G2Bay6, ServiceType = "test", CustomName = "bay6"
+        };
+        G2Bay6.CustomLocationNames.Add(g2Bay6CustomName);
 
         G2Bay7 = new ZoneRV.Models.Location.Location()
         {
@@ -265,9 +341,15 @@ public static class ProductionTestData
             Name                = "Bay 7",
             Description         = "Bay 7 of Gen 2",
             Type                = ProductionLocationType.Bay,
-            CustomLocationNames = [new LocationCustomName(){ Id = IdUtils.LocationNameId, Line = Gen2, ServiceType = "test", CustomName = "bay7"}],
+            CustomLocationNames = [],
             InventoryLocations  = []
         };
+        
+        var g2Bay7CustomName = new LocationCustomName()
+        {
+            Id = IdUtils.LocationNameId, Location = G2Bay7, ServiceType = "test", CustomName = "bay7"
+        };
+        G2Bay7.CustomLocationNames.Add(g2Bay7CustomName);
 
         ExpoBay1 = new ZoneRV.Models.Location.Location()
         {
@@ -278,9 +360,15 @@ public static class ProductionTestData
             Name                = "Bay 1",
             Description         = "Bay 1 of Expo",
             Type                = ProductionLocationType.Bay,
-            CustomLocationNames = [new LocationCustomName(){ Id = IdUtils.LocationNameId, Line = Expo, ServiceType = "test", CustomName = "bay1"}],
-            InventoryLocations                                  = []
+            CustomLocationNames = [],
+            InventoryLocations  = []
         };
+        
+        var expoBay1CustomName = new LocationCustomName()
+        {
+            Id = IdUtils.LocationNameId, Location = ExpoBay1, ServiceType = "test", CustomName = "bay1"
+        };
+        ExpoBay1.CustomLocationNames.Add(expoBay1CustomName);
 
         ExpoBay2 = new ZoneRV.Models.Location.Location()
         {
@@ -291,9 +379,15 @@ public static class ProductionTestData
             Name                = "Bay 2",
             Description         = "Bay 2 of Expo",
             Type                = ProductionLocationType.Bay,
-            CustomLocationNames = [new LocationCustomName(){ Id = IdUtils.LocationNameId, Line = Expo, ServiceType = "test", CustomName = "bay2"}],
-            InventoryLocations                                  = []
+            CustomLocationNames = [],
+            InventoryLocations  = []
         };
+        
+        var expoBay2CustomName = new LocationCustomName()
+        {
+            Id = IdUtils.LocationNameId, Location = ExpoBay2, ServiceType = "test", CustomName = "bay2"
+        };
+        ExpoBay2.CustomLocationNames.Add(expoBay2CustomName);
 
         ExpoBay3 = new ZoneRV.Models.Location.Location()
         {
@@ -304,9 +398,15 @@ public static class ProductionTestData
             Name                = "Bay 3",
             Description         = "Bay 3 of Expo",
             Type                = ProductionLocationType.Bay,
-            CustomLocationNames = [new LocationCustomName(){ Id = IdUtils.LocationNameId, Line = Expo, ServiceType = "test", CustomName = "bay3"}],
-            InventoryLocations                                  = []
+            CustomLocationNames = [],
+            InventoryLocations  = []
         };
+        
+        var expoBay3CustomName = new LocationCustomName()
+        {
+            Id = IdUtils.LocationNameId, Location = ExpoBay3, ServiceType = "test", CustomName = "bay3"
+        };
+        ExpoBay3.CustomLocationNames.Add(expoBay3CustomName);
 
         ExpoBay4 = new ZoneRV.Models.Location.Location()
         {
@@ -317,9 +417,15 @@ public static class ProductionTestData
             Name                = "Bay 4",
             Description         = "Bay 4 of Expo",
             Type                = ProductionLocationType.Bay,
-            CustomLocationNames = [new LocationCustomName(){ Id = IdUtils.LocationNameId, Line = Expo, ServiceType = "test", CustomName = "bay4"}],
-            InventoryLocations                                  = []
+            CustomLocationNames = [],
+            InventoryLocations  = []
         };
+        
+        var expoBay4CustomName = new LocationCustomName()
+        {
+            Id = IdUtils.LocationNameId, Location = ExpoBay4, ServiceType = "test", CustomName = "bay4"
+        };
+        ExpoBay4.CustomLocationNames.Add(expoBay4CustomName);
 
         ExpoBay5 = new ZoneRV.Models.Location.Location()
         {
@@ -330,9 +436,15 @@ public static class ProductionTestData
             Name                = "Bay 5",
             Description         = "Bay 5 of Expo",
             Type                = ProductionLocationType.Bay,
-            CustomLocationNames = [new LocationCustomName(){ Id = IdUtils.LocationNameId, Line = Expo, ServiceType = "test", CustomName = "bay5"}],
-            InventoryLocations                                  = []
+            CustomLocationNames = [],
+            InventoryLocations  = []
         };
+        
+        var expoBay5CustomName = new LocationCustomName()
+        {
+            Id = IdUtils.LocationNameId, Location = ExpoBay5, ServiceType = "test", CustomName = "bay5"
+        };
+        ExpoBay5.CustomLocationNames.Add(expoBay5CustomName);
         
         LocationFactory = new LocationFactory()
         {
@@ -361,8 +473,8 @@ public static class ProductionTestData
         };
 #endregion
     }
-    
-    static readonly DateTimeOffset currentTime = DateTimeOffset.Now;
+
+    private static readonly DateTimeOffset CurrentTime = DateTimeOffset.Now;
 
     /// <param name="percentage">Value from 0.0 to 1.0</param>
     public static LocationInfo GetLocationInfo(ProductionLine line, [Range(0f, 1f)] float percentage)
@@ -379,7 +491,7 @@ public static class ProductionTestData
 
         for (int i = 0; i < (float)positions.Count * percentage; i++)
         {
-            results.AddPositionChange(currentTime - TimeSpan.FromDays(i), positions.ElementAt(i));
+            results.AddPositionChange(CurrentTime - TimeSpan.FromDays(i), positions.ElementAt(i));
         }
 
         return results;
