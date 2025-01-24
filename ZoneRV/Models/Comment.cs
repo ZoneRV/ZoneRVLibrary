@@ -7,11 +7,9 @@ public class Comment
 
     public string CardId => Card.Id;
     
-    [ZoneRVJsonIgnore(JsonIgnoreType.Cache)] public required Card Card { get; init; }
+    public required Card Card { get; init; }
     
-    public required string AuthorId { get; init; }
-    
-    [ZoneRVJsonIgnore(JsonIgnoreType.Cache)] public User? Author { get; internal set; }
+    public User? Author { get; internal set; }
     
     public required DateTimeOffset DateCreated { get; init; }
     

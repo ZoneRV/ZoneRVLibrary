@@ -35,19 +35,19 @@ public class JobCard : Card
     }
 
 
-    [ZoneRVJsonIgnore(JsonIgnoreType.Api)] private TimeSpan _taskTime { get; set; }
+    private TimeSpan _taskTime { get; set; }
     
     /// <summary>
     /// Default value of 10 minutes
     /// </summary>
-    [ZoneRVJsonIgnore(JsonIgnoreType.Cache)] public TimeSpan TaskTime
+    public TimeSpan TaskTime
     {
         get => _taskTime > TimeSpan.Zero ? _taskTime : TimeSpan.FromMinutes(10);
         
         set => _taskTime = value;
     } 
     
-    [ZoneRVJsonIgnore(JsonIgnoreType.Both)] public TimeSpan RemainingTaskTime => TaskTime - TaskTime * GetCompletionRate();
+    public TimeSpan RemainingTaskTime => TaskTime - TaskTime * GetCompletionRate();
 
 }
 

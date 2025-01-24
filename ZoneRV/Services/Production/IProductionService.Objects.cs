@@ -140,7 +140,6 @@ public abstract partial class IProductionService
         var comment = new Comment()
         {
             Author = user,
-            AuthorId = info.AuthorId,
             Card = card,
             Content = info.Content,
             DateCreated = info.DateCreated,

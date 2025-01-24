@@ -8,7 +8,6 @@ global using Serilog;
 global using Newtonsoft.Json;
 
 global using ZoneRV;
-global using ZoneRV.Attributes;
 global using ZoneRV.Models;
 global using ZoneRV.Models.DB;
 global using ZoneRV.Models.Location;

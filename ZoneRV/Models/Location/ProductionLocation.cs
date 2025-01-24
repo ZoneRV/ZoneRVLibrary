@@ -24,7 +24,7 @@ public class Location : IEquatable<Location>, IEqualityComparer<Location>, IComp
     public virtual ICollection<LocationInventoryName> InventoryLocations  { get; set; } = default!;
     public virtual ICollection<LocationCustomName>    CustomLocationNames { get; set; } = default!;
 
-    [ZoneRVJsonIgnore(JsonIgnoreType.Both)] public decimal Order
+    public decimal Order
     {
         get => _order;
 
