@@ -28,12 +28,12 @@ public static class TrelloUtils
         };
     }
 
-    internal static JobCardInfo ToJobCardInfo(this TrelloDotNet.Model.Card trelloCard, IEnumerable<CachedTrelloAction> cardActions, IEnumerable<CustomField> customFields)
+    internal static JobCardCreationInfo ToJobCardInfo(this TrelloDotNet.Model.Card trelloCard, IEnumerable<CachedTrelloAction> cardActions, IEnumerable<CustomField> customFields)
     {
         var cachedTrelloActions = cardActions.ToList();
         var enumerable = customFields.ToList();
 
-        return new JobCardInfo()
+        return new JobCardCreationInfo()
         {
             Id = trelloCard.Id,
             Name = trelloCard.Name,
@@ -51,12 +51,12 @@ public static class TrelloUtils
         };
     }
 
-    internal static RedCardInfo ToRedCardInfo(this TrelloDotNet.Model.Card trelloCard, IEnumerable<CachedTrelloAction> cardActions, IEnumerable<CustomField> customFields)
+    internal static RedCardCreationInfo ToRedCardInfo(this TrelloDotNet.Model.Card trelloCard, IEnumerable<CachedTrelloAction> cardActions, IEnumerable<CustomField> customFields)
     {
         var cachedTrelloActions = cardActions.ToList();
         var enumerable = customFields.ToList();
 
-        return new RedCardInfo()
+        return new RedCardCreationInfo()
         {
             Id = trelloCard.Id,
             Name = trelloCard.Name,
@@ -98,7 +98,7 @@ public static class TrelloUtils
         };
     }
 
-    internal static ChecklistInfo ToChecklistInfo(this Checklist trelloChecklist, IEnumerable<CachedTrelloAction> cardActions)
+    internal static ChecklistCreationInfo ToChecklistInfo(this Checklist trelloChecklist, IEnumerable<CachedTrelloAction> cardActions)
     {
         var cachedTrelloActions = cardActions.ToList();
         Dictionary<string, DateTimeOffset?> checkUpdates = [];
@@ -108,7 +108,7 @@ public static class TrelloUtils
             checkUpdates.Add(checkId!, cachedTrelloActions.Where(x => x.CheckId == checkId).Max(x => x.DateOffset));
         }
             
-        return new ChecklistInfo()
+        return new ChecklistCreationInfo()
         {
             Name = trelloChecklist.Name,
             Id = trelloChecklist.Id,
@@ -118,9 +118,9 @@ public static class TrelloUtils
         };
     }
 
-    internal static CheckInfo ToCheckInfo(this ChecklistItem trelloCheck, DateTimeOffset? lastUpdated)
+    internal static CheckCreationInfo ToCheckInfo(this ChecklistItem trelloCheck, DateTimeOffset? lastUpdated)
     {
-        return new CheckInfo()
+        return new CheckCreationInfo()
         {
             Name = trelloCheck.Name,
             Id = trelloCheck.Id,

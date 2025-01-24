@@ -3,6 +3,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ZoneRV.Models.Location;
 
+/// <summary>
+/// Represents a location in the production process.
+/// </summary>
+/// <remarks>
+/// The Location class supports comparison, equality, and ordering functions, including custom operators.
+/// </remarks>
 [DebuggerDisplay("{Line} - {Name}")]
 [Table("Location")]
 public class Location : IEquatable<Location>, IEqualityComparer<Location>, IComparable<Location>

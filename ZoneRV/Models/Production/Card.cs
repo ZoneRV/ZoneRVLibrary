@@ -1,8 +1,13 @@
 ﻿namespace ZoneRV.Models.Production;
 
+/// <summary>
+/// Represents a card in the production line for a sales order containing information about its state,
+/// associated production data, area of origin, and other related metadata.
+/// It serves as an abstract base class for specific card types.
+/// </summary>
 public abstract class Card
 {
-    public Card(SalesProductionInfo van, CardInfo info, AreaOfOrigin areaOfOrigin)
+    public Card(SalesProductionInfo van, CardCreationInfo info, AreaOfOrigin areaOfOrigin)
     {
         ProductionInfo = van;
         AreaOfOrigin = areaOfOrigin;
@@ -91,15 +96,20 @@ public abstract class Card
     }
 }
 
-
-public abstract class CardInfo
+/// <summary>
+/// Represents the foundational data required to create a card within the production system.
+/// It includes essential information such as the card's status, identification, name, URL,
+/// timestamps related to status updates, and metadata about associated items like checklists, comments, and attachments.
+/// Serves as a base or shared data container for specific card creation types.
+/// </summary>
+public abstract class CardCreationInfo
 {
     public required CardStatus CardStatus { get; init; }
     public required string Name { get; init; }
     public required string Id { get; init; }
     public required string Url { get; init; }
     public required DateTimeOffset? CardStatusLastUpdated { get; init; }
-    public IEnumerable<ChecklistInfo> ChecklistInfos { get; init; } = [];
+    public IEnumerable<ChecklistCreationInfo> ChecklistInfos { get; init; } = [];
     public IEnumerable<CommentInfo> CommentInfos { get; init; } = [];
     public IEnumerable<AttachmentInfo> AttachmentInfos { get; init; } = [];
 }

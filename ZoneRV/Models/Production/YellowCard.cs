@@ -13,7 +13,7 @@ public class YellowCard : Card
 }
 
 [DebuggerDisplay("{Name}")]
-public class YellowCardInfo : CardInfo
+public class YellowCardInfo : CardCreationInfo
 {
     public required DateTimeOffset? CreationDate { get; set; }
 }

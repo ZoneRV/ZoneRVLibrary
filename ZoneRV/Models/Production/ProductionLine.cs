@@ -3,6 +3,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ZoneRV.Models.Production;
 
+/// <summary>
+/// Represents a production line, which is a collection of production models in a manufacturing context.
+/// </summary>
 [DebuggerDisplay("{Name}")]
 [Table("Line")]
 public class ProductionLine

@@ -20,7 +20,7 @@ public abstract partial class IProductionService
     protected ConcurrentDictionary<string, Attachment> Attachments { get; } = [];
     protected ConcurrentDictionary<string, User> Users { get; } = [];
 
-    protected JobCard CreateJobCard(SalesProductionInfo van, JobCardInfo info, AreaOfOrigin areaOfOrigin, Location location)
+    protected JobCard CreateJobCard(SalesProductionInfo van, JobCardCreationInfo info, AreaOfOrigin areaOfOrigin, Location location)
     {
         var jobcard = new JobCard(van, info, areaOfOrigin, location);
 
@@ -45,7 +45,7 @@ public abstract partial class IProductionService
         return jobcard;
     }
 
-     protected RedCard CreateRedCard(SalesProductionInfo van, RedCardInfo info, AreaOfOrigin areaOfOrigin)
+     protected RedCard CreateRedCard(SalesProductionInfo van, RedCardCreationInfo info, AreaOfOrigin areaOfOrigin)
      {
          var redCard = new RedCard(van, info, areaOfOrigin);
 
@@ -95,7 +95,7 @@ public abstract partial class IProductionService
         return yellowCard;
     }
 
-    protected Checklist CreateChecklist(ChecklistInfo info, Card card)
+    protected Checklist CreateChecklist(ChecklistCreationInfo info, Card card)
     {
         var checklist = new Checklist()
         {
@@ -116,7 +116,7 @@ public abstract partial class IProductionService
         return checklist;
     }
     
-    protected Check CreateCheck(CheckInfo info, Checklist checklist)
+    protected Check CreateCheck(CheckCreationInfo info, Checklist checklist)
     {
         var check = new Check()
         {
