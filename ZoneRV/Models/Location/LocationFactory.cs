@@ -16,14 +16,11 @@ public class LocationFactory
     /// </summary>
     public required LocationCollection Locations { get; init; }
 
-    public IEnumerator<string> IgnoredListNames
-        => _ignoredListNames.GetEnumerator();
-        
-    private List<string> _ignoredListNames = [];
+    public List<string> IgnoredListNames { get; set; } = [];
 
     public Location? GetLocationFromCustomName(ProductionLine? line, string name)
     {
-        if (_ignoredListNames.Contains(name))
+        if (IgnoredListNames.Contains(name))
             return null;
         
         return Locations.FirstOrDefault(x => 

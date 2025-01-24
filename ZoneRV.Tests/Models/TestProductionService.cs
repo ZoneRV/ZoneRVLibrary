@@ -68,7 +68,7 @@ public class TestProductionService : IProductionService
                 van.HandoverStateLastUpdated = handoverStateUpdated;
                 
                 van.LocationInfo.AddPositionChange(handover - TimeSpan.FromDays(60), LocationFactory.PreProduction);
-                var allLocations = LocationFactory.GetAllLocationsFromLine(model.ProductionLine).Where(x => x.Type == ProductionLocationType.Bay).ToList();
+                var allLocations = LocationFactory.Locations.GetAllLocationsFromLine(model.ProductionLine).Where(x => x.Type == ProductionLocationType.Bay).ToList();
 
                 List<ZoneRV.Models.Location.Location> locations;
                 int moves = line.BoardsInCarPark + line.BoardsHandedOver + line.BoardsHandoverOverDue - i;
