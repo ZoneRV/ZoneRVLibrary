@@ -1,4 +1,8 @@
+using System.Reflection;
+using System.Text.Json.Serialization;
+using MartinCostello.OpenApi;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using Serilog;
 using ZoneRV.Api;
 using ZoneRV.DBContexts;
@@ -19,7 +23,18 @@ try
     builder.Services.AddSerilog();
     Log.Logger.Information("Starting Api", Environment.UserName);
 
+    builder.Services.AddControllers()
+           .AddNewtonsoftJson((options) =>
+            {
+                options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            });
+    
     builder.Services.AddOpenApi();
+
+    builder.Services.AddOpenApiExtensions((options) =>
+    {
+        options.AddXmlComments<Program>();
+    });
 
     builder.Services.AddDbContext<ProductionContext>
     ((_, options ) =>
@@ -34,7 +49,7 @@ try
     IProductionService? productionService = app.Services.GetService<IProductionService>();
             
     ArgumentNullException.ThrowIfNull(productionService);
-    productionService.InitialiseService();
+    //productionService.InitialiseService();
 
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
@@ -47,6 +62,7 @@ try
             });
     }
 
+    app.MapControllers();
     app.UseHttpsRedirection();
 
     app.Run();

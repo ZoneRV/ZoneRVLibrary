@@ -12,9 +12,11 @@ namespace ZoneRV.Services.Production;
 [SuppressMessage("ReSharper", "InconsistentNaming")]
 public abstract partial class IProductionService
 {
-    public           List<ProductionLine> ProductionLines  { get; init; }
-    public           ModelNameMatcher     ModelNameMatcher { get; init; }
-    public abstract  LocationFactory      LocationFactory  { get; init; }
+    public          List<ProductionLine> ProductionLines  { get; init; }
+    public          ModelNameMatcher     ModelNameMatcher { get; init; }
+    public abstract LocationFactory      LocationFactory  { get; init; }
+
+    protected IServiceScopeFactory ScopeFactory { get; set;  }
 
     public             IConfiguration Configuration    { get; set; }
     public             bool           WebhooksEnabled  { get; set; }
@@ -24,7 +26,9 @@ public abstract partial class IProductionService
     public IProductionService(IServiceScopeFactory scopeFactory, IConfiguration configuration)
     {
         Configuration = configuration;
-        using (var scope = scopeFactory.CreateScope())
+        ScopeFactory  = scopeFactory;
+        
+        using (var scope = ScopeFactory.CreateScope())
         {
             var productionContext = scope.ServiceProvider.GetRequiredService<ProductionContext>();
 
@@ -32,16 +36,6 @@ public abstract partial class IProductionService
             ProductionLines = productionContext.Lines
                 .Include(l => l.Models).ToList();
         }
-
-        var models = ProductionLines.SelectMany(x => x.Models).ToList();
-        ModelNameMatcher = new ModelNameMatcher(models);
-    }
-    
-    public IProductionService(IConfiguration configuration, IEnumerable<ProductionLine> productionLines)
-    {
-        Configuration = configuration;
-
-        ProductionLines = productionLines.ToList();
 
         var models = ProductionLines.SelectMany(x => x.Models).ToList();
         ModelNameMatcher = new ModelNameMatcher(models);

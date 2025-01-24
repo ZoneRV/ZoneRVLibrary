@@ -1,5 +1,10 @@
 ﻿using System.Collections.Concurrent;
+using System.Data;
 using System.Diagnostics.CodeAnalysis;
+using Azure.Core;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using ZoneRV.DBContexts;
 
 namespace ZoneRV.Services.Production;
 
@@ -19,6 +24,28 @@ public abstract partial class IProductionService
     protected ConcurrentDictionary<string, Comment> Comments { get; } = [];
     protected ConcurrentDictionary<string, Attachment> Attachments { get; } = [];
     protected ConcurrentDictionary<string, User> Users { get; } = [];
+
+    public async Task<ProductionLine> CreateProductionLine(string name)
+    {
+        if (ProductionLines.Any(x => x.Name.ToLower() == name.ToLower()))
+            throw new DuplicateNameException("Cannot create Production line with name {name}, Already exists.");
+        
+        using (var scope = ScopeFactory.CreateScope())
+        {
+            var productionContext = scope.ServiceProvider.GetRequiredService<ProductionContext>();
+
+            var line = productionContext.Lines.Add(new ProductionLine()
+            {
+                Name = name
+            });
+
+            await productionContext.SaveChangesAsync();
+            
+            ProductionLines.Add(line.Entity);
+
+            return line.Entity;
+        }
+    }
 
     protected JobCard CreateJobCard(SalesProductionInfo van, JobCardCreationInfo info, AreaOfOrigin areaOfOrigin, Location location)
     {
