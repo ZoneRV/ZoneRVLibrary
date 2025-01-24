@@ -46,9 +46,14 @@ public abstract partial class IProductionService
         var models = ProductionLines.SelectMany(x => x.Models).ToList();
         ModelNameMatcher = new ModelNameMatcher(models);
     }
-    
+
+    /// <summary>
+    /// Initializes the production service by setting up necessary dependencies, loading configurations,
+    /// and preparing resources for operation. This method is intended to be overridden in derived classes
+    /// with specific implementation details for different production service types.
+    /// </summary>
     public abstract Task InitialiseService();
-    
+
     private ConcurrentDictionary<SalesProductionInfo, Task<SalesProductionInfo>> _currentBoardTasks { get; init; } = [];
 
     protected abstract Task<SalesProductionInfo> _loadVanFromSourceAsync(SalesProductionInfo info);

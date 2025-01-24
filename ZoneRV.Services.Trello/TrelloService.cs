@@ -84,7 +84,6 @@ public class TrelloService : IProductionService
         TrelloClient = new TrelloClient(TrelloApiKey, TrelloUserToken, clientOptions);
     }
 
-
     public override async Task InitialiseService()
     {
         Member member;
@@ -145,34 +144,33 @@ public class TrelloService : IProductionService
 
     private async Task LoadBasicProductionInfo()
     {
-        List<Card>         lineMoveBoardCards = await TrelloClient.GetCardsOnBoardAsync(LineMoveBoardId, new GetCardOptions() {IncludeList = true});
-        List<TrelloAction> lineMoveActions    = await TrelloClient.GetActionsOfBoardAsync(LineMoveBoardId, new GetActionsOptions() { Limit = 1000, Filter = ["updateCard:idList"]});
-        
-        List<Card>         prohoCards   = await TrelloClient.GetCardsOnBoardAsync(ProHoDashboardId, new GetCardOptions());
+        // Fetch all the cards and actions on the Line Move Board
+        List<Card> lineMoveBoardCards = await TrelloClient.GetCardsOnBoardAsync(LineMoveBoardId, new GetCardOptions() { IncludeList = true });
+        List<TrelloAction> lineMoveActions = await TrelloClient.GetActionsOfBoardAsync(LineMoveBoardId, new GetActionsOptions() { Limit = 1000, Filter = ["updateCard:idList"] });
 
+        // Fetch all the cards and actions on the "ProHo Dashboard"
+        List<Card> prohoCards = await TrelloClient.GetCardsOnBoardAsync(ProHoDashboardId, new GetCardOptions());
         var prohoCachedActions = await GetTrelloActionsWithCache(ProHoDashboardId, ["updateCard"]);
 
+        // Fetch the lists on the "Line Move Board"
         List<List>? lists = await TrelloClient.GetListsOnBoardAsync(LineMoveBoardId);
+
+        // Build a list of model prefixes used to match card names
         List<string> modelPrefixes = ProductionLines.SelectMany(x => x.Models.Select(y => y.Prefix.ToLower())).ToList();
 
+        // Filter cards on the Line Move and ProHo Boards to match relevant vehicle model prefixes
         lineMoveBoardCards = lineMoveBoardCards
-                             .Where(c 
-                                 => modelPrefixes
-                                     .Any(vm 
-                                        => c.Name.ToLower().Contains(vm.ToLower()) 
-                                    )).ToList();
-        
-        prohoCards = prohoCards
-                            .Where(c 
-                                => modelPrefixes
-                                    .Any(vm 
-                                        => c.Name.ToLower().Contains(vm.ToLower()) 
-                                    )).ToList();
+            .Where(c => modelPrefixes.Any(vm => c.Name.ToLower().Contains(vm.ToLower()))).ToList();
 
+        prohoCards = prohoCards
+            .Where(c => modelPrefixes.Any(vm => c.Name.ToLower().Contains(vm.ToLower()))).ToList();
+
+        // Temporary list to store duplicate (or blocked) formatted names to avoid reprocessing and ambiguity between cards with same names
         List<string> tempBlockedNames = [];
-        
+
+        // Retrieve stored van information from the database
         List<VanId> storedVanIds;
-        
+
         using (var scope = _scopeFactory.CreateScope())
         {
             var trelloContext = scope.ServiceProvider.GetRequiredService<TrelloContext>();
@@ -180,106 +178,111 @@ public class TrelloService : IProductionService
             storedVanIds = trelloContext.VanIds.ToList();
         }
 
+        // Iterate through every card in the filtered "Line Move Board" cards
         foreach (Card lineMoveCard in lineMoveBoardCards)
         {
-            
+            // Attempt to extract the model, number, and formatted name from the card name
             if (ModelNameMatcher.TryGetSingleName(lineMoveCard.Name, out var model, out var number, out string? formattedName))
             {
+                // Skip processing if the card's formatted name is already in the blocked list
                 if (tempBlockedNames.Contains(formattedName))
                     continue;
 
+                // If the van is already in the dictionary, handle duplicates
                 if (Vans.ContainsKey(formattedName))
                 {
+                    // Remove the duplicate van and block its processing
                     Vans.TryRemove(formattedName, out _);
                     tempBlockedNames.Add(formattedName);
 
                     Log.Logger.Error("{name} found at least twice in line move board. Ignoring both until issue is resolved.", formattedName);
-                    
                     continue;
                 }
 
-                VanId?  vanId = storedVanIds.SingleOrDefault(x => x.VanName == formattedName);
+                // Retrieve the van ID and associated URL if it exists in the database
+                VanId? vanId = storedVanIds.SingleOrDefault(x => x.VanName == formattedName);
                 string? idString;
                 string? urlString;
-                
-                if(vanId is not null && vanId.Blocked)
-                    continue;
 
+                // Skip blocked van IDs
+                if (vanId is not null && vanId.Blocked) continue;
+
+                // If the van doesn't exist or its ID/URL is missing, attempt to search for it
                 if (vanId is null || string.IsNullOrEmpty(vanId.Id) || string.IsNullOrEmpty(vanId.Url))
                 {
                     TimeSpan lastUpdated = DateTimeOffset.UtcNow - lineMoveCard.LastActivity.UtcDateTime;
-                    var      search      = await TrySearchForVanId(formattedName, lastUpdated);
+                    var search = await TrySearchForVanId(formattedName, lastUpdated);
 
-                    if (!search.Success)
-                        continue;
+                    // Skip further processing if the van search failed
+                    if (!search.Success) continue;
 
-                    else
-                    {
-                        idString = search.Object.Id;
-                        urlString = search.Object.Url;
-                    }
+                    // Otherwise, populate ID and URL from the search results
+                    idString = search.Object.Id;
+                    urlString = search.Object.Url;
                 }
                 else
                 {
+                    // Use the existing ID and URL in the database
                     idString = vanId.Id;
                     urlString = vanId.Url;
                 }
 
+                // Track location history for the current van
                 List<(DateTimeOffset moveDate, Location location)> locationHistory = [];
-                
+
+                // Process move actions for the current card to build location history
                 foreach (var moveAction in lineMoveActions.Where(x => x.Data.Card.Id == lineMoveCard.Id))
                 {
                     List list;
 
+                    // Find the list after the card was moved
                     if (lists.Count(x => x.Id == moveAction.Data.ListAfter.Id) == 1)
                         list = lists.Single(x => x.Id == moveAction.Data.ListAfter.Id);
-
                     else
                         continue;
 
                     string listName = list.Name;
 
+                    // Map predefined lists to specific production locations
                     if (listName == "SCHEDULED VANS (50x)" || listName == "SCHEDULED EXPO VANS")
                     {
-                        if(locationHistory.All(x => x.location != LocationFactory.PreProduction))
+                        if (locationHistory.All(x => x.location != LocationFactory.PreProduction))
                             locationHistory.Add((moveAction.Date, LocationFactory.PreProduction));
-                        
                         continue;
                     }
 
                     if (listName == "OUTSIDE - Carpark GEN2 WIP" || listName == "OUTSIDE - Carpark GEN2 Ready For Transport")
                     {
-                        if(locationHistory.All(x => x.location != LocationFactory.PostProduction))
+                        if (locationHistory.All(x => x.location != LocationFactory.PostProduction))
                             locationHistory.Add((moveAction.Date, LocationFactory.PostProduction));
-                        
                         continue;
                     }
 
                     if (listName == "OUTSIDE - Carpark EXPO Ready For Transport" || listName == "OUTSIDE - Carpark EXPO - WIP")
                     {
-                        if(locationHistory.All(x => x.location != LocationFactory.PostProduction))
+                        if (locationHistory.All(x => x.location != LocationFactory.PostProduction))
                             locationHistory.Add((moveAction.Date, LocationFactory.PostProduction));
-                        
                         continue;
                     }
 
+                    // Attempt to resolve a custom location for the current production line based on the list name
                     var location = LocationFactory.GetLocationFromCustomName(model.ProductionLine, listName);
-                    
-                    if(location is null)
-                        continue;
-                    
+
+                    if (location is null) continue;
+
                     locationHistory.Add((moveAction.Date, location));
                 }
 
+                // Add the new van information to the dictionary with its location history
                 Vans.TryAdd(formattedName, new SalesProductionInfo()
                 {
-                    Number = number, 
-                    Model = model, 
-                    Url = urlString, 
+                    Number = number,
+                    Model = model,
+                    Url = urlString,
                     Id = idString,
                     LocationInfo = new LocationInfo(locationHistory)
                 });
-                
+
                 Log.Logger.Debug("New van information added");
             }
             else
@@ -288,17 +291,22 @@ public class TrelloService : IProductionService
             }
         }
 
+        // Log the total number of vans added to the production service
         Log.Logger.Information("{vanCount} Vans added to the production service. Adding handover dates...", Vans.Count);
 
+        // Process "ProHo Dashboard" cards to add handover information to vans
         foreach (Card card in prohoCards)
         {
+            // Attempt to extract the van's name from the card's name
             if (ModelNameMatcher.TryGetSingleName(card.Name, out string? formattedName))
             {
-                if (!card.Due.HasValue)
-                    continue;
+                // Skip cards without a due date
+                if (!card.Due.HasValue) continue;
 
+                // Find and update the corresponding van's handover information
                 if (Vans.TryGetValue(formattedName, out SalesProductionInfo? value))
                 {
+                    // Get actions with due dates for the current card
                     List<CachedTrelloAction> actions = prohoCachedActions.Where(x => x.CardId == card.Id && x.DueDate.HasValue).ToList();
 
                     foreach (CachedTrelloAction action in actions.OrderBy(x => x.DateOffset))
@@ -306,18 +314,22 @@ public class TrelloService : IProductionService
                         value.AddHandoverHistory(action.DateOffset, action.DueDate!.Value);
                     }
 
+                    // Update the handover state based on the card's due completion status
                     if (card.Due.HasValue)
                     {
-                        value.HandoverState =
-                            card.DueComplete ? HandoverState.HandedOver : HandoverState.UnhandedOver;
-                        
+                        value.HandoverState = card.DueComplete ? HandoverState.HandedOver : HandoverState.UnhandedOver;
+
                         var dueUpdatedAction = actions.LastOrDefault(x => x.DueDate.HasValue);
-                        
-                        if(dueUpdatedAction is not null)
+                        if (dueUpdatedAction is not null)
                             value.HandoverStateLastUpdated = dueUpdatedAction.DateOffset;
                     }
 
-                    Log.Logger.Debug("Added {handover} to {vanName} ({handoverStat})", card.Due.Value.LocalDateTime.Date.ToString("dd/MM/yy"), value.Name, value.HandoverState);
+                    Log.Logger.Debug(
+                        "Added {handover} to {vanName} ({handoverStat})",
+                        card.Due.Value.LocalDateTime.Date.ToString("dd/MM/yy"),
+                        value.Name,
+                        value.HandoverState
+                    );
                 }
             }
             else
@@ -326,29 +338,32 @@ public class TrelloService : IProductionService
             }
         }
 
+        // Log the count of vans with updated handover dates
         Log.Logger.Information("{vanCount} handover dates added", Vans.Count(x => x.Value.HandoverDate.HasValue));
 
+        // Generate logs for the current production statistics across all production lines
         foreach (var productionLine in ProductionLines)
         {
             var vansInLine = Vans.Where(x => x.Value.Model.ProductionLine == productionLine).Select(x => x.Value).ToList();
-                
+
             int prepCount = vansInLine.Count(x =>
                 x.LocationInfo.CurrentLocation.Type is ProductionLocationType.Prep && x.HandoverState is HandoverState.HandedOver);
-                
+
             int prodCount = vansInLine.Count(x =>
                 x.LocationInfo.CurrentLocation.Type is ProductionLocationType.Bay or ProductionLocationType.Module or ProductionLocationType.Subassembly);
-                
+
             int finishingCount = vansInLine.Count(x =>
                 x.LocationInfo.CurrentLocation.Type is ProductionLocationType.Finishing && x.HandoverState is not HandoverState.HandedOver);
-            
+
             int handoverDueCount = vansInLine.Count(x =>
                 x.HandoverDate < DateTimeOffset.Now && x.HandoverState is HandoverState.UnhandedOver);
-            
+
             int handedOverCount = vansInLine.Count(x =>
                 x.HandoverState is HandoverState.HandedOver);
-            
-            Log.Logger.Information("{line}: Prep: {prepCount} - In Production: {prodCount} - In Finishing: {finishingCount} - Over Due: {overdueCount} - Handed Over: {handoverCount}",
-                                   productionLine.Name, prepCount, prodCount, finishingCount, handoverDueCount ,handedOverCount);
+
+            Log.Logger.Information(
+                "{line}: Prep: {prepCount} - In Production: {prodCount} - In Finishing: {finishingCount} - Over Due: {overdueCount} - Handed Over: {handoverCount}",
+                productionLine.Name, prepCount, prodCount, finishingCount, handoverDueCount, handedOverCount);
         }
     }
 
