@@ -48,6 +48,7 @@ public abstract partial class IProductionService
     }
     
     public abstract Task InitialiseService();
+    
     private ConcurrentDictionary<SalesProductionInfo, Task<SalesProductionInfo>> _currentBoardTasks { get; init; } = [];
 
     protected abstract Task<SalesProductionInfo> _loadVanFromSourceAsync(SalesProductionInfo info);
