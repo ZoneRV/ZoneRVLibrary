@@ -4,8 +4,8 @@
         <TargetFramework>net9.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <UserSecretsId>aspnet-WebApplication1-ef38a072-92f8-4bf0-be7a-e3cdcb3d671d</UserSecretsId>
-        <RootNamespace>WebApplication1</RootNamespace>
+        <UserSecretsId>aspnet-ZoneRV-ef38a072-92f8-4bf0-be7a-e3cdcb3d671d</UserSecretsId>
+        <RootNamespace>ZoneRV.Api</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

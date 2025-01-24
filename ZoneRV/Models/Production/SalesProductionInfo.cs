@@ -1,5 +1,10 @@
 ﻿namespace ZoneRV.Models.Production;
 
+/// <summary>
+/// Represents production-related information for a sales unit.
+/// This class includes details about job, yellow, and red cards, completion rates, handover dates,
+/// and other production-centric data for a specific sales production unit.
+/// </summary>
 [DebuggerDisplay("{Name} - {Id}")]
 public class SalesProductionInfo : IEqualityComparer<SalesProductionInfo>
 {

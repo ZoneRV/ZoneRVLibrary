@@ -1,6 +1,6 @@
 ﻿namespace ZoneRV.Models.UpdateModels;
 
-public class ProductionInfoUpdated
+public class ProductionInfoUpdated : IBaseUpdate
 {
     
 }
