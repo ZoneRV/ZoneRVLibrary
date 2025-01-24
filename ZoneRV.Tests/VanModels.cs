@@ -10,7 +10,7 @@ public class VanModels
     public void AllModelsHaveDebuggerDisplay()
     {
         Type[] ignoredTypes = [typeof(LocationFactory)];  
-        var types = typeof(ZoneRV.Models.Van.AreaOfOrigin).Assembly.GetTypes();
+        var types = typeof(ZoneRV.Models.Production.AreaOfOrigin).Assembly.GetTypes();
         
         foreach (var type in types
                      .Where(x => !ignoredTypes.Contains(x) && 

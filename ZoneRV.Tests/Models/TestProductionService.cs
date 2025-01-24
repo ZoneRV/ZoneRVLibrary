@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
-using ZoneRV.Models;
+using ZoneRV.Models.Production;
 using ZoneRV.Models.Enums;
 using ZoneRV.Models.Location;
 using ZoneRV.Services.Production;
@@ -34,16 +34,16 @@ public class TestProductionService : IProductionService
             for (int i = 0; i < line.BoardCount; i++)
             {
                 var model = line.ProductionLine.Models.ElementAt(i % line.ProductionLine.Models.Count);
-                var name  = model.Prefix.ToUpper() + (i + 1).ToString("000");
+                var number = (i + 1).ToString("000");
                 
-                var locationInfo = new VanLocationInfo();
+                var locationInfo = new LocationInfo();
             
-                var van = new VanProductionInfo()
+                var van = new SalesProductionInfo()
                 {
-                    Name = name,
-                    VanModel = model,
-                    Url = $"https://www.google.com/search?q=fun+facts+about+the+number+{i}",
-                    Id = name.GetHashCode().ToString(),
+                    Number       = number,
+                    Model        = model,
+                    Url          = $"https://www.google.com/search?q=fun+facts+about+the+number+{i}",
+                    Id           = (model.Prefix + number).GetHashCode().ToString(),
                     LocationInfo = locationInfo
                 };
                 
@@ -70,7 +70,7 @@ public class TestProductionService : IProductionService
                 van.LocationInfo.AddPositionChange(handover - TimeSpan.FromDays(60), LocationFactory.PreProduction);
                 var allLocations = LocationFactory.GetAllLocationsFromLine(model.ProductionLine).Where(x => x.Type == ProductionLocationType.Bay).ToList();
 
-                List<ProductionLocation> locations;
+                List<ZoneRV.Models.Location.Location> locations;
                 int moves = line.BoardsInCarPark + line.BoardsHandedOver + line.BoardsHandoverOverDue - i;
 
                 if (moves > 0)
@@ -93,7 +93,7 @@ public class TestProductionService : IProductionService
                     }
                 }
                 
-                Vans.TryAdd(name.ToLower(), van);
+                Vans.TryAdd((model.Prefix + number).ToLower(), van);
             }
         }
         
@@ -102,7 +102,7 @@ public class TestProductionService : IProductionService
         return Task.CompletedTask;
     }
 
-    protected override async Task<VanProductionInfo> _loadVanFromSourceAsync(VanProductionInfo info)
+    protected override async Task<SalesProductionInfo> _loadVanFromSourceAsync(SalesProductionInfo info)
     {
         await Task.Delay(LoadTimeForBoard);
         throw new NotImplementedException();

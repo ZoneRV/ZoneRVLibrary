@@ -1,12 +1,10 @@
-﻿namespace ZoneRV.Models.Van;
+﻿namespace ZoneRV.Models.Production;
 
 [DebuggerDisplay("{Name} Completed:{IsChecked}")]
 public class Check
 {
     public required string Id { get; init; }
-
-
-    public string CheckListId => Checklist.Id;
+    
     [ZoneRVJsonIgnore(JsonIgnoreType.Cache)] public required Checklist Checklist { get; init; }
     
     public required string Name { get; set; }

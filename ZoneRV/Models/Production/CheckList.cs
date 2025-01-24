@@ -1,4 +1,4 @@
-﻿namespace ZoneRV.Models.Van;
+﻿namespace ZoneRV.Models.Production;
 
 [DebuggerDisplay("{Name}: {CompletedChecks}/{UncompletedChecks}")]
 public class Checklist
@@ -8,7 +8,6 @@ public class Checklist
 
     public required string Name { get; set; }
     
-    public string CardId  => Card.Id;
     [ZoneRVJsonIgnore(JsonIgnoreType.Cache)] public required Card Card { get; init; }
     
     [ZoneRVJsonIgnore(JsonIgnoreType.Cache)] public required List<Check> Checks { get; init; } = [];

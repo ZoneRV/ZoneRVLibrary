@@ -6,8 +6,8 @@ namespace ZoneRV.Tests.Location;
 
 public class LocationInfoTests
 {
-    VanLocationInfo fullHistory => ProductionTestData.GetLocationInfo(ProductionTestData.Gen2, 1);
-    VanLocationInfo halfHistory => ProductionTestData.GetLocationInfo(ProductionTestData.Gen2, .5f);
+    LocationInfo fullHistory => ProductionTestData.GetLocationInfo(ProductionTestData.Gen2, 1);
+    LocationInfo halfHistory => ProductionTestData.GetLocationInfo(ProductionTestData.Gen2, .5f);
 
     [Fact]
     public void CannotAddLocationThatExistAlready()
@@ -43,7 +43,7 @@ public class LocationInfoTests
         // Cant add move with already existing date
         Assert.Throws<ArgumentException>(
             "date",
-            () => halfHistory.AddPositionChange(halfHistory.LocationHistory.MinBy(x => x.moveDate).moveDate,
-                new ProductionLocation(){BayNumber = 8, Order = 8, Name = "fail", Description = "made to fail", Type = ProductionLocationType.Bay, Line = ProductionTestData.Gen2}));
+            () => halfHistory.AddPositionChange(halfHistory.MinBy(x => x.moveDate).moveDate,
+                new ZoneRV.Models.Location.Location(){BayNumber = 8, Order = 8, Name = "fail", Description = "made to fail", Type = ProductionLocationType.Bay, Line = ProductionTestData.Gen2}));
     }
 }

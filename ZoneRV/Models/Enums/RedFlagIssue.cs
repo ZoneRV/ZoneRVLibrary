@@ -1,4 +1,4 @@
-﻿namespace ZoneRV.Models.Van;
+﻿namespace ZoneRV.Models.Enums;
 
 public enum RedFlagIssue
 {

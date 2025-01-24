@@ -1,4 +1,4 @@
-using ZoneRV.Models;
+using ZoneRV.Models.Production;
 using ZoneRV.Tests.Objects;
 
 namespace ZoneRV.Tests;
@@ -13,26 +13,30 @@ public class VanNameRegexTests
     }
     
     [Theory]
-    [InlineData("ZpP-145", "zpp", "zpp145")]
-    [InlineData("ZpP145-", "zpp", "zpp145")]
-    [InlineData("ZpP.145", "zpp", "zpp145")]
-    [InlineData("ZpP:145", "zpp", "zpp145")]
-    [InlineData(":ZpP145:", "zpp", "zpp145")]
-    [InlineData("ZpP 145", "zpp", "zpp145")]
-    [InlineData(" ZpP145 ", "zpp", "zpp145")]
-    [InlineData("(exp010)", "exp", "exp010")]
-    [InlineData("(exp010", "exp", "exp010")]
-    [InlineData("exp010)", "exp", "exp010")]
-    [InlineData("zss100 and zss100 should still return zss100", "zss", "zss100")]
-    [InlineData("this is zpp100r, so amazing we just had to build it twice", "zpp", "zpp100r")]
-    public void ShouldReturnVanName(string input, string modelPrefix, string expectedVanName)
+    [InlineData("ZpP-145",  "zpp", "145", "zpp145")]
+    [InlineData("ZpP145-",  "zpp", "145", "zpp145")]
+    [InlineData("ZpP.145",  "zpp", "145", "zpp145")]
+    [InlineData("ZpP:145",  "zpp", "145", "zpp145")]
+    [InlineData(":ZpP145:", "zpp", "145", "zpp145")]
+    [InlineData("ZpP 145",  "zpp", "145", "zpp145")]
+    [InlineData(" ZpP145 ", "zpp", "145", "zpp145")]
+    [InlineData("(exp010)", "exp", "010", "exp010")]
+    [InlineData("(exp010",  "exp", "010", "exp010")]
+    [InlineData("exp010)",  "exp", "010", "exp010")]
+    
+    [InlineData("zss100 and zss100 should still return zss100",              "zss", "100", "zss100")]
+    [InlineData("this is zpp100r, so amazing we just had to build it twice", "zppr", "100", "zpp100r")]
+    public void ShouldReturnVanName(string input, string modelPrefix, string number, string expectedVanName)
     {
-        var pass = _nameMatcher.TryGetSingleVanName(input, out Model? vanModel, out string? vanNameResult);
+        var pass = _nameMatcher.TryGetSingleName(input, out Model? vanModel, out string? numberResult, out string? vanNameResult);
         
         Assert.True(pass);
         
         Assert.NotNull(vanModel);
         Assert.Equal(modelPrefix, vanModel.Prefix);
+        
+        Assert.NotNull(number);
+        Assert.Equal(number, numberResult);
         
         Assert.NotNull(vanNameResult);
         Assert.Equal(expectedVanName, vanNameResult.ToLower());
@@ -42,7 +46,7 @@ public class VanNameRegexTests
     [InlineData("zsp100 and zpp401")]
     public void ShouldReturnFalse(string input)
     {
-        Assert.False(_nameMatcher.TryGetSingleVanName(input, out _, out _));
+        Assert.False(_nameMatcher.TryGetSingleName(input, out _));
     }
 
     [Theory]

@@ -1,24 +1,24 @@
-﻿namespace ZoneRV.Models.Van;
+﻿namespace ZoneRV.Models.Production;
 
-[DebuggerDisplay("{Name} - {Van.Name}")]
+[DebuggerDisplay("{Name} - {ProductionInfo.Name}")]
 public class JobCard : Card
 {
-    public JobCard(VanProductionInfo van, JobCardInfo info, AreaOfOrigin areaOfOrigin, ProductionLocation location) : base(van, info, areaOfOrigin)
+    public JobCard(SalesProductionInfo van, JobCardInfo info, AreaOfOrigin areaOfOrigin, Location.Location location) : base(van, info, areaOfOrigin)
     {
         Location = location;
         _taskTime = info.TaskTime;
     }
     
-    public ProductionLocation Location { get; set; }
+    public Location.Location Location { get; set; }
 
     public DueStatus DueStatus
     {
         get
         {
-            if (this.Location < this.Van.LocationInfo.CurrentLocation)
+            if (this.Location < this.ProductionInfo.LocationInfo.CurrentLocation)
                 return DueStatus.NotDue;
                 
-            if (this.Location > this.Van.LocationInfo.CurrentLocation)
+            if (this.Location > this.ProductionInfo.LocationInfo.CurrentLocation)
                 return DueStatus.OverDue;
             
             return DueStatus.Due;

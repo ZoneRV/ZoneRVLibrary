@@ -4,24 +4,28 @@ using System.Diagnostics;
 namespace ZoneRV.Models.Location;
 
 [DebuggerDisplay("{CurrentLocation}")]
-public class VanLocationInfo
+public class LocationInfo : IEnumerable<(DateTimeOffset moveDate, Location location)>
 {
-    private List<(DateTimeOffset moveDate, ProductionLocation location)> _locationHistory = [];
+    private List<(DateTimeOffset moveDate, Location location)> _locationHistory;
 
-    public ProductionLocation CurrentLocation =>
-        _locationHistory.Count == 0 ? LocationFactory.PreProduction : _locationHistory.MaxBy(x => x.moveDate).location;
-    
-    public IReadOnlyList<(DateTimeOffset moveDate, ProductionLocation location)> LocationHistory
+    public LocationInfo(IEnumerable<(DateTimeOffset moveDate, Location location)> history)
     {
-        get => _locationHistory.AsReadOnly();
-        init => _locationHistory = value.ToList();
+        _locationHistory = history.ToList();
     }
+    
+    public LocationInfo()
+    {
+        _locationHistory = [];
+    }
+
+    public Location CurrentLocation =>
+        _locationHistory.Count == 0 ? LocationFactory.PreProduction : _locationHistory.MaxBy(x => x.moveDate).location;
 
     /// <exception cref="ArgumentException">Location info already contains location.</exception>
     /// <exception cref="ArgumentException">Non-bay locations Cannot be added as a location change.</exception>
     /// <exception cref="ArgumentException">Locations from different production lines cant be added to one van.</exception>
     /// <exception cref="ArgumentException">Location information already contains a location move for a date.</exception>
-    private bool CheckPositionChangesValid(List<(DateTimeOffset date, ProductionLocation location)> changes)
+    private bool CheckPositionChangesValid(List<(DateTimeOffset date, Location location)> changes)
     {
         foreach (var change in changes)
         {
@@ -47,7 +51,7 @@ public class VanLocationInfo
         return true;
     }
 
-    public void AddPositionChange(DateTimeOffset date, ProductionLocation location)
+    public void AddPositionChange(DateTimeOffset date, Location location)
     {
         if (CheckPositionChangesValid([(date, location)]))
         {
@@ -56,7 +60,7 @@ public class VanLocationInfo
         }
     }
     
-    public void AddPositionChangeRange(List<(DateTimeOffset date, ProductionLocation location)> changes)
+    public void AddPositionChangeRange(List<(DateTimeOffset date, Location location)> changes)
     {
         if (CheckPositionChangesValid(changes))
         {
@@ -65,7 +69,7 @@ public class VanLocationInfo
         }
     }
 
-    public ProductionLocation GetPositionFromDate(DateTimeOffset date)
+    public Location GetPositionFromDate(DateTimeOffset date)
     {
         if (_locationHistory.Count == 0 || date < _locationHistory.First().moveDate)
             return LocationFactory.PreProduction;
@@ -73,7 +77,7 @@ public class VanLocationInfo
         return _locationHistory.SkipWhile(x => date < x.moveDate).First().location;
     }
 
-    public (DateTimeOffset start, DateTimeOffset? end)? GetDateRange(ProductionLocation position)
+    public (DateTimeOffset start, DateTimeOffset? end)? GetDateRange(Location position)
     {
         if (_locationHistory.All(x => x.location != position))
             return null;
@@ -99,5 +103,15 @@ public class VanLocationInfo
             return false;
 
         return _locationHistory.First(x => x.location == LocationFactory.PostProduction).moveDate < end;
+    }
+
+    public IEnumerator<(DateTimeOffset moveDate, Location location)> GetEnumerator()
+    {
+        return _locationHistory.GetEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
     }
 }

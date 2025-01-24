@@ -1,10 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Serilog;
-using TrelloDotNet.AutomationEngine.Model;
-using ZoneRV.Services;
 using ZoneRV.Services.Production;
 using ZoneRV.Services.Trello;
-using ZoneRV.Services.Trello.DB;
 
 namespace ZoneRV.Api;
 

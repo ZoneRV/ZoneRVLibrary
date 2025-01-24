@@ -1,9 +1,9 @@
-﻿namespace ZoneRV.Models.Van;
+﻿namespace ZoneRV.Models.Production;
 
 [DebuggerDisplay("{Name} - {Parent.Info.Name}")]
 public class YellowCard : Card
 {
-    public YellowCard(VanProductionInfo van, YellowCardInfo info, AreaOfOrigin areaOfOrigin) : base(van, info, areaOfOrigin)
+    public YellowCard(SalesProductionInfo van, YellowCardInfo info, AreaOfOrigin areaOfOrigin) : base(van, info, areaOfOrigin)
     {
         CreationDate = info.CreationDate;
     }

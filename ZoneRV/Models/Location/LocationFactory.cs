@@ -18,7 +18,7 @@ public class LocationFactory
         
     private List<string> _ignoredListNames = [];
 
-    public ProductionLocation? GetLocationFromCustomName(ProductionLine? line, string name)
+    public Location? GetLocationFromCustomName(ProductionLine? line, string name)
     {
         if (_ignoredListNames.Contains(name))
             return null;
@@ -29,13 +29,13 @@ public class LocationFactory
             x.CustomLocationNames.Any(l => l.CustomName == name));
     }
 
-    public IEnumerable<ProductionLocation> GetAllLocationsFromLine(ProductionLine? line)
+    public IEnumerable<Location> GetAllLocationsFromLine(ProductionLine? line)
         => Locations.Where(x => x.Line == line);
     
     /// <summary>
     /// Default location for new vans
     /// </summary>
-    public static readonly ProductionLocation PreProduction = new ProductionLocation()
+    public static readonly Location PreProduction = new Location()
     {
         Name = "Pre Production",
         Description = "Production has not yet started",
@@ -46,7 +46,7 @@ public class LocationFactory
     /// <summary>
     /// Default location for vans after completion
     /// </summary>
-    public static readonly ProductionLocation PostProduction = new ProductionLocation()
+    public static readonly Location PostProduction = new Location()
     {
         Name = "Post Production",
         Description = "Production has finished",
@@ -54,7 +54,7 @@ public class LocationFactory
         Type = ProductionLocationType.Finishing
     };
 
-    public ProductionLocation CreateLocation(
+    public Location CreateLocation(
         string locationName, 
         string locationDescription, 
         decimal locationOrder, 
@@ -82,7 +82,7 @@ public class LocationFactory
                 throw new ArgumentNullException(nameof(bayNumber), "Bay number cannot be null if location is a bay");
         }
         
-        ProductionLocation newLocation = new ProductionLocation()
+        Location newLocation = new Location()
         {
             Name = locationName,
             Description = locationDescription,
@@ -98,7 +98,7 @@ public class LocationFactory
         return newLocation;
     }
 
-    public ProductionLocation CreatePrepLocation(
+    public Location CreatePrepLocation(
         string                              locationName, 
         string                              locationDescription, 
         decimal                             locationOrder, 
@@ -109,7 +109,7 @@ public class LocationFactory
             productionLine, null, inventoryLocations);
     }
 
-    public ProductionLocation CreateSubassemblyLocation(
+    public Location CreateSubassemblyLocation(
         string                              locationName, 
         string                              locationDescription, 
         decimal                             locationOrder, 
@@ -120,7 +120,7 @@ public class LocationFactory
             productionLine, null, inventoryLocations);
     }
 
-    public ProductionLocation CreateModuleLocation(
+    public Location CreateModuleLocation(
         string                              locationName, 
         string                              locationDescription, 
         decimal                             locationOrder, 
@@ -131,7 +131,7 @@ public class LocationFactory
             productionLine, null, inventoryLocations);
     }
 
-    public ProductionLocation CreateBayLocation(
+    public Location CreateBayLocation(
         string                              locationName, 
         string                              locationDescription, 
         ProductionLine                      productionLine,

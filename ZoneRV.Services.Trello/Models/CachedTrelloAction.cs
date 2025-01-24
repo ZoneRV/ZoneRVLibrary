@@ -13,7 +13,7 @@ public class CachedTrelloAction
     [Required, MaxLength(24)] public required DateTimeOffset DateOffset { get; set; }
     [Required, MaxLength(48)] public required string         ActionType { get; set; }
     [Required, MaxLength(24)] public required string         MemberId   { get; set; }
-    public                                    string?        Content    { get; set; }
+    public string? Content { get; set; }
     [MaxLength(24)] public string? CheckId { get; set; }
     public required DateTimeOffset? DueDate { get; set; }
 }

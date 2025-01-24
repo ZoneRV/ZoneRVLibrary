@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ZoneRV.Models.Van;
+namespace ZoneRV.Models.Production;
 
 [DebuggerDisplay("{Name}")]
 [Table("AreaOfOrigin")]

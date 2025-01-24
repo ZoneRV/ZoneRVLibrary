@@ -1,9 +1,9 @@
-﻿namespace ZoneRV.Models.Van;
+﻿namespace ZoneRV.Models.Production;
 
-[DebuggerDisplay("{Name} - {Van.Name}")]
+[DebuggerDisplay("{Name} - {ProductionInfo.Name}")]
 public class RedCard : Card
 {
-    public RedCard(VanProductionInfo van, RedCardInfo info, AreaOfOrigin areaOfOrigin) : base(van, info, areaOfOrigin)
+    public RedCard(SalesProductionInfo van, RedCardInfo info, AreaOfOrigin areaOfOrigin) : base(van, info, areaOfOrigin)
     {
         RedFlagIssue = info.RedFlagIssue;
         CreationDate = info.CreationDate;

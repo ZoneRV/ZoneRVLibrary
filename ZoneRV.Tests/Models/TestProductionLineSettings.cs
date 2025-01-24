@@ -1,4 +1,4 @@
-﻿using ZoneRV.Models;
+﻿using ZoneRV.Models.Production;
 
 namespace ZoneRV.Tests.Models;
 

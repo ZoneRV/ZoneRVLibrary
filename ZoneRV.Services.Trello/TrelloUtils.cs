@@ -3,7 +3,7 @@ using TrelloDotNet.Model;
 using TrelloDotNet.Model.Actions;
 using ZoneRV.Models;
 using ZoneRV.Models.Enums;
-using ZoneRV.Models.Van;
+using ZoneRV.Models.Production;
 using ZoneRV.Services.Trello.Models;
 using Attachment = TrelloDotNet.Model.Attachment;
 using Checklist = TrelloDotNet.Model.Checklist;

@@ -3,30 +3,36 @@
 namespace ZoneRV.Models.Location;
 
 [DebuggerDisplay("{_locations.Count} locations")]
-public class LocationCollection : IEnumerable<ProductionLocation>
+public class LocationCollection : IEnumerable<Location>
 {
-    private readonly List<ProductionLocation> _locations = [];
+    private readonly List<Location> _locations = [];
     
-    public IEnumerator<ProductionLocation> GetEnumerator()
+    public IEnumerator<Location> GetEnumerator()
         => _locations.GetEnumerator();
 
     IEnumerator IEnumerable.GetEnumerator()
         => GetEnumerator();
     
-    public LocationCollection(IEnumerable<ProductionLocation> initialLocations)
+    public LocationCollection(IEnumerable<Location> initialLocations)
     {
         _locations.Add(LocationFactory.PreProduction);
         _locations.Add(LocationFactory.PostProduction);
         
         _locations.AddRange(initialLocations);
     }
+    
+    public LocationCollection()
+    {
+        _locations.Add(LocationFactory.PreProduction);
+        _locations.Add(LocationFactory.PostProduction);
+    }
 
-    internal void Add(ProductionLocation newLocation)
+    internal void Add(Location newLocation)
     {
         _locations.Add(newLocation);
     }
 
-    public ProductionLocation? GetBay(ProductionLine line, int bayNumber)
+    public Location? GetBay(ProductionLine line, int bayNumber)
     {
         return _locations.SingleOrDefault(x => x.Line is not null && x.Line == line && x.BayNumber == bayNumber);
     }

@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using ZoneRV.Models;
+using ZoneRV.Models.Production;
 using ZoneRV.Models.Enums;
 using ZoneRV.Models.Location;
 
@@ -20,28 +20,28 @@ public static class ProductionTestData
     
     public static LocationFactory LocationFactory;
 
-    public static ProductionLocation G2Chassis;
-    public static ProductionLocation ExpoChassis;
+    public static ZoneRV.Models.Location.Location G2Chassis;
+    public static ZoneRV.Models.Location.Location ExpoChassis;
     
-    public static ProductionLocation Subs;
-    public static ProductionLocation Cabs;
+    public static ZoneRV.Models.Location.Location Subs;
+    public static ZoneRV.Models.Location.Location Cabs;
     
-    public static ProductionLocation G2WallRoof;
-    public static ProductionLocation ExpoWallRoof;
+    public static ZoneRV.Models.Location.Location G2WallRoof;
+    public static ZoneRV.Models.Location.Location ExpoWallRoof;
     
-    public static ProductionLocation G2Bay1;
-    public static ProductionLocation G2Bay2;
-    public static ProductionLocation G2Bay3;
-    public static ProductionLocation G2Bay4;
-    public static ProductionLocation G2Bay5;
-    public static ProductionLocation G2Bay6;
-    public static ProductionLocation G2Bay7;
+    public static ZoneRV.Models.Location.Location G2Bay1;
+    public static ZoneRV.Models.Location.Location G2Bay2;
+    public static ZoneRV.Models.Location.Location G2Bay3;
+    public static ZoneRV.Models.Location.Location G2Bay4;
+    public static ZoneRV.Models.Location.Location G2Bay5;
+    public static ZoneRV.Models.Location.Location G2Bay6;
+    public static ZoneRV.Models.Location.Location G2Bay7;
 
-    public static ProductionLocation ExpoBay1;
-    public static ProductionLocation ExpoBay2;
-    public static ProductionLocation ExpoBay3;
-    public static ProductionLocation ExpoBay4;
-    public static ProductionLocation ExpoBay5;
+    public static ZoneRV.Models.Location.Location ExpoBay1;
+    public static ZoneRV.Models.Location.Location ExpoBay2;
+    public static ZoneRV.Models.Location.Location ExpoBay3;
+    public static ZoneRV.Models.Location.Location ExpoBay4;
+    public static ZoneRV.Models.Location.Location ExpoBay5;
 
     static ProductionTestData()
     {
@@ -108,7 +108,7 @@ public static class ProductionTestData
 #endregion
 
 #region Line Locations
-        G2Chassis = new ProductionLocation()
+        G2Chassis = new ZoneRV.Models.Location.Location()
         {
             Id                  = IdUtils.LocationId,
             Order               = 0,
@@ -120,7 +120,7 @@ public static class ProductionTestData
             InventoryLocations  = []
         };
 
-        ExpoChassis = new ProductionLocation()
+        ExpoChassis = new ZoneRV.Models.Location.Location()
         {
             Id                  = IdUtils.LocationId,
             Order               = 0,
@@ -132,7 +132,7 @@ public static class ProductionTestData
             InventoryLocations  = []
         };
 
-        Subs = new ProductionLocation()
+        Subs = new ZoneRV.Models.Location.Location()
         {
             Id                  = IdUtils.LocationId,
             Order               = 0.25M,
@@ -143,7 +143,7 @@ public static class ProductionTestData
             InventoryLocations  = []
         };
 
-        Cabs = new ProductionLocation()
+        Cabs = new ZoneRV.Models.Location.Location()
         {
             Id                  = IdUtils.LocationId,
             Order               = 0.5M,
@@ -154,7 +154,7 @@ public static class ProductionTestData
             InventoryLocations  = []
         };
 
-        G2WallRoof = new ProductionLocation()
+        G2WallRoof = new ZoneRV.Models.Location.Location()
         {
             Id                  = IdUtils.LocationId,
             Line                = Gen2,
@@ -166,7 +166,7 @@ public static class ProductionTestData
             InventoryLocations  = []
         };
 
-        ExpoWallRoof = new ProductionLocation()
+        ExpoWallRoof = new ZoneRV.Models.Location.Location()
         {
             Id                  = IdUtils.LocationId,
             Line                = Expo,
@@ -178,7 +178,7 @@ public static class ProductionTestData
             InventoryLocations  = []
         };
 
-        G2Bay1 = new ProductionLocation()
+        G2Bay1 = new ZoneRV.Models.Location.Location()
         {
             Id                  = IdUtils.LocationId,
             Line                = Gen2,
@@ -191,7 +191,7 @@ public static class ProductionTestData
             InventoryLocations  = []
         };
 
-        G2Bay2 = new ProductionLocation()
+        G2Bay2 = new ZoneRV.Models.Location.Location()
         {
             Id                  = IdUtils.LocationId,
             Line                = Gen2,
@@ -204,7 +204,7 @@ public static class ProductionTestData
             InventoryLocations  = []
         };
 
-        G2Bay3 = new ProductionLocation()
+        G2Bay3 = new ZoneRV.Models.Location.Location()
         {
             Id                  = IdUtils.LocationId,
             Line                = Gen2,
@@ -217,7 +217,7 @@ public static class ProductionTestData
             InventoryLocations  = []
         };
 
-        G2Bay4 = new ProductionLocation()
+        G2Bay4 = new ZoneRV.Models.Location.Location()
         {
             Id                  = IdUtils.LocationId,
             Line                = Gen2,
@@ -230,7 +230,7 @@ public static class ProductionTestData
             InventoryLocations  = []
         };
 
-        G2Bay5 = new ProductionLocation()
+        G2Bay5 = new ZoneRV.Models.Location.Location()
         {
             Id                  = IdUtils.LocationId,
             Line                = Gen2,
@@ -243,7 +243,7 @@ public static class ProductionTestData
             InventoryLocations  = []
         };
 
-        G2Bay6 = new ProductionLocation()
+        G2Bay6 = new ZoneRV.Models.Location.Location()
         {
             Id                  = IdUtils.LocationId,
             Line                = Gen2,
@@ -256,7 +256,7 @@ public static class ProductionTestData
             InventoryLocations  = []
         };
 
-        G2Bay7 = new ProductionLocation()
+        G2Bay7 = new ZoneRV.Models.Location.Location()
         {
             Id                  = IdUtils.LocationId,
             Line                = Gen2,
@@ -269,7 +269,7 @@ public static class ProductionTestData
             InventoryLocations  = []
         };
 
-        ExpoBay1 = new ProductionLocation()
+        ExpoBay1 = new ZoneRV.Models.Location.Location()
         {
             Id                  = IdUtils.LocationId,
             Line                = Expo,
@@ -282,7 +282,7 @@ public static class ProductionTestData
             InventoryLocations                                  = []
         };
 
-        ExpoBay2 = new ProductionLocation()
+        ExpoBay2 = new ZoneRV.Models.Location.Location()
         {
             Id                  = IdUtils.LocationId,
             Line                = Expo,
@@ -295,7 +295,7 @@ public static class ProductionTestData
             InventoryLocations                                  = []
         };
 
-        ExpoBay3 = new ProductionLocation()
+        ExpoBay3 = new ZoneRV.Models.Location.Location()
         {
             Id                  = IdUtils.LocationId,
             Line                = Expo,
@@ -308,7 +308,7 @@ public static class ProductionTestData
             InventoryLocations                                  = []
         };
 
-        ExpoBay4 = new ProductionLocation()
+        ExpoBay4 = new ZoneRV.Models.Location.Location()
         {
             Id                  = IdUtils.LocationId,
             Line                = Expo,
@@ -321,7 +321,7 @@ public static class ProductionTestData
             InventoryLocations                                  = []
         };
 
-        ExpoBay5 = new ProductionLocation()
+        ExpoBay5 = new ZoneRV.Models.Location.Location()
         {
             Id                  = IdUtils.LocationId,
             Line                = Expo,
@@ -365,9 +365,9 @@ public static class ProductionTestData
     static readonly DateTimeOffset currentTime = DateTimeOffset.Now;
 
     /// <param name="percentage">Value from 0.0 to 1.0</param>
-    public static VanLocationInfo GetLocationInfo(ProductionLine line, [Range(0f, 1f)] float percentage)
+    public static LocationInfo GetLocationInfo(ProductionLine line, [Range(0f, 1f)] float percentage)
     {
-        VanLocationInfo results = new VanLocationInfo();
+        LocationInfo results = new LocationInfo();
         
         var positions = LocationFactory.Locations.Where(x 
             =>  x.Line is not null && 

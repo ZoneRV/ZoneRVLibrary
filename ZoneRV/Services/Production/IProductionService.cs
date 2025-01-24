@@ -48,16 +48,16 @@ public abstract partial class IProductionService
     }
     
     public abstract Task InitialiseService();
-    private ConcurrentDictionary<VanProductionInfo, Task<VanProductionInfo>> _currentBoardTasks { get; init; } = [];
+    private ConcurrentDictionary<SalesProductionInfo, Task<SalesProductionInfo>> _currentBoardTasks { get; init; } = [];
 
-    protected abstract Task<VanProductionInfo> _loadVanFromSourceAsync(VanProductionInfo info);
+    protected abstract Task<SalesProductionInfo> _loadVanFromSourceAsync(SalesProductionInfo info);
 
-    public async Task<VanProductionInfo> LoadVanBoardAsync(VanProductionInfo info)
+    public async Task<SalesProductionInfo> LoadVanBoardAsync(SalesProductionInfo info)
     {
-        if (info.ProducitionInfoLoaded)
+        if (info.ProductionInfoLoaded)
             return info;
         
-        if (_currentBoardTasks.TryGetValue(info, out Task<VanProductionInfo>? existingTask))
+        if (_currentBoardTasks.TryGetValue(info, out Task<SalesProductionInfo>? existingTask))
         {
             await Task.WhenAll([existingTask]);
 
@@ -65,13 +65,13 @@ public abstract partial class IProductionService
         }
         else
         {
-            Task<VanProductionInfo> newTask = _loadVanFromSourceAsync(info);
+            Task<SalesProductionInfo> newTask = _loadVanFromSourceAsync(info);
 
             _currentBoardTasks.TryAdd(info, newTask);
 
             await newTask.WaitAsync(CancellationToken.None);
 
-            info.ProducitionInfoLoaded = true;
+            info.ProductionInfoLoaded = true;
 
             await Task.Delay(100); // TODO: fix so delay isn't needed
 
@@ -82,9 +82,9 @@ public abstract partial class IProductionService
     }
 
     public abstract int MaxDegreeOfParallelism { get; protected set; }
-    public async Task<IEnumerable<VanProductionInfo>> GetVanBoardsAsync(IEnumerable<VanProductionInfo> infos, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<SalesProductionInfo>> GetVanBoardsAsync(IEnumerable<SalesProductionInfo> infos, CancellationToken cancellationToken = default)
     {
-        ConcurrentBag<VanProductionInfo> boards = [];
+        ConcurrentBag<SalesProductionInfo> boards = [];
         
         ParallelOptions parallelOptions = new ParallelOptions
         {

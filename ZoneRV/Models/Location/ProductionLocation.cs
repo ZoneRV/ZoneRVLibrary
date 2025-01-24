@@ -5,7 +5,7 @@ namespace ZoneRV.Models.Location;
 
 [DebuggerDisplay("{Line} - {Name}")]
 [Table("Location")]
-public class ProductionLocation : IEquatable<ProductionLocation>, IEqualityComparer<ProductionLocation>, IComparable<ProductionLocation>
+public class Location : IEquatable<Location>, IEqualityComparer<Location>, IComparable<Location>
 {
     [Key, Required] public int Id { get; init; }
     
@@ -42,32 +42,32 @@ public class ProductionLocation : IEquatable<ProductionLocation>, IEqualityCompa
     /// <summary>
     ///Use <see cref="LocationFactory"/>  to create locations
     /// </summary>
-    internal ProductionLocation()
+    internal Location()
     {
         
     }
 
-    public static bool operator <(ProductionLocation first, ProductionLocation second)
+    public static bool operator <(Location first, Location second)
     {
         return first.Order < second.Order;
     }
 
-    public static bool operator >(ProductionLocation first, ProductionLocation second)
+    public static bool operator >(Location first, Location second)
     {
         return first.Order > second.Order;
     }
 
-    public static bool operator ==(ProductionLocation first, ProductionLocation second)
+    public static bool operator ==(Location first, Location second)
     {
         return first.GetHashCode() == second.GetHashCode();
     }
 
-    public static bool operator !=(ProductionLocation first, ProductionLocation second)
+    public static bool operator !=(Location first, Location second)
     {
         return first.GetHashCode() != second.GetHashCode();
     }
     
-    public bool Equals(ProductionLocation? other)
+    public bool Equals(Location? other)
     {
         if (other is null) 
             return false;
@@ -85,7 +85,7 @@ public class ProductionLocation : IEquatable<ProductionLocation>, IEqualityCompa
                Type == other.Type;
     }
 
-    public int CompareTo(ProductionLocation? other)
+    public int CompareTo(Location? other)
     {
         ArgumentNullException.ThrowIfNull(other);
         
@@ -115,7 +115,7 @@ public class ProductionLocation : IEquatable<ProductionLocation>, IEqualityCompa
         if (obj.GetType() != GetType()) 
             return false;
         
-        return Equals((ProductionLocation)obj);
+        return Equals((Location)obj);
     }
 
     public override int GetHashCode()
@@ -123,10 +123,10 @@ public class ProductionLocation : IEquatable<ProductionLocation>, IEqualityCompa
         return HashCode.Combine((Line is null ? -1 : Line.Id), Name, Order, (int)Type);
     }
 
-    public int GetHashCode(ProductionLocation obj)
+    public int GetHashCode(Location obj)
         => obj.GetHashCode();
 
-    public bool Equals(ProductionLocation? x, ProductionLocation? y)
+    public bool Equals(Location? x, Location? y)
     {
         if(x is null)
             return false;

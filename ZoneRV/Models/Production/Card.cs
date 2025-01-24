@@ -1,10 +1,10 @@
-﻿namespace ZoneRV.Models.Van;
+﻿namespace ZoneRV.Models.Production;
 
 public abstract class Card
 {
-    public Card(VanProductionInfo van, CardInfo info, AreaOfOrigin areaOfOrigin)
+    public Card(SalesProductionInfo van, CardInfo info, AreaOfOrigin areaOfOrigin)
     {
-        Van = van;
+        ProductionInfo = van;
         AreaOfOrigin = areaOfOrigin;
         Id = info.Id;
         Name = info.Name;
@@ -17,8 +17,8 @@ public abstract class Card
     public string Id { get; init; }
     public string Url { get; init; }
     
-    public string BoardId => Van.Id!; // Impossible for a van to have cards without an Id
-    public VanProductionInfo Van { get; init; }
+    public string BoardId => ProductionInfo.Id!; // Impossible for a van to have cards without an Id
+    public SalesProductionInfo ProductionInfo { get; init; }
     
     public AreaOfOrigin AreaOfOrigin { get; set; }
 

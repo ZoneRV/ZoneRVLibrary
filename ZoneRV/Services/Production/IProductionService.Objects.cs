@@ -9,7 +9,7 @@ public abstract partial class IProductionService
     /// <summary>
     /// Key is the van name
     /// </summary>
-    protected ConcurrentDictionary<string, VanProductionInfo> Vans { get; } = [];
+    protected ConcurrentDictionary<string, SalesProductionInfo> Vans { get; } = [];
     
     protected ConcurrentDictionary<string, Check> Checks { get; } = [];
     protected ConcurrentDictionary<string, Checklist> Checklists { get; } = [];
@@ -20,7 +20,7 @@ public abstract partial class IProductionService
     protected ConcurrentDictionary<string, Attachment> Attachments { get; } = [];
     protected ConcurrentDictionary<string, User> Users { get; } = [];
 
-    protected JobCard CreateJobCard(VanProductionInfo van, JobCardInfo info, AreaOfOrigin areaOfOrigin, ProductionLocation location)
+    protected JobCard CreateJobCard(SalesProductionInfo van, JobCardInfo info, AreaOfOrigin areaOfOrigin, Location location)
     {
         var jobcard = new JobCard(van, info, areaOfOrigin, location);
 
@@ -45,7 +45,7 @@ public abstract partial class IProductionService
         return jobcard;
     }
 
-     protected RedCard CreateRedCard(VanProductionInfo van, RedCardInfo info, AreaOfOrigin areaOfOrigin)
+     protected RedCard CreateRedCard(SalesProductionInfo van, RedCardInfo info, AreaOfOrigin areaOfOrigin)
      {
          var redCard = new RedCard(van, info, areaOfOrigin);
 
@@ -70,7 +70,7 @@ public abstract partial class IProductionService
         return redCard;
     }
 
-     protected YellowCard CreateYellowCard(VanProductionInfo van, YellowCardInfo info, AreaOfOrigin areaOfOrigin)
+     protected YellowCard CreateYellowCard(SalesProductionInfo van, YellowCardInfo info, AreaOfOrigin areaOfOrigin)
      {
          var yellowCard = new YellowCard(van, info, areaOfOrigin);
 
@@ -133,7 +133,7 @@ public abstract partial class IProductionService
         return check;
     }
 
-    protected Comment CreateComment(VanProductionInfo van, CommentInfo info, Card card)
+    protected Comment CreateComment(SalesProductionInfo van, CommentInfo info, Card card)
     {
         Users.TryGetValue(info.AuthorId, out var user);
 
@@ -153,7 +153,7 @@ public abstract partial class IProductionService
         return comment;
     }
 
-    protected Attachment CreateAttachment(VanProductionInfo van, AttachmentInfo info, Card card)
+    protected Attachment CreateAttachment(SalesProductionInfo van, AttachmentInfo info, Card card)
     {
         var attachment = new Attachment()
         {

@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -13,19 +12,18 @@ using TrelloDotNet.Model.Options.GetMemberOptions;
 using TrelloDotNet.Model.Search;
 using ZoneRV.DBContexts;
 using ZoneRV.Models;
-using ZoneRV.Models.DB;
 using ZoneRV.Models.Enums;
 using ZoneRV.Models.Location;
+using ZoneRV.Models.Production;
 using ZoneRV.Services.Production;
-using ZoneRV.Services.Trello.DB;
 using ZoneRV.Services.Trello.Models;
-using TrelloActionData = ZoneRV.Services.Trello.DB.TrelloActionData;
+using Card = TrelloDotNet.Model.Card;
 
 namespace ZoneRV.Services.Trello;
 
 public class TrelloService : IProductionService
 {
-    private readonly       IServiceScopeFactory ScopeFactory;
+    private readonly       IServiceScopeFactory _scopeFactory;
     public sealed override LocationFactory      LocationFactory { get; init; }
     
     public static List<string> TrelloActionFilters => ["commentCard", "updateCustomFieldItem", "createCard", "updateCheckItemStateOnCard"];
@@ -42,7 +40,7 @@ public class TrelloService : IProductionService
     
     public TrelloService(IServiceScopeFactory scopeFactory, IConfiguration configuration) : base(scopeFactory, configuration)
     {
-        ScopeFactory = scopeFactory;
+        _scopeFactory = scopeFactory;
         
         TrelloApiKey = configuration["TrelloApiKey"] ??
                        throw new ArgumentNullException(nameof(TrelloApiKey), "Trello api key required");
@@ -57,7 +55,7 @@ public class TrelloService : IProductionService
                         throw new ArgumentNullException(nameof(ProHoDashboardId), "ProHo Dashboard board id required");
 
 
-        List<ProductionLocation> locations;
+        List<Location> locations;
         
         using (var scope = scopeFactory.CreateScope())
         {
@@ -175,7 +173,7 @@ public class TrelloService : IProductionService
         
         List<VanId> storedVanIds;
         
-        using (var scope = ScopeFactory.CreateScope())
+        using (var scope = _scopeFactory.CreateScope())
         {
             var trelloContext = scope.ServiceProvider.GetRequiredService<TrelloContext>();
             
@@ -185,7 +183,7 @@ public class TrelloService : IProductionService
         foreach (Card lineMoveCard in lineMoveBoardCards)
         {
             
-            if (ModelNameMatcher.TryGetSingleVanName(lineMoveCard.Name, out var model, out string? formattedName))
+            if (ModelNameMatcher.TryGetSingleName(lineMoveCard.Name, out var model, out var number, out string? formattedName))
             {
                 if (tempBlockedNames.Contains(formattedName))
                     continue;
@@ -227,7 +225,7 @@ public class TrelloService : IProductionService
                     urlString = vanId.Url;
                 }
 
-                List<(DateTimeOffset moveDate, ProductionLocation location)> locationHistory = [];
+                List<(DateTimeOffset moveDate, Location location)> locationHistory = [];
                 
                 foreach (var moveAction in lineMoveActions.Where(x => x.Data.Card.Id == lineMoveCard.Id))
                 {
@@ -273,16 +271,13 @@ public class TrelloService : IProductionService
                     locationHistory.Add((moveAction.Date, location));
                 }
 
-                Vans.TryAdd(formattedName, new VanProductionInfo()
+                Vans.TryAdd(formattedName, new SalesProductionInfo()
                 {
-                    Name = formattedName, 
-                    VanModel = model, 
+                    Number = number, 
+                    Model = model, 
                     Url = urlString, 
                     Id = idString,
-                    LocationInfo = new VanLocationInfo()
-                    {
-                        LocationHistory = locationHistory
-                    }
+                    LocationInfo = new LocationInfo(locationHistory)
                 });
                 
                 Log.Logger.Debug("New van information added");
@@ -297,12 +292,12 @@ public class TrelloService : IProductionService
 
         foreach (Card card in prohoCards)
         {
-            if (ModelNameMatcher.TryGetSingleVanName(card.Name, out _, out string? formattedName))
+            if (ModelNameMatcher.TryGetSingleName(card.Name, out string? formattedName))
             {
                 if (!card.Due.HasValue)
                     continue;
 
-                if (Vans.TryGetValue(formattedName, out VanProductionInfo? value))
+                if (Vans.TryGetValue(formattedName, out SalesProductionInfo? value))
                 {
                     List<CachedTrelloAction> actions = prohoCachedActions.Where(x => x.CardId == card.Id && x.DueDate.HasValue).ToList();
 
@@ -335,7 +330,7 @@ public class TrelloService : IProductionService
 
         foreach (var productionLine in ProductionLines)
         {
-            var vansInLine = Vans.Where(x => x.Value.VanModel.ProductionLine == productionLine).Select(x => x.Value).ToList();
+            var vansInLine = Vans.Where(x => x.Value.Model.ProductionLine == productionLine).Select(x => x.Value).ToList();
                 
             int prepCount = vansInLine.Count(x =>
                 x.LocationInfo.CurrentLocation.Type is ProductionLocationType.Prep && x.HandoverState is HandoverState.HandedOver);
@@ -357,9 +352,9 @@ public class TrelloService : IProductionService
         }
     }
 
-    protected override async Task<VanProductionInfo> _loadVanFromSourceAsync(VanProductionInfo van)
+    protected override async Task<SalesProductionInfo> _loadVanFromSourceAsync(SalesProductionInfo van)
     {
-        using (var scope = ScopeFactory.CreateScope())
+        using (var scope = _scopeFactory.CreateScope())
         {
             var trelloContext = scope.ServiceProvider.GetRequiredService<TrelloContext>();
 
@@ -428,7 +423,7 @@ public class TrelloService : IProductionService
                 switch (cardType)
                 {
                     case CardType.JobCard:
-                        var position = LocationFactory.GetLocationFromCustomName(van.VanModel.ProductionLine, card.List.Name);
+                        var position = LocationFactory.GetLocationFromCustomName(van.Model.ProductionLine, card.List.Name);
                         if (position is not null)
                             CreateJobCard(van, card.ToJobCardInfo(cardActions, cardFields), TrelloUtils.ToAreaOfOrigin(card, cardFields), position);
                         break;
@@ -450,7 +445,7 @@ public class TrelloService : IProductionService
 
     private async Task<List<CachedTrelloAction>> GetTrelloActionsWithCache(string id, List<string>? actionFilters = null)
     {
-        using (var scope = ScopeFactory.CreateScope())
+        using (var scope = _scopeFactory.CreateScope())
         {
             var trelloContext = scope.ServiceProvider.GetRequiredService<TrelloContext>();
 
@@ -535,7 +530,7 @@ public class TrelloService : IProductionService
     
     private async Task<TryObject<VanId>> TrySearchForVanId(string name, TimeSpan? age = null)
     {
-        using (var scope = ScopeFactory.CreateScope())
+        using (var scope = _scopeFactory.CreateScope())
         {
             var trelloContext = scope.ServiceProvider.GetRequiredService<TrelloContext>();
 

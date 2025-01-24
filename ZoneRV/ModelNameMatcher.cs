@@ -24,15 +24,18 @@ public class ModelNameMatcher
     ///     Throws exception if input string contains multiple distinct van names.
     ///     <see cref="GetAllMentionedVans">Use this for strings with multiple vans.</see>
     /// </exception>
-    public bool TryGetSingleVanName(
+    public bool TryGetSingleName(
         string input,
-        [NotNullWhen(true)] out Model? vanType, 
+        [NotNullWhen(true)] out Model? model, 
+        [NotNullWhen(true)] out string? number, 
         [NotNullWhen(true)] out string? result)
     {
         input = input.ToLower();
         
-        vanType = null;
+        model  = null;
         result = null;
+        number = null;
+        
         MatchCollection matches = VanRegex.Matches(input);
         
         if (matches.Count == 0)
@@ -45,14 +48,19 @@ public class ModelNameMatcher
             Log.Logger.Warning("Van name {input} contains multiple van names", input);
             return false;
         }
-        
-        result = string.Join(null, matches[0].Groups.Values.Skip(1));
 
-        vanType = Models
+        model = Models
             .First(x => x.Prefix.ToLower() == matches[0].Groups[1].Value);
+
+        number = matches[0].Groups[2].Value;
+
+        result = (model.Prefix + number).ToLower();
         
         return true; 
     }
+
+    public bool TryGetSingleName(string input, [NotNullWhen(true)] out string? result)
+        => TryGetSingleName(input, out _, out _, out result);
 
     public IEnumerable<string> GetAllMentionedVans(string input)
     {

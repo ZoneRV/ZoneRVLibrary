@@ -1,25 +1,24 @@
-﻿namespace ZoneRV.Models;
+﻿namespace ZoneRV.Models.Production;
 
 [DebuggerDisplay("{Name} - {Id}")]
-public class VanProductionInfo : IEqualityComparer<VanProductionInfo>
+public class SalesProductionInfo : IEqualityComparer<SalesProductionInfo>
 {
     public string? Id { get; set; }
-    public required string Name { get; init; }
-    public bool ProducitionInfoLoaded { get; internal set; } = false;
+    public string Name => Model.Prefix + Number;
+    public bool ProductionInfoLoaded { get; internal set; } = false;
+    public bool InventoryInfoLoaded { get; internal set; } = false;
     public string? Url { get; set; }
     
-    public List<string> JobCardIds { get; } = [];
     public List<JobCard> JobCards { get; } = [];
-    public List<string> RedCardIds { get; } = [];
     public List<RedCard> RedCards { get; } = [];
-    public List<string> YellowCardIds { get; } = [];
     public List<YellowCard> YellowCards { get; } = [];
 
     public IEnumerable<Card> Cards => JobCards.Select(Card (x) => x).Concat(RedCards).Concat(YellowCards);
 
     public double CompletionRate => Cards.Any() ? Cards.Average(x => x.GetCompletionRate()) : 0;
     
-    public required Model VanModel { get; init; }
+    public required Model  Model  { get; init; }
+    public required string Number { get; init; }
     
     private List<(DateTimeOffset ChangeDate, DateTimeOffset HandoverDate)> _handoverHistory = []; 
     public DateTimeOffset? HandoverDate => _handoverHistory.Count > 0 ? _handoverHistory.MaxBy(x => x.ChangeDate).HandoverDate : null;
@@ -30,9 +29,9 @@ public class VanProductionInfo : IEqualityComparer<VanProductionInfo>
     public void AddHandoverHistory(DateTimeOffset changeDate, DateTimeOffset handoverDate)
         => _handoverHistory.Add((changeDate, handoverDate));
 
-    public VanLocationInfo LocationInfo { get; init; } = new VanLocationInfo();
+    public LocationInfo LocationInfo { get; init; } = new LocationInfo();
 
-    public bool Equals(VanProductionInfo? x, VanProductionInfo? y)
+    public bool Equals(SalesProductionInfo? x, SalesProductionInfo? y)
     {
         if (ReferenceEquals(x, y)) return true;
         if (x is null) return false;
@@ -41,7 +40,7 @@ public class VanProductionInfo : IEqualityComparer<VanProductionInfo>
         return string.Equals(x.Id, y.Id, StringComparison.InvariantCultureIgnoreCase);
     }
 
-    public int GetHashCode(VanProductionInfo obj)
+    public int GetHashCode(SalesProductionInfo obj)
     {
         return StringComparer.InvariantCultureIgnoreCase.GetHashCode(obj.Name);
     }
