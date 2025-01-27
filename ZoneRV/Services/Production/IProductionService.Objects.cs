@@ -56,16 +56,19 @@ public abstract partial class IProductionService
         {
             var productionContext = scope.ServiceProvider.GetRequiredService<ProductionContext>();
 
-            var area = productionContext.AreaOfOrigin.Add(new AreaOfOrigin()
-            {
-                Name = name
-            });
+            var area =
+                new AreaOfOrigin()
+                {
+                    Name = name, Line = line
+                };
+            
+            line.AreaOfOrigins.Add(area);
+
+            productionContext.Update(line);
 
             await productionContext.SaveChangesAsync();
             
-            line.AreaOfOrigins.Add(area.Entity);
-
-            return area.Entity;
+            return area;
         }
     }
 

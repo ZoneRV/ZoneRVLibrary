@@ -34,7 +34,9 @@ public abstract partial class IProductionService
 
 
             ProductionLines = productionContext.Lines
-                .Include(l => l.Models).ToList();
+                .Include(l => l.Models)
+                .Include(l => l.AreaOfOrigins)
+                .ToList();
         }
 
         var models = ProductionLines.SelectMany(x => x.Models).ToList();
