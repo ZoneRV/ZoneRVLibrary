@@ -1,6 +1,6 @@
 ﻿namespace ZoneRV.Models.UpdateModels;
 
-public class JobCardUpdated : IBaseUpdate
+public interface IBaseUpdate
 {
     
 }

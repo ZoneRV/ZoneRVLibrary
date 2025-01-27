@@ -1,6 +1,6 @@
 ﻿namespace ZoneRV.Models.UpdateModels;
 
-public class CheckUpdated
+public class CheckUpdated : IBaseUpdate
 {
     
 }

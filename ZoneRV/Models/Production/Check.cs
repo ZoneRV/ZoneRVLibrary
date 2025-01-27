@@ -15,7 +15,7 @@ public class Check
 {
     public required string Id { get; init; }
     
-    [ZoneRVJsonIgnore(JsonIgnoreType.Cache)] public required Checklist Checklist { get; init; }
+    public required Checklist Checklist { get; init; }
     
     public required string Name { get; set; }
 

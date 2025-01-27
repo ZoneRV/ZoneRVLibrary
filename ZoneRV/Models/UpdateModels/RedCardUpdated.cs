@@ -1,6 +1,6 @@
 ﻿namespace ZoneRV.Models.UpdateModels;
 
-public class RedCardUpdated
+public class RedCardUpdated : IBaseUpdate
 {
     
 }

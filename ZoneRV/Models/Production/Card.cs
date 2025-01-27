@@ -34,17 +34,17 @@ public abstract class Card
     public List<Attachment> Attachments { get; init; } = [];
     
     
-    [ZoneRVJsonIgnore(JsonIgnoreType.Both)] public int TotalChecks => AllChecks.Count();
-    [ZoneRVJsonIgnore(JsonIgnoreType.Both)] public int CompletedCheckCount => AllChecks.Count(x => x.IsChecked);
-    [ZoneRVJsonIgnore(JsonIgnoreType.Both)] public int UncompletedCheckCount => AllChecks.Count(x => !x.IsChecked);
+    public int TotalChecks => AllChecks.Count();
+    public int CompletedCheckCount => AllChecks.Count(x => x.IsChecked);
+    public int UncompletedCheckCount => AllChecks.Count(x => !x.IsChecked);
     
-    [ZoneRVJsonIgnore(JsonIgnoreType.Both)] public IEnumerable<Check> AllChecks => Checklists.SelectMany(x => x.Checks);
+    public IEnumerable<Check> AllChecks => Checklists.SelectMany(x => x.Checks);
 
     
-    [ZoneRVJsonIgnore(JsonIgnoreType.Api)] private CardStatus _cardStatus;
-    [ZoneRVJsonIgnore(JsonIgnoreType.Api)] private DateTimeOffset? _cardStatusLastUpdated;
+    private CardStatus _cardStatus;
+    private DateTimeOffset? _cardStatusLastUpdated;
     
-    [ZoneRVJsonIgnore(JsonIgnoreType.Cache)] public CardStatus CardStatus
+    public CardStatus CardStatus
     {
         get
         {

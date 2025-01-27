@@ -1,6 +1,6 @@
 ﻿namespace ZoneRV.Models.UpdateModels;
 
-public class CommentUpdated
+public class CommentUpdated : IBaseUpdate
 {
     
 }

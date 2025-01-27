@@ -62,8 +62,19 @@ public class LocationFactory
     /// <param name="bayNumber">The bay number associated with the location (optional).</param>
     /// <param name="inventoryLocations">A collection of inventory locations associated with this location (optional).</param>
     /// <returns>A newly created <see cref="Location"/> object based on the provided parameters.</returns>
-    /// <exception cref="ArgumentNullException">Thrown if a required argument is null.</exception>
-    /// <exception cref="ArgumentException">Thrown if an argument does not meet the required criteria.</exception>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when:
+    /// <list type="bullet">
+    /// <item><description><paramref name="productionLine"/> is null while <paramref name="type"/> is <see cref="ProductionLocationType.Bay"/>.</description></item>
+    /// <item><description><paramref name="bayNumber"/> is null while <paramref name="type"/> is <see cref="ProductionLocationType.Bay"/>.</description></item>
+    /// </list>
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    /// Thrown when:
+    /// <list type="bullet">
+    /// <item><description>Multiple locations of type <paramref name="type"/> within the same <paramref name="productionLine"/> have the same <paramref name="locationOrder"/>.</description></item>
+    /// </list>
+    /// </exception>
     public Location CreateLocation(
         string                              locationName,
         string                              locationDescription,

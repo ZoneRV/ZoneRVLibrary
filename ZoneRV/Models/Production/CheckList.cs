@@ -19,15 +19,15 @@ public class Checklist
 
     public required string Name { get; set; }
     
-    [ZoneRVJsonIgnore(JsonIgnoreType.Cache)] public required Card Card { get; init; }
+    public required Card Card { get; init; }
     
-    [ZoneRVJsonIgnore(JsonIgnoreType.Cache)] public required List<Check> Checks { get; init; } = [];
+    public required List<Check> Checks { get; init; } = [];
     
-    [ZoneRVJsonIgnore(JsonIgnoreType.Both)] public int CompletedChecks => Checks.Count(x => x.IsChecked);
+    public int CompletedChecks => Checks.Count(x => x.IsChecked);
     
-    [ZoneRVJsonIgnore(JsonIgnoreType.Both)] public int UncompletedChecks => Checks.Count(x => !x.IsChecked);
+    public int UncompletedChecks => Checks.Count(x => !x.IsChecked);
     
-    [ZoneRVJsonIgnore(JsonIgnoreType.Both)] public float CompletionRate => Checks.Count > 0 ? CompletedChecks / (float)Checks.Count : 0f;
+    public float CompletionRate => Checks.Count > 0 ? CompletedChecks / (float)Checks.Count : 0f;
 }
 
 /// <summary>
