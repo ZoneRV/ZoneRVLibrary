@@ -72,7 +72,7 @@ public abstract partial class IProductionService
         }
     }
 
-    protected JobCard CreateJobCard(SalesProductionInfo van, JobCardCreationInfo info, AreaOfOrigin areaOfOrigin, Location location)
+    protected JobCard CreateJobCard(SalesProductionInfo van, JobCardCreationInfo info, AreaOfOrigin? areaOfOrigin, Location location)
     {
         var jobcard = new JobCard(van, info, areaOfOrigin, location);
 
@@ -97,7 +97,7 @@ public abstract partial class IProductionService
         return jobcard;
     }
 
-     protected RedCard CreateRedCard(SalesProductionInfo van, RedCardCreationInfo info, AreaOfOrigin areaOfOrigin)
+     protected RedCard CreateRedCard(SalesProductionInfo van, RedCardCreationInfo info, AreaOfOrigin? areaOfOrigin)
      {
          var redCard = new RedCard(van, info, areaOfOrigin);
 
@@ -122,7 +122,7 @@ public abstract partial class IProductionService
         return redCard;
     }
 
-     protected YellowCard CreateYellowCard(SalesProductionInfo van, YellowCardInfo info, AreaOfOrigin areaOfOrigin)
+     protected YellowCard CreateYellowCard(SalesProductionInfo van, YellowCardInfo info, AreaOfOrigin? areaOfOrigin)
      {
          var yellowCard = new YellowCard(van, info, areaOfOrigin);
 

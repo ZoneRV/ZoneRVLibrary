@@ -7,7 +7,7 @@
 /// </summary>
 public abstract class Card
 {
-    public Card(SalesProductionInfo van, CardCreationInfo info, AreaOfOrigin areaOfOrigin)
+    public Card(SalesProductionInfo van, CardCreationInfo info, AreaOfOrigin? areaOfOrigin)
     {
         ProductionInfo = van;
         AreaOfOrigin = areaOfOrigin;
@@ -25,7 +25,7 @@ public abstract class Card
     public string BoardId => ProductionInfo.Id!; // Impossible for a van to have cards without an Id
     public SalesProductionInfo ProductionInfo { get; init; }
     
-    public AreaOfOrigin AreaOfOrigin { get; set; }
+    public AreaOfOrigin? AreaOfOrigin { get; set; }
 
     public List<Checklist> Checklists { get; init; } = [];
 

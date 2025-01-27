@@ -433,22 +433,23 @@ public class TrelloService : IProductionService
                 var cardActions = cachedActions.Where(x => x.BoardId == van.Id).ToList();
                 var cardFields  = customFields.Where(x => x.ModelId == van.Id).ToList();
 
-                CardType cardType = TrelloUtils.GetCardType(card.Name, card.List.Name);
+                CardType     cardType = TrelloUtils.GetCardType(card, cardFields);
+                AreaOfOrigin? area     = TrelloUtils.ToAreaOfOrigin(card, cardFields, AreaOfOrigins);
 
                 switch (cardType)
                 {
                     case CardType.JobCard:
                         var position = LocationFactory.GetLocationFromCustomName(van.Model.ProductionLine, card.List.Name);
-                        if (position is not null)
-                            CreateJobCard(van, card.ToJobCardInfo(cardActions, cardFields), TrelloUtils.ToAreaOfOrigin(card, cardFields), position);
+                        if (position is not null && area is not null)
+                            CreateJobCard(van, card.ToJobCardInfo(cardActions, cardFields), area, position);
                         break;
 
                     case CardType.RedCard:
-                        CreateRedCard(van, card.ToRedCardInfo(cardActions, cardFields), TrelloUtils.ToAreaOfOrigin(card, cardFields));
+                        CreateRedCard(van, card.ToRedCardInfo(cardActions, cardFields), area);
                         break;
 
                     case CardType.YellowCard:
-                        CreateYellowCard(van, card.ToYellowCardInfo(cardActions, cardFields), TrelloUtils.ToAreaOfOrigin(card, cardFields));
+                        CreateYellowCard(van, card.ToYellowCardInfo(cardActions, cardFields), area);
                         break;
                 }
             }

@@ -49,7 +49,7 @@ try
     IProductionService? productionService = app.Services.GetService<IProductionService>();
             
     ArgumentNullException.ThrowIfNull(productionService);
-    //productionService.InitialiseService();
+    await productionService.InitialiseService();
 
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())

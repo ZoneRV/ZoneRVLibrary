@@ -18,6 +18,7 @@ public class SalesProductionInfo : IEqualityComparer<SalesProductionInfo>
     public List<RedCard> RedCards { get; } = [];
     public List<YellowCard> YellowCards { get; } = [];
 
+    [JsonIgnore]
     public IEnumerable<Card> Cards => JobCards.Select(Card (x) => x).Concat(RedCards).Concat(YellowCards);
 
     public double CompletionRate => Cards.Any() ? Cards.Average(x => x.GetCompletionRate()) : 0;

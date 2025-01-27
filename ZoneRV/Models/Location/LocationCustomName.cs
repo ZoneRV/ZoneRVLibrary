@@ -24,5 +24,5 @@ public class LocationCustomName
     [Required, MaxLength(128)]
     public required string CustomName { get; set; }
     
-    [ForeignKey("LocationId")] public required Location Location { get; set; }
+    [ForeignKey("LocationId"), Required] public required Location Location { get; set; }
 }

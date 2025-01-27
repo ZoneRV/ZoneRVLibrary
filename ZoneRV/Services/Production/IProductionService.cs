@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System.Collections;
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,8 @@ namespace ZoneRV.Services.Production;
 public abstract partial class IProductionService
 {
     public          List<ProductionLine> ProductionLines  { get; init; }
+    public          List<Model>          Models           => ProductionLines.SelectMany(x => x.Models).ToList();
+    public          List<AreaOfOrigin>   AreaOfOrigins    => ProductionLines.SelectMany(x => x.AreaOfOrigins).ToList();
     public          ModelNameMatcher     ModelNameMatcher { get; init; }
     public abstract LocationFactory      LocationFactory  { get; init; }
 

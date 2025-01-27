@@ -1,4 +1,5 @@
-﻿using Serilog;
+﻿using System.Collections;
+using Serilog;
 using TrelloDotNet.Model;
 using TrelloDotNet.Model.Actions;
 using ZoneRV.Models;
@@ -191,16 +192,26 @@ public static class TrelloUtils
         "SIGN-OFFs"
     ];
     
-    public static CardType GetCardType(string cardName, string listName)
+    public static CardType GetCardType(TrelloDotNet.Model.Card card, IEnumerable<CustomField> customFields)
     {
-        if (RedCardListNames.Contains(listName) && !IgnoredRedAndYellowCardNames.Contains(cardName))
-            return CardType.RedCard;
+        if (RedCardListNames.Contains(card.List.Name) && !IgnoredRedAndYellowCardNames.Contains(card.Name))
+        {
+            var desiredField = customFields.Single(x => x.Name == "Yellow Card Issue");
 
-        if (YellowCardListNames.Contains(listName) && !IgnoredRedAndYellowCardNames.Contains(cardName))
+            CustomFieldItem desiredFieldItem;
+
+            if (card.CustomFieldItems.Any(x => x.CustomFieldId == desiredField.Id))
+                return CardType.YellowCard;
+
+            else
+                return CardType.RedCard;
+        }
+
+        if (YellowCardListNames.Contains(card.List.Name) && !IgnoredRedAndYellowCardNames.Contains(card.Name))
             return CardType.YellowCard;
 
-        if (!IgnoredJobListsNames.Contains(cardName) && !RedCardListNames.Contains(listName) &&
-            !YellowCardListNames.Contains(listName))
+        if (!IgnoredJobListsNames.Contains(card.Name) && !RedCardListNames.Contains(card.List.Name) &&
+            !YellowCardListNames.Contains(card.List.Name))
             return CardType.JobCard;
 
         return CardType.None;
@@ -316,8 +327,23 @@ public static class TrelloUtils
         }
     }
     
-    internal static AreaOfOrigin ToAreaOfOrigin(TrelloDotNet.Model.Card card, IEnumerable<CustomField> customFields)
+    internal static AreaOfOrigin? ToAreaOfOrigin(TrelloDotNet.Model.Card card, IEnumerable<CustomField> customFields, IEnumerable<AreaOfOrigin> areaOfOrigins)
     {
-        throw new NotImplementedException();
+        var desiredFields = customFields.Where(x => x.Name == "Area of Origin" || x.Name == "Area of Origin:");
+
+        IEnumerable<CustomFieldItem> desiredFieldItems;
+
+        if (card.CustomFieldItems.Any(x => desiredFields.Any(y => y.Id == x.CustomFieldId)))
+            desiredFieldItems = card.CustomFieldItems.Where(x => desiredFields.Any(y => y.Id == x.CustomFieldId));
+        else
+            return null;
+
+        string fieldValue = desiredFields
+                           .SelectMany(x => x.Options)
+                           .First(option => !string.IsNullOrEmpty(option.Value.Text) &&
+                                            desiredFieldItems.Any(cardItem => cardItem.ValueId == option.Id)).Value.Text;
+
+
+        return areaOfOrigins.FirstOrDefault(x => x.Name.ToLower() == fieldValue.ToLower());
     }
 }

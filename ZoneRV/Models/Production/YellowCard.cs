@@ -7,7 +7,7 @@
 [DebuggerDisplay("{Name} - {Parent.Info.Name}")]
 public class YellowCard : Card
 {
-    public YellowCard(SalesProductionInfo van, YellowCardInfo info, AreaOfOrigin areaOfOrigin) : base(van, info, areaOfOrigin)
+    public YellowCard(SalesProductionInfo van, YellowCardInfo info, AreaOfOrigin? areaOfOrigin) : base(van, info, areaOfOrigin)
     {
         CreationDate = info.CreationDate;
     }

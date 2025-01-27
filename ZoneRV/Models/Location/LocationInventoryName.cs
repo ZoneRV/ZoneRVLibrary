@@ -25,5 +25,5 @@ public class LocationInventoryName
     [Required, MaxLength(128)]
     public required string CustomName { get; set; }
     
-    public required ProductionLine Line { get; set; }
+    [ForeignKey("LocationId"), Required] public required Location Location { get; set; }
 }
