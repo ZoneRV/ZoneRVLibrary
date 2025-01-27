@@ -10,7 +10,7 @@ namespace ZoneRV.Models.Production;
 [Table("Line")]
 public class ProductionLine
 {
-    [Key, Required] public int    Id   { get; set; }
+    [Key, Required] public          int    Id   { get; set; }
     [MaxLength(24)] public required string Name { get; set; }
 
     public List<Model> Models { get; set; } = [];

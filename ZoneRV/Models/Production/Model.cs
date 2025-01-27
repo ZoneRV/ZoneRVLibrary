@@ -16,7 +16,7 @@ namespace ZoneRV.Models.Production;
 [Table("Model")]
 public class Model
 {
-    [Key, Required] public required int Id { get; set; }
+    [Key, Required] public                     int Id { get; set; }
     
     [ForeignKey("Line")] public required int LineId { get; set; }
     

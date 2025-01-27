@@ -47,6 +47,28 @@ public abstract partial class IProductionService
         }
     }
 
+    public async Task<AreaOfOrigin> CreateAreaOfOrigin(ProductionLine line, string name)
+    {
+        if (line.AreaOfOrigins.Any(x => x.Name.ToLower() == name.ToLower()))
+            throw new DuplicateNameException("Cannot create Area of Origin with name {name}, Already exists.");
+        
+        using (var scope = ScopeFactory.CreateScope())
+        {
+            var productionContext = scope.ServiceProvider.GetRequiredService<ProductionContext>();
+
+            var area = productionContext.AreaOfOrigin.Add(new AreaOfOrigin()
+            {
+                Name = name
+            });
+
+            await productionContext.SaveChangesAsync();
+            
+            line.AreaOfOrigins.Add(area.Entity);
+
+            return area.Entity;
+        }
+    }
+
     protected JobCard CreateJobCard(SalesProductionInfo van, JobCardCreationInfo info, AreaOfOrigin areaOfOrigin, Location location)
     {
         var jobcard = new JobCard(van, info, areaOfOrigin, location);
