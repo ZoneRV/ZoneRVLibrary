@@ -22,7 +22,6 @@ public abstract class Card
     public string Id { get; init; }
     public string Url { get; init; }
     
-    public string BoardId => ProductionInfo.Id!; // Impossible for a van to have cards without an Id
     public SalesProductionInfo ProductionInfo { get; init; }
     
     public AreaOfOrigin? AreaOfOrigin { get; set; }
@@ -38,11 +37,11 @@ public abstract class Card
     public int CompletedCheckCount => AllChecks.Count(x => x.IsChecked);
     public int UncompletedCheckCount => AllChecks.Count(x => !x.IsChecked);
     
-    public IEnumerable<Check> AllChecks => Checklists.SelectMany(x => x.Checks);
+    [JsonIgnore] public IEnumerable<Check> AllChecks => Checklists.SelectMany(x => x.Checks);
 
     
-    private CardStatus _cardStatus;
-    private DateTimeOffset? _cardStatusLastUpdated;
+    [JsonIgnore] private CardStatus      _cardStatus;
+    [JsonIgnore] private DateTimeOffset? _cardStatusLastUpdated;
     
     public CardStatus CardStatus
     {

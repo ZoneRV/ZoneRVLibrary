@@ -21,8 +21,8 @@ public class Location : IEquatable<Location>, IEqualityComparer<Location>, IComp
     
     [MaxLength(1024)] public required string Description { get; set; }
 
-    public virtual ICollection<LocationInventoryName> InventoryLocations  { get; set; } = default!;
-    public virtual ICollection<LocationCustomName>    CustomLocationNames { get; set; } = default!;
+    [JsonIgnore] public virtual ICollection<LocationInventoryName> InventoryLocations  { get; set; } = default!;
+    [JsonIgnore] public virtual ICollection<LocationCustomName>    CustomLocationNames { get; set; } = default!;
 
     public decimal Order
     {
