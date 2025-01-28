@@ -1,0 +1,241 @@
+﻿End point ideas
+
+Job Cards
+- GET /job-cards/{id} : retrieve a specific job card ID.
+- GET /job-cards/van-model/{model_id} : Get all job cards for a specific van model.
+- GET /job-cards/type/{type} : Get job cards filtered by type.
+- GET /job-cards : Retrieve all  job cards
+- POST /job-cards : create a new job card
+
+Warranty Claims
+- GET /warranty/claims/category/{van_model_id} : Retrieve warranty claims by category and van model (weekly report)
+- GET /warranty/claims/budget : Retrieve warranty claims within a specific budget (custom, monthly, or quarterly).
+- GET /warranty/claims/date-range : Get warranty claim details by a specific date range.
+- GET /warranty/claims/component/{component_id} : Retrieve warranty claims by component.
+- Post /warranty/claims/report : submit a custom warranty claim report
+
+Sales and Revenue
+- GET /sales/parts/value/region/{region_id} : Get part sales value by region
+- GET /sales/accessories/weekly : retrieve accessories sales value per week
+- GET /sales/van-model/analysis/{model_id} : Analyse van model sales performance.
+- GET /sales/used-vans/dealership/{dealership_id}: Get used van sales, count, cost and, target sale data by dealership.
+- GET /sales/revenue : retrieve total sales revenue
+- GET /sales/forecasting : Sales Forecasting for future planning
+- GET /sales/rep-performance/{rep_id} : Get sales performance metrics by sales representative
+
+Inventory Management
+- GET /inventory/van-stock/location/{location_id} : Get van stock levels by location
+- GET /inventory/alerts/restock : Inventory update and restock alerts
+- GET /inventory/status : Get the status of current inventory levels
+- GET /inventory/valuation: Retrieve inventory valuation for financial reporting
+- GET /inventory/expiring-stock : View stock that is nearing its expiration
+- POST /inventory/update : update inventory levels
+
+Supply Chain Management
+- GET /suppliers/performance :  Evaluate supplier performance based on delivery times and quality.
+- GET /suppliers/contact/{supplier_id} : Retrieve supplier contact information.
+- GET /orders/active : View all active purchase orders
+- GET /orders/status/{order_id} : Track the status of a specific purchase order
+- GET /orders/incoming-deliveries : check incoming deliveries and their expected arrival dates
+- POST /orders/new : Create a new purchase order
+- GET /supply-chain/health : View the overall health of the supply chain, including disruptions.
+- GET /supply-chain/material-requirements : Forecast upcoming material needs.
+- GET /supply-chain/part-costs/supplier/{supplier_id} : View part costs by supplier.  
+
+Customer Service
+- GET /customers/{customer_id} : Retrieve customer information by ID.
+- POST /service-requests : submit a new service request.
+- GET /service-requests/{request_id} : track the status of a specific service request.
+- GET /service-history/{van_id} : Retrieve maintenance and service history for a specific van.
+- POST /customer-feedback : submit customer feedback and reviews.
+- GET /customer/complaints/{customer_id} : View recorded complaints by a specific customer.
+
+Safety and Compliance
+- GET /safety/incidents/manufacturer/{manufacturer_id} : Retrieve safety incidents reported for a specific manufacturer
+- GET /safety/incidents/van-model/{model_id} : Get safety incidents by van model.
+- POST /safety/incidents/report : submit a new safety incident report.
+- GET /safety/compliance/status/{van_id} : Check the safety compliance status of a van.
+- GET /safety/recalls/manufacturer/{manufacturer_id} : retrieve a list of safety recalls for a manufacturer.
+- GET /safety/trends : View trends in reported safety issues
+- GET /safety/resolution-timeline/{incident_id} : Get resolution timelines for reported incidents.
+- GET /safety/training : Access safety training procedures or certifications.
+- GET /safety/reports/date-range : Generates Safety reports for a specified date range.
+
+Financial Management
+- GET /finance/budget-vs-actual : Compare monthly budget against actual expenses.
+- GET /finance/profit-margins/van-model/{model_id} : Retrieve Profit margins by van model
+- GET  /finance/accounts-payable: View a summary of accounts payable.
+- GET /finance/accounts-receivable : view a summary of accounts receivable.
+- GET /finance/cogs : Retrieve the cost of goods sold (CoGS)
+- GET /finance/cash-flow : Analyse the company's cash flow
+- GET /finance/pn1 : Generate a profit and loss (P&L) statement.
+- GET /finance/tax-report : Generate tax reports for filing.
+- GET /finance/expense-tracking/department/{department_id} : track expenses by department 
+
+Reporting and Analytics
+- GET /reports/kpis : Retrieve key performance indicators (KPIs).
+- GET /reports/financial-summary : View the financial health summary of the organisation.
+- GET /reports/customer-satisfaction : Generate customer satisfaction reports
+- GET /reports/safety-compliance : Generate safety compliance reports.
+- GET /reports/production-efficiency : Analyse production efficiency metrics.
+- GET /reports/regional-performance : Analyse performance metrics across regions. 
+- GET /reports/growth-metrics : Generate annual growth metrics.
+- GET /reports/board-ready : Generate high-level reports for board presentations.
+
+Technician tools
+- GET /technicians/tasks/daily/{technician_id} : Retrieve a technician's daily task list.
+- POST /technicians/tasks/complete/{task_id} : submit work completion for a specific task.
+- GET /technicians/performance/{technician_id} : View performance metrics for a technician.
+- GET /maintenance/schedule/{van_id} : View maintenance schedules for a specific van.
+- GET /parts/availability : check the availability of parts.
+- POST /parts/request : submit a request for replacement parts.
+- GET /manuals/{van_model_id}: Access technical manuals and repair diagrams.
+
+Miscellaneous
+- GET /bom/{production_id} : Retrieve the Bill of Materials (BoM) for a specific product
+- GET /emergency/repair-requests : submit or view high-priority repair requests.
+- POST /alerts/crisis : Notify terms of urgent crises, such as recalls or major disruptions
+
+Part sales Value per week *
+
+active buyback vans daily report, quantity, cost, resale target *
+
+get buyback vans data by region *
+
+get active service contracts by van model *
+
+Van Condition Report *
+
+Get Sales Data by Region and Van Model *
+
+get resolved vs unresolved safety issues *
+
+incident resolution timeline *
+
+get part specifications *
+
+manufacturing feedback *
+
+failure rate analysis *
+
+inventory status *
+
+delivery tracking * 
+
+supply chain disruption alerts *
+
+procurement history of part *
+
+part usage report *
+
+Return Material Authorization (RMA) *
+
+Cost Analysis by material or part *
+
+sales revenue by van model *
+
+operating expenses report * 
+
+financial performance summary *
+
+Payment processing for dealers *
+
+depreciation of used vans *
+
+dealer Sales reports * 
+
+loan and lease tracking *
+
+employee expense reports *
+
+service request by customer * 
+
+warranty eligibility check * 
+
+record customer complaints
+
+search by van serial (model) number
+
+van maintenance history
+
+service appointment scheduling
+
+customer feedback and reviews
+
+contact history
+
+customer satisfaction ratings
+
+escalation tracking
+
+replacement parts requests
+
+common issue reporting by van model
+
+email or sms updates
+
+resolve issue and close case
+
+customer satisfaction analytics
+
+sales performance overview
+
+financial health summary
+
+warranty claims summary
+
+customer satisfaction trends
+
+production efficiency reports
+
+top-selling van models
+
+active issues summary
+
+dealer network performance
+
+monthly revenue and profit by van model
+
+strategic goals progress
+
+high-level forecasting
+
+dealer and customer feedback summary
+
+van inventory overview
+
+Active orders
+
+order status updates
+
+raw materials inventory
+
+production schedule
+
+manufacturing defect reports
+
+Material Requirements Planning (MRP)
+
+quality assurance checklist
+
+parts supply requests
+
+shipment tracking
+
+manufacturing cost analysis
+
+forecasted demand for parts
+
+maintenance schedule
+
+submit work completion report
+
+technical manuals and diagrams
+
+job performance metrics
+
+emergency incident reporting
+
+service reports by van model
+
+customer communication logs
