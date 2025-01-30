@@ -68,6 +68,8 @@ public abstract partial class IProductionService
 
             await productionContext.SaveChangesAsync();
             
+            MarkSOsUnloaded(x => x.Model.LineId == line.Id);
+            
             return area;
         }
     }
@@ -209,7 +211,6 @@ public abstract partial class IProductionService
         var attachment = new Attachment()
         {
             Card = card,
-            FileName = info.FileName,
             Id = info.Id,
             Url = info.Url
         };

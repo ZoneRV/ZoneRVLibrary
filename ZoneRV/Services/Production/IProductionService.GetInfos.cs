@@ -30,12 +30,12 @@ public abstract partial class IProductionService
         
         if(infos.Count == 0)
         {
-            Log.Logger.Warning("Could not find any vans that match the predicate {predicate}", predicate);
+            Log.Logger.Warning("Could not find any vans that match the predicate {predicate}", predicate); // TODO: fix log
             return false;
         }
         else
         {
-            Log.Logger.Warning("Found multiple vans that match the predicate {predicate}", predicate);
+            Log.Logger.Warning("Found multiple vans that match the predicate {predicate}", predicate); // TODO: fix log
             return false;
         }
     }

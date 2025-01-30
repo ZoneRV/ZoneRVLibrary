@@ -81,6 +81,9 @@ public abstract partial class IProductionService
             await Task.Delay(100); // TODO: fix so delay isn't needed
 
             _currentBoardTasks.TryRemove(info, out _);
+            
+            Log.Logger.Information("{name} production information loaded. Jobs:{jobs} Red Cards:{redCards} Yellow Cards:{yellowCards}", 
+                info.Name, info.JobCards.Count, info.RedCards.Count, info.YellowCards.Count);
 
             return newTask.Result;
         }
@@ -112,5 +115,80 @@ public abstract partial class IProductionService
         });
 
         return boards;
+    }
+
+    public void MarkSOsUnloaded(Func<SalesProductionInfo, bool> predicate)
+    {
+        foreach (SalesProductionInfo? info in Vans.Values)
+        {
+            if (!predicate(info) || !info.ProductionInfoLoaded)
+                continue;
+
+            var jobIds    = info.JobCards.Select(x => x.Id).ToList();
+            var redIds    = info.RedCards.Select(x => x.Id).ToList();
+            var yellowIds = info.YellowCards.Select(x => x.Id).ToList();
+
+            List<string> checkListIds = [];
+            List<string> commentIds = [];
+
+            foreach (var jobId in new List<string>(jobIds))
+            {
+                JobCards.TryRemove(jobId, out var job);
+                
+                if(job is not null)
+                {
+                    checkListIds.AddRange(job.Checklists.Select(x => x.Id));
+                    job.Checklists.Clear();
+                    info.JobCards.Remove(job);
+                }
+            }
+
+            foreach (var redId in new List<string>(redIds))
+            {
+                RedCards.TryRemove(redId, out var red);
+                
+                if(red is not null)
+                {
+                    checkListIds.AddRange(red.Checklists.Select(x => x.Id));
+                    red.Checklists.Clear();
+                    info.RedCards.Remove(red);
+                }
+            }
+
+            foreach (var yellowId in new List<string>(yellowIds))
+            {
+                YellowCards.TryRemove(yellowId, out var yellow);
+                
+                if(yellow is not null)
+                {
+                    checkListIds.AddRange(yellow.Checklists.Select(x => x.Id));
+                    yellow.Checklists.Clear();
+                    info.YellowCards.Remove(yellow);
+                }
+            }
+
+            foreach (var checkListId in new List<string>(checkListIds))
+            {
+                Checklists.TryRemove(checkListId, out var checklist);
+
+                if (checklist is not null)
+                {
+                    foreach (var check in checklist.Checks)
+                    {
+                        Checklists.TryRemove(check.Id, out _);
+                    }
+                    checklist.Checks.Clear();
+                }
+            }
+            
+            // TODO Comments
+
+            Debug.Assert(!info.Cards.Any());
+            
+            Log.Logger.Information("{name} production information unloaded. Jobs:{jobs} Red Cards:{redCards} Yellow Cards:{yellowCards}", 
+                                   info.Name, jobIds.Count, redIds.Count, yellowIds.Count);
+            
+            info.ProductionInfoLoaded = false;
+        }
     }
 }

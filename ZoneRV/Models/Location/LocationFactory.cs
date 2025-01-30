@@ -24,7 +24,7 @@ public class LocationFactory
             return null;
         
         return Locations.FirstOrDefault(x => 
-            (x.Line is not null && line is null) || 
+            (x.Line is null && line is null) || 
             (x.Line is not null && line is not null && x.Line.Id == line.Id) && 
             x.CustomLocationNames.Any(l => l.CustomName == name));
     }

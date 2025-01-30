@@ -21,7 +21,7 @@ try
            .CreateLogger();
 
     builder.Services.AddSerilog();
-    Log.Logger.Information("Starting Api", Environment.UserName);
+    Log.Logger.Information("Starting Api on {machine}", Environment.MachineName);
 
     builder.Services.AddControllers()
            .AddNewtonsoftJson((options) =>
