@@ -11,6 +11,7 @@ riderModule.iml
 
 /ZoneRV.Api/appsettings.json
 /ZoneRV.Api/appsettings.Development.json
+/ZoneRV.Api/Properties/launchSettings.json
 
 # User-specific files
 *.rsuser

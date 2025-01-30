@@ -1,4 +1,6 @@
-﻿namespace ZoneRV.Models.Production;
+﻿using ZoneRV.Serialization;
+
+namespace ZoneRV.Models.Production;
 
 /// <summary>
 /// Represents production-related information for a sales unit.
@@ -8,10 +10,10 @@
 [DebuggerDisplay("{Name} - {Id}")]
 public class SalesProductionInfo : IEqualityComparer<SalesProductionInfo>
 {
-    public string? Id { get; set; }
-    public string Name => Model.Prefix + Number;
-    public bool ProductionInfoLoaded { get; internal set; } = false;
-    public bool InventoryInfoLoaded { get; internal set; } = false;
+    [FilterableField] public string? Id { get; set; }
+    [FilterableField] public string Name => Model.Prefix + Number;
+    [JsonIgnore] public bool ProductionInfoLoaded { get; internal set; } = false;
+    [JsonIgnore] public bool InventoryInfoLoaded { get; internal set; } = false;
     public string? Url { get; set; }
     
     public List<JobCard> JobCards { get; } = [];

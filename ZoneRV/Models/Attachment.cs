@@ -1,20 +1,19 @@
-﻿namespace ZoneRV.Models;
+﻿using ZoneRV.Serialization;
 
-[DebuggerDisplay("{FileName}:{Id} - {Url}")]
+namespace ZoneRV.Models;
+
+[DebuggerDisplay("{Id}:{Url}")]
 public class Attachment
 {
-    public required string Id { get; init; }
-    public required string Url { get; set; }
-    public required string FileName { get; set; }
-
-    public string CardId => Card.Id;
-    public required Card Card { get; init; }
+    public required              string Id      { get; init; }
+    [JsonIgnore] public required string Url     { get; set; }
+    [FilterableField] public     string Content => throw new NotImplementedException();
+    public required              Card   Card    { get; init; }
 }
 
-[DebuggerDisplay("{FileName}:{Id} - {Url}")]
+[DebuggerDisplay("{Id} - {Url}")]
 public class AttachmentInfo
 {
     public required string Id { get; init; }
     public required string Url { get; init; }
-    public required string FileName { get; init; }
 }

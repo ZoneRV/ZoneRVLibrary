@@ -4,8 +4,6 @@
 public class Comment
 {
     public required string Id { get; init; }
-
-    public string CardId => Card.Id;
     
     public required Card Card { get; init; }
     

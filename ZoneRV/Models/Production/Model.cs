@@ -24,6 +24,8 @@ public class Model
     
     [MaxLength(1024)] public required string? Description { get; set; }
     
+    //TODO: add a model ype (eg van}
+    
     [Required, MaxLength(10)] public required string Prefix { get; set; }
     
     

@@ -146,8 +146,7 @@ public static class TrelloUtils
         return new AttachmentInfo()
         {
             Id = attachment.Id,
-            Url = attachment.Url,
-            FileName = attachment.FileName
+            Url = attachment.Url
         };
     }
 
