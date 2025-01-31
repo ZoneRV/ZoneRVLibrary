@@ -1,4 +1,6 @@
-﻿namespace ZoneRV.Models.Production;
+﻿using ZoneRV.Serialization;
+
+namespace ZoneRV.Models.Production;
 
 /// <summary>
 /// Represents a checklist composed of multiple checks, tracking their completion status.
@@ -19,15 +21,15 @@ public class Checklist
 
     public required string Name { get; set; }
     
-    public required Card Card { get; init; }
+    [OptionalJsonField(true)] public required Card Card { get; init; }
     
     public required List<Check> Checks { get; init; } = [];
     
-    public int CompletedChecks => Checks.Count(x => x.IsChecked);
+    [JsonIgnore] public int CompletedChecks => Checks.Count(x => x.IsChecked);
     
-    public int UncompletedChecks => Checks.Count(x => !x.IsChecked);
+    [JsonIgnore] public int UncompletedChecks => Checks.Count(x => !x.IsChecked);
     
-    public float CompletionRate => Checks.Count > 0 ? CompletedChecks / (float)Checks.Count : 0f;
+    [JsonIgnore] public float CompletionRate => Checks.Count > 0 ? CompletedChecks / (float)Checks.Count : 0f;
 }
 
 /// <summary>

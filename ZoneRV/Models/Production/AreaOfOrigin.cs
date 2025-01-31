@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using ZoneRV.Serialization;
 
 namespace ZoneRV.Models.Production;
 
@@ -13,5 +14,6 @@ public class AreaOfOrigin
     [Key, Required]        public          int    Id   { get; set; }
     [MaxLength(24)]        public required string Name { get; set; }
     
-    [ForeignKey("LineId"), Required] public required ProductionLine Line { get; set; }
+    [ForeignKey("LineId"), Required, OptionalJsonField] 
+    public required ProductionLine Line { get; set; }
 }

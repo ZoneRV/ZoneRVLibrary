@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Diagnostics;
+using ZoneRV.Serialization;
 
 namespace ZoneRV.Models.Location;
 
@@ -10,7 +11,7 @@ namespace ZoneRV.Models.Location;
 [DebuggerDisplay("{CurrentLocation}")]
 public class LocationInfo : IEnumerable<(DateTimeOffset moveDate, Location location)>
 {
-    private List<(DateTimeOffset moveDate, Location location)> _locationHistory;
+    [OptionalJsonField] private List<(DateTimeOffset moveDate, Location location)> _locationHistory;
 
     public LocationInfo(IEnumerable<(DateTimeOffset moveDate, Location location)> history)
     {

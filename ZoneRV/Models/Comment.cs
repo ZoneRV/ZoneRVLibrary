@@ -1,11 +1,13 @@
-﻿namespace ZoneRV.Models;
+﻿using ZoneRV.Serialization;
+
+namespace ZoneRV.Models;
 
 [DebuggerDisplay("{Content} - {Author.Username}")]
 public class Comment
 {
     public required string Id { get; init; }
     
-    public required Card Card { get; init; }
+    [OptionalJsonField(true)] public required Card Card { get; init; }
     
     public User? Author { get; internal set; }
     

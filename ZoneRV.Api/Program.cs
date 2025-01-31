@@ -1,9 +1,7 @@
-using System.Reflection;
-using System.Text.Json.Serialization;
 using MartinCostello.OpenApi;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using Serilog;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
 using ZoneRV.Api;
 using ZoneRV.DBContexts;
 using ZoneRV.Services.Production;
@@ -27,6 +25,7 @@ try
            .AddNewtonsoftJson((options) =>
             {
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                options.SerializerSettings.Converters.Add(new StringEnumConverter(new CamelCaseNamingStrategy()));
             });
     
     builder.Services.AddOpenApi();

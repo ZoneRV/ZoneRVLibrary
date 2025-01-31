@@ -10,20 +10,20 @@ namespace ZoneRV.Models.Production;
 [DebuggerDisplay("{Name} - {Id}")]
 public class SalesProductionInfo : IEqualityComparer<SalesProductionInfo>
 {
-    [FilterableField] public string? Id { get; set; }
-    [FilterableField] public string Name => Model.Prefix + Number;
+    public string? Id { get; set; }
+    public string Name => Model.Prefix + Number;
     [JsonIgnore] public bool ProductionInfoLoaded { get; internal set; } = false;
     [JsonIgnore] public bool InventoryInfoLoaded { get; internal set; } = false;
     public string? Url { get; set; }
     
-    public List<JobCard> JobCards { get; } = [];
-    public List<RedCard> RedCards { get; } = [];
-    public List<YellowCard> YellowCards { get; } = [];
+    [OptionalJsonField(true)] public List<JobCard> JobCards { get; } = [];
+    [OptionalJsonField(true)] public List<RedCard> RedCards { get; } = [];
+    [OptionalJsonField(true)] public List<YellowCard> YellowCards { get; } = [];
 
     [JsonIgnore]
     public IEnumerable<Card> Cards => JobCards.Select(Card (x) => x).Concat(RedCards).Concat(YellowCards);
 
-    public double CompletionRate => Cards.Any() ? Cards.Average(x => x.GetCompletionRate()) : 0;
+    [OptionalJsonField(true)] public double CompletionRate => Cards.Any() ? Cards.Average(x => x.GetCompletionRate()) : 0;
     
     public required Model  Model  { get; init; }
     public required string Number { get; init; }

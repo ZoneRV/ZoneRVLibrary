@@ -1,4 +1,6 @@
-﻿namespace ZoneRV.Models.Production;
+﻿using ZoneRV.Serialization;
+
+namespace ZoneRV.Models.Production;
 
 /// <summary>
 /// Represents a specific item or task within a checklist that can be tracked for completion status.
@@ -15,7 +17,7 @@ public class Check
 {
     public required string Id { get; init; }
     
-    public required Checklist Checklist { get; init; }
+    [OptionalJsonField(true)] public required Checklist Checklist { get; init; }
     
     public required string Name { get; set; }
 
@@ -26,7 +28,7 @@ public class Check
         init => _isChecked = value;
     }
     
-    private DateTimeOffset? _lastModified { get; set; }
+    [JsonIgnore] private DateTimeOffset? _lastModified { get; set; }
     public DateTimeOffset? LastModified 
     { 
         get => _lastModified;

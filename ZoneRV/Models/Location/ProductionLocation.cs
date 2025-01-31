@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using ZoneRV.Serialization;
 
 namespace ZoneRV.Models.Location;
 
@@ -15,7 +16,7 @@ public class Location : IEquatable<Location>, IEqualityComparer<Location>, IComp
 {
     [Key, Required] public int Id { get; init; }
     
-    public virtual ProductionLine? Line { get; init; }
+    [OptionalJsonField] public virtual ProductionLine? Line { get; init; }
     
     [MaxLength(128)] public required string Name { get; set; }
     
@@ -39,7 +40,7 @@ public class Location : IEquatable<Location>, IEqualityComparer<Location>, IComp
     }
 
     
-    private decimal _order;
+    [JsonIgnore] private decimal _order;
     
     public required ProductionLocationType Type { get; init; }
     

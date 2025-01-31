@@ -14,7 +14,7 @@ public class SalesOrderController : ControllerBase
         ProductionService = productionService;
     }
     
-    [HttpGet("{name}/{loadProduction}"), UseJsonFieldSerializer]
+    [HttpGet("{name}/{loadProduction}")]
     public async Task<ActionResult<SalesProductionInfo>> Get(string name, bool loadProduction, [FromBody] List<string> includedFields)
     {
         if (!ProductionService.TryGetInfoByName(name, out var info))
@@ -23,14 +23,10 @@ public class SalesOrderController : ControllerBase
         if (loadProduction && !info.ProductionInfoLoaded)
             await ProductionService.LoadVanBoardAsync(info);
         
-        var settings =
-            new JsonSerializerSettings()
-            {
-                ContractResolver = new JsonFieldContractResolver(includedFields), 
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-            };
-
-        var json = JsonConvert.SerializeObject(info, settings);
+        var json = JsonConvert.SerializeObject(
+                            info, 
+                            ZoneJsonSerializerSettings.GetOptionalSerializerSettings(includedFields)
+                            );
         
         return Ok(json);
     }

@@ -1,4 +1,6 @@
-﻿namespace ZoneRV.Models.Production;
+﻿using ZoneRV.Serialization;
+
+namespace ZoneRV.Models.Production;
 
 /// <summary>
 /// Represents a card in the production line for a sales order containing information about its state,
@@ -22,15 +24,15 @@ public abstract class Card
     public string Id { get; init; }
     public string Url { get; init; }
     
-    public SalesProductionInfo ProductionInfo { get; init; }
+    [OptionalJsonField] public SalesProductionInfo ProductionInfo { get; init; }
     
     public AreaOfOrigin? AreaOfOrigin { get; set; }
 
-    public List<Checklist> Checklists { get; init; } = [];
+    [OptionalJsonField(true)] public List<Checklist> Checklists { get; init; } = [];
 
-    public List<Comment> Comments { get; init; } = [];
+    [OptionalJsonField(true)] public List<Comment> Comments { get; init; } = [];
     
-    public List<Attachment> Attachments { get; init; } = [];
+    [OptionalJsonField(true)] public List<Attachment> Attachments { get; init; } = [];
     
     
     public int TotalChecks => AllChecks.Count();

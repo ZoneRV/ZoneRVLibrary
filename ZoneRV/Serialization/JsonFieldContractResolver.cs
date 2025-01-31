@@ -5,23 +5,26 @@ namespace ZoneRV.Serialization;
 
 public class JsonFieldContractResolver : DefaultContractResolver
 {
-    public JsonFieldContractResolver(IEnumerable<string> fieldnames)
+    public JsonFieldContractResolver(IEnumerable<string> fieldNames)
     {
-        FieldNames = fieldnames.ToList();
+        _fieldNames = fieldNames.ToList();
     }
     
-    private List<string> FieldNames = [];
+    private readonly List<string> _fieldNames;
     
     protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
     {
-        var filterAttribute = member.CustomAttributes.FirstOrDefault(x => x.AttributeType == typeof(FilterableFieldAttribute));
+        var filterAttribute = member.CustomAttributes.FirstOrDefault(x => x.AttributeType == typeof(OptionalJsonFieldAttribute));
         
         var property = base.CreateProperty(member, memberSerialization);
 
         if(filterAttribute is not null && member.DeclaringType is not null)
         {
             property.ShouldSerialize =
-                o => FieldNames.Any(x => x.ToLower() == $"{member.DeclaringType.Name.ToLower()}_{member.Name.ToLower()}");
+                o => _fieldNames.Any(x => 
+                    x.Equals(
+                        $"{member.DeclaringType.Name.ToLower()}_{member.Name.ToLower()}", 
+                        StringComparison.CurrentCultureIgnoreCase));
         }
 
         return property;
