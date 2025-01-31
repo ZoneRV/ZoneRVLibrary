@@ -8,7 +8,7 @@ namespace ZoneRV.Models.Production;
 /// and other production-centric data for a specific sales production unit.
 /// </summary>
 [DebuggerDisplay("{Name} - {Id}")]
-public class SalesProductionInfo : IEqualityComparer<SalesProductionInfo>
+public class SalesOrder : IEqualityComparer<SalesOrder>
 {
     public string? Id { get; set; }
     public string Name => Model.Prefix + Number;
@@ -39,7 +39,7 @@ public class SalesProductionInfo : IEqualityComparer<SalesProductionInfo>
 
     public LocationInfo LocationInfo { get; init; } = new LocationInfo();
 
-    public bool Equals(SalesProductionInfo? x, SalesProductionInfo? y)
+    public bool Equals(SalesOrder? x, SalesOrder? y)
     {
         if (ReferenceEquals(x, y)) return true;
         if (x is null) return false;
@@ -48,7 +48,7 @@ public class SalesProductionInfo : IEqualityComparer<SalesProductionInfo>
         return string.Equals(x.Id, y.Id, StringComparison.InvariantCultureIgnoreCase);
     }
 
-    public int GetHashCode(SalesProductionInfo obj)
+    public int GetHashCode(SalesOrder obj)
     {
         return StringComparer.InvariantCultureIgnoreCase.GetHashCode(obj.Name);
     }

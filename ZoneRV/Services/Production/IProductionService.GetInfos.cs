@@ -7,16 +7,16 @@ namespace ZoneRV.Services.Production;
 [SuppressMessage("ReSharper", "InconsistentNaming")]
 public abstract partial class IProductionService
 {
-    public bool TryGetInfoByName(string name, [NotNullWhen(true)] out SalesProductionInfo? info)
+    public bool TryGetInfoByName(string name, [NotNullWhen(true)] out SalesOrder? info)
         => TryGetSingleInfo(x => string.Equals(x.Name, name, StringComparison.CurrentCultureIgnoreCase), out info);
     
-    public bool TryGetInfoById(string id, [NotNullWhen(true)] out SalesProductionInfo? info)
+    public bool TryGetInfoById(string id, [NotNullWhen(true)] out SalesOrder? info)
         => Vans.TryGetValue(id.ToLower(), out info);
     
-    public IEnumerable<SalesProductionInfo> GetInfos(Func<SalesProductionInfo, bool> predicate)
+    public IEnumerable<SalesOrder> GetInfos(Func<SalesOrder, bool> predicate)
         => Vans.Values.Where(predicate);
 
-    public bool TryGetSingleInfo(Func<SalesProductionInfo, bool> predicate, [NotNullWhen(true)] out SalesProductionInfo? info)
+    public bool TryGetSingleInfo(Func<SalesOrder, bool> predicate, [NotNullWhen(true)] out SalesOrder? info)
     {
         var infos = GetInfos(predicate).ToList();
         

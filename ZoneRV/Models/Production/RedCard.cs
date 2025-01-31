@@ -8,7 +8,7 @@
 [DebuggerDisplay("{Name} - {ProductionInfo.Name}")]
 public class RedCard : Card
 {
-    public RedCard(SalesProductionInfo van, RedCardCreationInfo info, AreaOfOrigin? areaOfOrigin) : base(van, info, areaOfOrigin)
+    public RedCard(SalesOrder van, RedCardCreationInfo info, AreaOfOrigin? areaOfOrigin) : base(van, info, areaOfOrigin)
     {
         RedFlagIssue = info.RedFlagIssue;
         CreationDate = info.CreationDate;

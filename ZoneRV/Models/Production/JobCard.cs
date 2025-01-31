@@ -12,7 +12,7 @@
 [DebuggerDisplay("{Name} - {ProductionInfo.Name}")]
 public class JobCard : Card
 {
-    public JobCard(SalesProductionInfo van, JobCardCreationInfo info, AreaOfOrigin? areaOfOrigin, Location.Location location) : base(van, info, areaOfOrigin)
+    public JobCard(SalesOrder van, JobCardCreationInfo info, AreaOfOrigin? areaOfOrigin, Location.Location location) : base(van, info, areaOfOrigin)
     {
         Location = location;
         _taskTime = info.TaskTime;

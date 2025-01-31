@@ -9,7 +9,7 @@ namespace ZoneRV.Models.Production;
 /// </summary>
 public abstract class Card
 {
-    public Card(SalesProductionInfo van, CardCreationInfo info, AreaOfOrigin? areaOfOrigin)
+    public Card(SalesOrder van, CardCreationInfo info, AreaOfOrigin? areaOfOrigin)
     {
         ProductionInfo = van;
         AreaOfOrigin = areaOfOrigin;
@@ -24,7 +24,7 @@ public abstract class Card
     public string Id { get; init; }
     public string Url { get; init; }
     
-    [OptionalJsonField] public SalesProductionInfo ProductionInfo { get; init; }
+    [OptionalJsonField] public SalesOrder ProductionInfo { get; init; }
     
     public AreaOfOrigin? AreaOfOrigin { get; set; }
 

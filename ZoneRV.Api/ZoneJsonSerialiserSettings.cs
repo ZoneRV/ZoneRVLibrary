@@ -13,7 +13,7 @@ public static class ZoneJsonSerializerSettings
     
     static ZoneJsonSerializerSettings()
     {
-        var types = typeof(SalesProductionInfo).Assembly.GetTypes();
+        var types = typeof(SalesOrder).Assembly.GetTypes();
 
         foreach (var type in types
                      .Where(x => x.IsClass &&

@@ -53,16 +53,16 @@ public abstract partial class IProductionService
     /// </summary>
     public abstract Task InitialiseService();
 
-    private ConcurrentDictionary<SalesProductionInfo, Task<SalesProductionInfo>> _currentBoardTasks { get; init; } = [];
+    private ConcurrentDictionary<SalesOrder, Task<SalesOrder>> _currentBoardTasks { get; init; } = [];
 
-    protected abstract Task<SalesProductionInfo> _loadVanFromSourceAsync(SalesProductionInfo info);
+    protected abstract Task<SalesOrder> _loadVanFromSourceAsync(SalesOrder info);
 
-    public async Task<SalesProductionInfo> LoadVanBoardAsync(SalesProductionInfo info)
+    public async Task<SalesOrder> LoadVanBoardAsync(SalesOrder info)
     {
         if (info.ProductionInfoLoaded)
             return info;
         
-        if (_currentBoardTasks.TryGetValue(info, out Task<SalesProductionInfo>? existingTask))
+        if (_currentBoardTasks.TryGetValue(info, out Task<SalesOrder>? existingTask))
         {
             await Task.WhenAll([existingTask]);
 
@@ -70,7 +70,7 @@ public abstract partial class IProductionService
         }
         else
         {
-            Task<SalesProductionInfo> newTask = _loadVanFromSourceAsync(info);
+            Task<SalesOrder> newTask = _loadVanFromSourceAsync(info);
 
             _currentBoardTasks.TryAdd(info, newTask);
 
@@ -90,9 +90,9 @@ public abstract partial class IProductionService
     }
 
     public abstract int MaxDegreeOfParallelism { get; protected set; }
-    public async Task<IEnumerable<SalesProductionInfo>> GetVanBoardsAsync(IEnumerable<SalesProductionInfo> infos, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<SalesOrder>> GetVanBoardsAsync(IEnumerable<SalesOrder> infos, CancellationToken cancellationToken = default)
     {
-        ConcurrentBag<SalesProductionInfo> boards = [];
+        ConcurrentBag<SalesOrder> boards = [];
         
         ParallelOptions parallelOptions = new ParallelOptions
         {
@@ -117,9 +117,9 @@ public abstract partial class IProductionService
         return boards;
     }
 
-    public void MarkSOsUnloaded(Func<SalesProductionInfo, bool> predicate)
+    public void MarkSOsUnloaded(Func<SalesOrder, bool> predicate)
     {
-        foreach (SalesProductionInfo? info in Vans.Values)
+        foreach (SalesOrder? info in Vans.Values)
         {
             if (!predicate(info) || !info.ProductionInfoLoaded)
                 continue;

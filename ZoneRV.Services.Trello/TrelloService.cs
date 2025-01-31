@@ -274,7 +274,7 @@ public class TrelloService : IProductionService
                 }
 
                 // Add the new van information to the dictionary with its location history
-                Vans.TryAdd(formattedName, new SalesProductionInfo()
+                Vans.TryAdd(formattedName, new SalesOrder()
                 {
                     Number = number,
                     Model = model,
@@ -304,7 +304,7 @@ public class TrelloService : IProductionService
                 if (!card.Due.HasValue) continue;
 
                 // Find and update the corresponding van's handover information
-                if (Vans.TryGetValue(formattedName, out SalesProductionInfo? value))
+                if (Vans.TryGetValue(formattedName, out SalesOrder? value))
                 {
                     // Get actions with due dates for the current card
                     List<CachedTrelloAction> actions = prohoCachedActions.Where(x => x.CardId == card.Id && x.DueDate.HasValue).ToList();
@@ -367,7 +367,7 @@ public class TrelloService : IProductionService
         }
     }
 
-    protected override async Task<SalesProductionInfo> _loadVanFromSourceAsync(SalesProductionInfo van)
+    protected override async Task<SalesOrder> _loadVanFromSourceAsync(SalesOrder van)
     {
         using (var scope = _scopeFactory.CreateScope())
         {

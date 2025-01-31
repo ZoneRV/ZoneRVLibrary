@@ -7,6 +7,8 @@ using ZoneRV.DBContexts;
 using ZoneRV.Services.Production;
 using Scalar.AspNetCore;
 
+ZoneJsonSerializerSettings.GetOptionalSerializerSettings([]);
+
 try
 {
     var builder = WebApplication.CreateBuilder(args);

@@ -15,7 +15,7 @@ public class SalesOrderController : ControllerBase
     }
     
     [HttpGet("{name}/{loadProduction}")]
-    public async Task<ActionResult<SalesProductionInfo>> Get(string name, bool loadProduction, [FromBody] List<string> includedFields)
+    public async Task<ActionResult<SalesOrder>> Get(string name, bool loadProduction, [FromBody] List<string> includedFields)
     {
         if (!ProductionService.TryGetInfoByName(name, out var info))
             return NotFound();
