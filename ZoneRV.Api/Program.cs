@@ -6,6 +6,7 @@ using ZoneRV.Api;
 using ZoneRV.DBContexts;
 using ZoneRV.Services.Production;
 using Scalar.AspNetCore;
+using ZoneRV.Serialization;
 
 ZoneJsonSerializerSettings.GetOptionalSerializerSettings([]);
 
@@ -28,6 +29,7 @@ try
             {
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
                 options.SerializerSettings.Converters.Add(new StringEnumConverter(new CamelCaseNamingStrategy()));
+                options.SerializerSettings.Converters.Add(new LocationInfoJsonConverter());
             });
     
     builder.Services.AddOpenApi();

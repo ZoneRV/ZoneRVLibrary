@@ -69,6 +69,7 @@ public static class ZoneJsonSerializerSettings
         };
         
         settings.Converters.Add(new StringEnumConverter(new CamelCaseNamingStrategy()));
+        settings.Converters.Add(new LocationInfoJsonConverter());
 
         return settings;
     }
