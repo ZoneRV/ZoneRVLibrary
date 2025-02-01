@@ -24,10 +24,10 @@ public class JobCard : Card
     {
         get
         {
-            if (this.Location < this.ProductionInfo.LocationInfo.CurrentLocation)
+            if (this.Location > this.ProductionInfo.LocationInfo.CurrentLocation)
                 return DueStatus.NotDue;
                 
-            if (this.Location > this.ProductionInfo.LocationInfo.CurrentLocation)
+            if (this.Location < this.ProductionInfo.LocationInfo.CurrentLocation)
                 return DueStatus.OverDue;
             
             return DueStatus.Due;

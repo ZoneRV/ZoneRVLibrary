@@ -88,4 +88,17 @@ public class ProductionLineController : ControllerBase
 
         return Ok(area);
     }
+
+    [HttpPost("location/add-custom-name/{locationId}/{customName}")]
+    public async Task<ActionResult<LocationCustomName>> AddCustomNameToLoation(int locationId, string customName)
+    {
+        var location = ProductionService.LocationFactory.Locations.SingleOrDefault(x => x.Id == locationId);
+
+        if (location is null)
+            return NotFound();
+
+        var customNameO = await ProductionService.CreateCustomNameToLocation(location, customName);
+
+        return Ok(customNameO);
+    }
 }

@@ -441,15 +441,15 @@ public class TrelloService : IProductionService
                     case CardType.JobCard:
                         var position = LocationFactory.GetLocationFromCustomName(van.Model.ProductionLine, card.List.Name);
                         if (position is not null && area is not null)
-                            CreateJobCard(van, card.ToJobCardInfo(cardActions, cardFields), area, position);
+                            BuildJobCard(van, card.ToJobCardInfo(cardActions, cardFields), area, position);
                         break;
 
                     case CardType.RedCard:
-                        CreateRedCard(van, card.ToRedCardInfo(cardActions, cardFields), area);
+                        BuildRedCard(van, card.ToRedCardInfo(cardActions, cardFields), area);
                         break;
 
                     case CardType.YellowCard:
-                        CreateYellowCard(van, card.ToYellowCardInfo(cardActions, cardFields), area);
+                        BuildYellowCard(van, card.ToYellowCardInfo(cardActions, cardFields), area);
                         break;
                 }
             }

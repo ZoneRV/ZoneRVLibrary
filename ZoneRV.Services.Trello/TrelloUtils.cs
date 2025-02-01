@@ -47,7 +47,7 @@ public static class TrelloUtils
                 .Where(x => x.ActionType == "commentCard")
                 .Select(x => x.ToCommentInfo()).ToList(),
             AttachmentInfos = trelloCard.Attachments
-                .Where(x => x.MimeType.StartsWith("image/"))
+                .Where(x => x.MimeType is not null && x.MimeType.StartsWith("image/"))
                 .Select(x => x.ToAttachmentInfo()),
         };
     }

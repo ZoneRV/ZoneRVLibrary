@@ -74,23 +74,56 @@ public abstract partial class IProductionService
         }
     }
 
-    protected JobCard CreateJobCard(SalesOrder van, JobCardCreationInfo info, AreaOfOrigin? areaOfOrigin, Location location)
+    public async Task<LocationCustomName> CreateCustomNameToLocation(Location location, string newCustomName)
+    {
+        if (location.CustomLocationNames.Any(x => x.CustomName.ToLower() == newCustomName.ToLower()))
+            throw new DuplicateNameException("Cannot create custom location name with name {name}, Already exists.");
+        
+        using (var scope = ScopeFactory.CreateScope())
+        {
+            var productionContext = scope.ServiceProvider.GetRequiredService<ProductionContext>();
+
+            var name =
+                new LocationCustomName()
+                {
+                    CustomName = newCustomName,
+                    Location = location,
+                    ServiceType = LocationTypeName
+                };
+            
+            location.CustomLocationNames.Add(name);
+
+            productionContext.Update(location);
+
+            await productionContext.SaveChangesAsync();
+            
+            if(location.Line is not null)
+                MarkSOsUnloaded(x => x.Model.LineId == location.Line.Id);
+
+            else
+                MarkSOsUnloaded(x => true);
+            
+            return name;
+        }
+    }
+
+    protected JobCard BuildJobCard(SalesOrder van, JobCardCreationInfo info, AreaOfOrigin? areaOfOrigin, Location location)
     {
         var jobcard = new JobCard(van, info, areaOfOrigin, location);
 
         foreach (var commentInfo in info.CommentInfos)
         {
-            CreateComment(van, commentInfo, jobcard);
+            BuildComment(van, commentInfo, jobcard);
         }
 
         foreach (var checklistInfo in info.ChecklistInfos)
         {
-            CreateChecklist(checklistInfo, jobcard);
+            BuildChecklist(checklistInfo, jobcard);
         }
 
         foreach (var attachment in info.AttachmentInfos)
         {
-            CreateAttachment(van, attachment, jobcard);
+            BuildAttachment(van, attachment, jobcard);
         }
 
         JobCards.TryAdd(info.Id, jobcard);
@@ -99,23 +132,23 @@ public abstract partial class IProductionService
         return jobcard;
     }
 
-     protected RedCard CreateRedCard(SalesOrder van, RedCardCreationInfo info, AreaOfOrigin? areaOfOrigin)
+     protected RedCard BuildRedCard(SalesOrder van, RedCardCreationInfo info, AreaOfOrigin? areaOfOrigin)
      {
          var redCard = new RedCard(van, info, areaOfOrigin);
 
         foreach (var commentInfo in info.CommentInfos)
         {
-            CreateComment(van, commentInfo, redCard);
+            BuildComment(van, commentInfo, redCard);
         }
 
         foreach (var checklistInfo in info.ChecklistInfos)
         {
-            CreateChecklist(checklistInfo, redCard);
+            BuildChecklist(checklistInfo, redCard);
         }
 
         foreach (var attachmentInfo in info.AttachmentInfos)
         {
-            CreateAttachment(van, attachmentInfo, redCard);
+            BuildAttachment(van, attachmentInfo, redCard);
         }
 
         RedCards.TryAdd(info.Id, redCard);
@@ -124,23 +157,23 @@ public abstract partial class IProductionService
         return redCard;
     }
 
-     protected YellowCard CreateYellowCard(SalesOrder van, YellowCardInfo info, AreaOfOrigin? areaOfOrigin)
+     protected YellowCard BuildYellowCard(SalesOrder van, YellowCardInfo info, AreaOfOrigin? areaOfOrigin)
      {
          var yellowCard = new YellowCard(van, info, areaOfOrigin);
 
         foreach (var commentInfo in info.CommentInfos)
         {
-            CreateComment(van, commentInfo, yellowCard);
+            BuildComment(van, commentInfo, yellowCard);
         }
 
         foreach (var checklistInfo in info.ChecklistInfos)
         {
-            CreateChecklist(checklistInfo, yellowCard);
+            BuildChecklist(checklistInfo, yellowCard);
         }
 
         foreach (var attachmentInfo in info.AttachmentInfos)
         {
-            CreateAttachment(van, attachmentInfo, yellowCard);
+            BuildAttachment(van, attachmentInfo, yellowCard);
         }
 
         YellowCards.TryAdd(info.Id, yellowCard);
@@ -149,7 +182,7 @@ public abstract partial class IProductionService
         return yellowCard;
     }
 
-    protected Checklist CreateChecklist(ChecklistCreationInfo info, Card card)
+    protected Checklist BuildChecklist(ChecklistCreationInfo info, Card card)
     {
         var checklist = new Checklist()
         {
@@ -161,7 +194,7 @@ public abstract partial class IProductionService
 
         foreach (var checkInfo in info.CheckInfos)
         {
-            CreateCheck(checkInfo, checklist);
+            BuildCheck(checkInfo, checklist);
         }
         
         Checklists.TryAdd(info.Id, checklist);
@@ -170,7 +203,7 @@ public abstract partial class IProductionService
         return checklist;
     }
     
-    protected Check CreateCheck(CheckCreationInfo info, Checklist checklist)
+    protected Check BuildCheck(CheckCreationInfo info, Checklist checklist)
     {
         var check = new Check()
         {
@@ -187,7 +220,7 @@ public abstract partial class IProductionService
         return check;
     }
 
-    protected Comment CreateComment(SalesOrder van, CommentInfo info, Card card)
+    protected Comment BuildComment(SalesOrder van, CommentInfo info, Card card)
     {
         Users.TryGetValue(info.AuthorId, out var user);
 
@@ -206,7 +239,7 @@ public abstract partial class IProductionService
         return comment;
     }
 
-    protected Attachment CreateAttachment(SalesOrder van, AttachmentInfo info, Card card)
+    protected Attachment BuildAttachment(SalesOrder van, AttachmentInfo info, Card card)
     {
         var attachment = new Attachment()
         {
