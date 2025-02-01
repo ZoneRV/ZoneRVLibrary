@@ -11,7 +11,7 @@ public abstract class Card
 {
     public Card(SalesOrder van, CardCreationInfo info, AreaOfOrigin? areaOfOrigin)
     {
-        ProductionInfo = van;
+        SalesOrder = van;
         AreaOfOrigin = areaOfOrigin;
         Id = info.Id;
         Name = info.Name;
@@ -24,7 +24,7 @@ public abstract class Card
     public string Id { get; init; }
     public string Url { get; init; }
     
-    [OptionalJsonField] public SalesOrder ProductionInfo { get; init; }
+    [OptionalJsonField] public SalesOrder SalesOrder { get; init; }
     
     public AreaOfOrigin? AreaOfOrigin { get; set; }
 

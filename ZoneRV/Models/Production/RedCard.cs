@@ -5,7 +5,7 @@
 /// A RedCard is a specific type of <see cref="Card"/> that identifies production-related
 /// issues or concerns, such as those defined in <see cref="RedFlagIssue"/>.
 /// </summary>
-[DebuggerDisplay("{Name} - {ProductionInfo.Name}")]
+[DebuggerDisplay("{Name} - {SalesOrder.Name}")]
 public class RedCard : Card
 {
     public RedCard(SalesOrder van, RedCardCreationInfo info, AreaOfOrigin? areaOfOrigin) : base(van, info, areaOfOrigin)

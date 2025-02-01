@@ -9,7 +9,7 @@
 /// task time, and remaining task time. It extends the basic functionality of <see cref="Card"/> by introducing logic
 /// specific to production workflows, particularly with regard to task tracking and scheduling.
 /// </remarks>
-[DebuggerDisplay("{Name} - {ProductionInfo.Name}")]
+[DebuggerDisplay("{Name} - {SalesOrder.Name}")]
 public class JobCard : Card
 {
     public JobCard(SalesOrder van, JobCardCreationInfo info, AreaOfOrigin? areaOfOrigin, Location.Location location) : base(van, info, areaOfOrigin)
@@ -24,10 +24,10 @@ public class JobCard : Card
     {
         get
         {
-            if (this.Location > this.ProductionInfo.LocationInfo.CurrentLocation)
+            if (this.Location > this.SalesOrder.LocationInfo.CurrentLocation)
                 return DueStatus.NotDue;
                 
-            if (this.Location < this.ProductionInfo.LocationInfo.CurrentLocation)
+            if (this.Location < this.SalesOrder.LocationInfo.CurrentLocation)
                 return DueStatus.OverDue;
             
             return DueStatus.Due;

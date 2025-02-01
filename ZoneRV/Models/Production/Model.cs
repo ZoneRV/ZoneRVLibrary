@@ -13,7 +13,7 @@ namespace ZoneRV.Models.Production;
 /// The class is mapped to a database table named "Model" and contains validation attributes
 /// for entity constraints.
 /// </remarks>
-[DebuggerDisplay("{Name} - {ProductionLine.Name}")]
+[DebuggerDisplay("{Name} - {Line.Name}")]
 [Table("Model")]
 public class Model
 {
@@ -31,5 +31,5 @@ public class Model
     
     
     
-    [ForeignKey("LineId"), OptionalJsonField] public required ProductionLine ProductionLine { get; set; }
+    [ForeignKey("LineId"), OptionalJsonField] public required ProductionLine Line { get; set; }
 }

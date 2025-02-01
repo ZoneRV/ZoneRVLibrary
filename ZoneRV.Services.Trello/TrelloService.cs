@@ -266,7 +266,7 @@ public class TrelloService : IProductionService
                     }
 
                     // Attempt to resolve a custom location for the current production line based on the list name
-                    var location = LocationFactory.GetLocationFromCustomName(model.ProductionLine, listName);
+                    var location = LocationFactory.GetLocationFromCustomName(model.Line, listName);
 
                     if (location is null) continue;
 
@@ -344,7 +344,7 @@ public class TrelloService : IProductionService
         // Generate logs for the current production statistics across all production lines
         foreach (var productionLine in ProductionLines)
         {
-            var vansInLine = Vans.Where(x => x.Value.Model.ProductionLine == productionLine).Select(x => x.Value).ToList();
+            var vansInLine = Vans.Where(x => x.Value.Model.Line == productionLine).Select(x => x.Value).ToList();
 
             int prepCount = vansInLine.Count(x =>
                 x.LocationInfo.CurrentLocation.Type is ProductionLocationType.Prep && x.HandoverState is HandoverState.HandedOver);
@@ -439,7 +439,7 @@ public class TrelloService : IProductionService
                 switch (cardType)
                 {
                     case CardType.JobCard:
-                        var position = LocationFactory.GetLocationFromCustomName(van.Model.ProductionLine, card.List.Name);
+                        var position = LocationFactory.GetLocationFromCustomName(van.Model.Line, card.List.Name);
                         if (position is not null && area is not null)
                             BuildJobCard(van, card.ToJobCardInfo(cardActions, cardFields), area, position);
                         break;
