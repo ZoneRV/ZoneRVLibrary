@@ -42,8 +42,13 @@ try
     builder.Services.AddDbContext<ProductionContext>
     ((_, options ) =>
         options
-           .UseSqlServer(builder.Configuration.GetConnectionString("MySqlConnectionsString"))
-           .LogTo(Log.Logger.Debug, LogLevel.Information));
+           .UseSqlServer(builder.Configuration.GetConnectionString("MySqlConnectionsString"), 
+                 (serverOptionsBuilder =>
+                 {
+                     serverOptionsBuilder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                 }))
+           .LogTo(Log.Logger.Debug, LogLevel.Information)
+        );
 
     builder.Services.AddZoneService(builder.Configuration);
 
