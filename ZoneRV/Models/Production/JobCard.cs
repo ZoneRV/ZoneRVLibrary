@@ -12,22 +12,22 @@
 [DebuggerDisplay("{Name} - {SalesOrder.Name}")]
 public class JobCard : Card
 {
-    public JobCard(SalesOrder van, JobCardCreationInfo info, AreaOfOrigin? areaOfOrigin, Location.Location location) : base(van, info, areaOfOrigin)
+    public JobCard(SalesOrder van, JobCardCreationInfo info, AreaOfOrigin? areaOfOrigin, OrderedLineLocation lineLocation) : base(van, info, areaOfOrigin)
     {
-        Location = location;
+        LineLocation = lineLocation;
         _taskTime = info.TaskTime;
     }
     
-    public Location.Location Location { get; set; }
+    public OrderedLineLocation LineLocation { get; set; }
 
     public DueStatus DueStatus
     {
         get
         {
-            if (this.Location > this.SalesOrder.LocationInfo.CurrentLocation)
+            if (this.LineLocation > this.SalesOrder.OrderedLineLocationInfo.CurrentLocation)
                 return DueStatus.NotDue;
                 
-            if (this.Location < this.SalesOrder.LocationInfo.CurrentLocation)
+            if (this.LineLocation < this.SalesOrder.OrderedLineLocationInfo.CurrentLocation)
                 return DueStatus.OverDue;
             
             return DueStatus.Due;

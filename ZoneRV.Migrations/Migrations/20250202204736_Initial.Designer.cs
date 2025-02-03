@@ -12,8 +12,8 @@ using ZoneRV.Services.Trello;
 namespace ZoneRV.Services.Trello.Migrations
 {
     [DbContext(typeof(TrelloContext))]
-    [Migration("20250120230328_increaseActionTypeLimit")]
-    partial class increaseActionTypeLimit
+    [Migration("20250202204736_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

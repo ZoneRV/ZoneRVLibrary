@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ZoneRV.Services.Trello.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialTrello : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -25,7 +25,7 @@ namespace ZoneRV.Services.Trello.Migrations
                     BoardId = table.Column<string>(type: "nvarchar(24)", maxLength: 24, nullable: false),
                     CardId = table.Column<string>(type: "nvarchar(24)", maxLength: 24, nullable: false),
                     DateOffset = table.Column<DateTimeOffset>(type: "datetimeoffset", maxLength: 24, nullable: false),
-                    ActionType = table.Column<string>(type: "nvarchar(24)", maxLength: 24, nullable: false),
+                    ActionType = table.Column<string>(type: "nvarchar(48)", maxLength: 48, nullable: false),
                     MemberId = table.Column<string>(type: "nvarchar(24)", maxLength: 24, nullable: false),
                     Content = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CheckId = table.Column<string>(type: "nvarchar(24)", maxLength: 24, nullable: true),

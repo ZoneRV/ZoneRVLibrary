@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
+using ZoneRV.Serialization;
 
 namespace ZoneRV.Models.Production;
 
@@ -13,7 +15,10 @@ public class ProductionLine
     [Key, Required] public          int    Id   { get; set; }
     [MaxLength(24)] public required string Name { get; set; }
 
-    public List<Model> Models { get; set; } = [];
+    [OptionalJsonField, Required, ForeignKey("WorkspaceId"), DeleteBehavior(DeleteBehavior.NoAction)] // TODO: Figure out the deletion behaviour
+    public required virtual ProductionWorkspace Workspace { get; init; }
+    
+    public List<Model>         Models    { get; set; } = [];
 
     public List<AreaOfOrigin> AreaOfOrigins { get; set; } = [];
 

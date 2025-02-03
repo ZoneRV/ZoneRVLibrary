@@ -46,6 +46,7 @@ try
                  (serverOptionsBuilder =>
                  {
                      serverOptionsBuilder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                     serverOptionsBuilder.MigrationsAssembly("ZoneRV.Migrations");
                  }))
            .LogTo(Log.Logger.Debug, LogLevel.Information)
         );

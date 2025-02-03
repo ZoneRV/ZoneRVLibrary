@@ -3,13 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ZoneRV.Models.Location;
 
-/// <summary>
-/// Represents the inventory name details associated with a location.
-/// </summary>
-/// <remarks>
-/// This class is used to define custom names for a service type and associates it with a production line.
-/// It aids in identifying services with user-defined names within a production system.
-/// </remarks>
+
 [Table("LocationInventoryName")]
 public class LocationInventoryName
 {
@@ -25,5 +19,5 @@ public class LocationInventoryName
     [Required, MaxLength(128)]
     public required string CustomName { get; set; }
     
-    [ForeignKey("LocationId"), Required] public required Location Location { get; set; }
+    [ForeignKey("LocationId"), Required] public required WorkspaceLocation Location { get; set; }
 }

@@ -25,7 +25,7 @@ public abstract partial class IProductionService
     protected ConcurrentDictionary<string, Attachment> Attachments { get; } = [];
     protected ConcurrentDictionary<string, User> Users { get; } = [];
 
-    public async Task<ProductionLine> CreateProductionLine(string name)
+    public async Task<ProductionLine> CreateProductionLine(ProductionWorkspace workspace, string name)
     {
         if (ProductionLines.Any(x => x.Name.ToLower() == name.ToLower()))
             throw new DuplicateNameException("Cannot create Production line with name {name}, Already exists.");
@@ -36,12 +36,13 @@ public abstract partial class IProductionService
 
             var line = productionContext.Lines.Add(new ProductionLine()
             {
+                Workspace = workspace,
                 Name = name
             });
 
             await productionContext.SaveChangesAsync();
             
-            ProductionLines.Add(line.Entity);
+            workspace.Lines.Add(line.Entity);
 
             return line.Entity;
         }
@@ -74,40 +75,7 @@ public abstract partial class IProductionService
         }
     }
 
-    public async Task<LocationCustomName> CreateCustomNameToLocation(Location location, string newCustomName)
-    {
-        if (location.CustomLocationNames.Any(x => x.CustomName.ToLower() == newCustomName.ToLower()))
-            throw new DuplicateNameException("Cannot create custom location name with name {name}, Already exists.");
-        
-        using (var scope = ScopeFactory.CreateScope())
-        {
-            var productionContext = scope.ServiceProvider.GetRequiredService<ProductionContext>();
-
-            var name =
-                new LocationCustomName()
-                {
-                    CustomName = newCustomName,
-                    Location = location,
-                    ServiceType = LocationTypeName
-                };
-            
-            location.CustomLocationNames.Add(name);
-
-            productionContext.Update(location);
-
-            await productionContext.SaveChangesAsync();
-            
-            if(location.Line is not null)
-                MarkSOsUnloaded(x => x.Model.LineId == location.Line.Id);
-
-            else
-                MarkSOsUnloaded(x => true);
-            
-            return name;
-        }
-    }
-
-    protected JobCard BuildJobCard(SalesOrder van, JobCardCreationInfo info, AreaOfOrigin? areaOfOrigin, Location location)
+    protected JobCard BuildJobCard(SalesOrder van, JobCardCreationInfo info, AreaOfOrigin? areaOfOrigin, OrderedLineLocation location)
     {
         var jobcard = new JobCard(van, info, areaOfOrigin, location);
 

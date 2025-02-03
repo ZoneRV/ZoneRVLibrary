@@ -53,24 +53,11 @@ public class TrelloService : IProductionService
         
         ProHoDashboardId = configuration["ProHoDashboardId"] ??
                         throw new ArgumentNullException(nameof(ProHoDashboardId), "ProHo Dashboard board id required");
-
-
-        List<Location> locations;
         
-        using (var scope = scopeFactory.CreateScope())
-        {
-            var productionContext = scope.ServiceProvider.GetRequiredService<ProductionContext>();
-            
-            locations= productionContext.Locations
-                             .Include(l => l.Line)
-                             .Include(l => l.CustomLocationNames.Where(cn => cn.ServiceType == LocationTypeName))
-                             .Include(l => l.InventoryLocations).ToList();
-        }
-            
 
         LocationFactory = new LocationFactory
         {
-            Locations = new LocationCollection(locations),
+            Workspaces = Workspaces!, // TODO: Check if this actually loads in correct oreder
             IgnoredListNames = [] // TODO: fill out
         };
         
@@ -228,7 +215,7 @@ public class TrelloService : IProductionService
                 }
 
                 // Track location history for the current van
-                List<(DateTimeOffset moveDate, Location location)> locationHistory = [];
+                List<(DateTimeOffset moveDate, OrderedLineLocation location)> locationHistory = [];
 
                 // Process move actions for the current card to build location history
                 foreach (var moveAction in lineMoveActions.Where(x => x.Data.Card.Id == lineMoveCard.Id))
@@ -246,22 +233,22 @@ public class TrelloService : IProductionService
                     // Map predefined lists to specific production locations
                     if (listName == "SCHEDULED VANS (50x)" || listName == "SCHEDULED EXPO VANS")
                     {
-                        if (locationHistory.All(x => x.location != LocationFactory.PreProduction))
-                            locationHistory.Add((moveAction.Date, LocationFactory.PreProduction));
+                        if (locationHistory.All(x => x.location != LocationFactory.PreProduction(model.Line)))
+                            locationHistory.Add((moveAction.Date, LocationFactory.PreProduction(model.Line)));
                         continue;
                     }
 
                     if (listName == "OUTSIDE - Carpark GEN2 WIP" || listName == "OUTSIDE - Carpark GEN2 Ready For Transport")
                     {
-                        if (locationHistory.All(x => x.location != LocationFactory.PostProduction))
-                            locationHistory.Add((moveAction.Date, LocationFactory.PostProduction));
+                        if (locationHistory.All(x => x.location != LocationFactory.PostProduction(model.Line)))
+                            locationHistory.Add((moveAction.Date, LocationFactory.PostProduction(model.Line)));
                         continue;
                     }
 
                     if (listName == "OUTSIDE - Carpark EXPO Ready For Transport" || listName == "OUTSIDE - Carpark EXPO - WIP")
                     {
-                        if (locationHistory.All(x => x.location != LocationFactory.PostProduction))
-                            locationHistory.Add((moveAction.Date, LocationFactory.PostProduction));
+                        if (locationHistory.All(x => x.location != LocationFactory.PostProduction(model.Line)))
+                            locationHistory.Add((moveAction.Date, LocationFactory.PostProduction(model.Line)));
                         continue;
                     }
 
@@ -280,7 +267,7 @@ public class TrelloService : IProductionService
                     Model = model,
                     Url = urlString,
                     Id = idString,
-                    LocationInfo = new LocationInfo(locationHistory)
+                    OrderedLineLocationInfo = new LocationInfo(model.Line, locationHistory)
                 });
 
                 Log.Logger.Debug("New van information added");
@@ -347,13 +334,13 @@ public class TrelloService : IProductionService
             var vansInLine = Vans.Where(x => x.Value.Model.Line == productionLine).Select(x => x.Value).ToList();
 
             int prepCount = vansInLine.Count(x =>
-                x.LocationInfo.CurrentLocation.Type is ProductionLocationType.Prep && x.HandoverState is HandoverState.HandedOver);
+                x.OrderedLineLocationInfo.CurrentLocation.Location.WorkspaceLocation.Type is ProductionLocationType.Prep && x.HandoverState is HandoverState.HandedOver);
 
             int prodCount = vansInLine.Count(x =>
-                x.LocationInfo.CurrentLocation.Type is ProductionLocationType.Bay or ProductionLocationType.Module or ProductionLocationType.Subassembly);
+                x.OrderedLineLocationInfo.CurrentLocation.Location.WorkspaceLocation.Type is ProductionLocationType.Bay or ProductionLocationType.Module or ProductionLocationType.Subassembly);
 
             int finishingCount = vansInLine.Count(x =>
-                x.LocationInfo.CurrentLocation.Type is ProductionLocationType.Finishing && x.HandoverState is not HandoverState.HandedOver);
+                x.OrderedLineLocationInfo.CurrentLocation.Location.WorkspaceLocation.Type is ProductionLocationType.Finishing && x.HandoverState is not HandoverState.HandedOver);
 
             int handoverDueCount = vansInLine.Count(x =>
                 x.HandoverDate < DateTimeOffset.Now && x.HandoverState is HandoverState.UnhandedOver);

@@ -2,17 +2,20 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ZoneRV.DBContexts;
 
 #nullable disable
 
-namespace ZoneRV.Migrations
+namespace ZoneRV.Api.Migrations
 {
     [DbContext(typeof(ProductionContext))]
-    partial class ProductionContextModelSnapshot : ModelSnapshot
+    [Migration("20250202204019_Initial")]
+    partial class Initial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -232,13 +235,13 @@ namespace ZoneRV.Migrations
 
             modelBuilder.Entity("ZoneRV.Models.Production.Model", b =>
                 {
-                    b.HasOne("ZoneRV.Models.Production.ProductionLine", "ProductionLine")
+                    b.HasOne("ZoneRV.Models.Production.ProductionLine", "Line")
                         .WithMany("Models")
                         .HasForeignKey("LineId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("ProductionLine");
+                    b.Navigation("Line");
                 });
 
             modelBuilder.Entity("ZoneRV.Models.Location.Location", b =>

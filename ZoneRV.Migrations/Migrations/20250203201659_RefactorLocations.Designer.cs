@@ -8,11 +8,11 @@ using ZoneRV.DBContexts;
 
 #nullable disable
 
-namespace ZoneRV.Migrations
+namespace ZoneRV.Migrations.Migrations
 {
     [DbContext(typeof(ProductionContext))]
-    [Migration("20250127222642_fixed_custom_location_values")]
-    partial class fixed_custom_location_values
+    [Migration("20250203201659_RefactorLocations")]
+    partial class RefactorLocations
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,7 +25,7 @@ namespace ZoneRV.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("ZoneRV.Models.Location.Location", b =>
+            modelBuilder.Entity("ZoneRV.Models.Location.LineLocation", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -33,36 +33,22 @@ namespace ZoneRV.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("BayNumber")
+                    b.Property<int>("LineId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(1024)
-                        .HasColumnType("nvarchar(1024)");
-
-                    b.Property<int?>("LineId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
-
-                    b.Property<decimal>("Order")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("Type")
+                    b.Property<int>("WorkspaceLocationId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("LineId");
 
-                    b.ToTable("Location", "production");
+                    b.HasIndex("WorkspaceLocationId");
+
+                    b.ToTable("LineLocation", "production");
                 });
 
-            modelBuilder.Entity("ZoneRV.Models.Location.LocationCustomName", b =>
+            modelBuilder.Entity("ZoneRV.Models.Location.LineLocationCustomName", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -75,8 +61,11 @@ namespace ZoneRV.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
 
-                    b.Property<int>("LocationId")
+                    b.Property<int>("LineLocationId")
                         .HasColumnType("int");
+
+                    b.Property<decimal>("Order")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("ServiceType")
                         .IsRequired()
@@ -85,9 +74,9 @@ namespace ZoneRV.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("LocationId");
+                    b.HasIndex("LineLocationId");
 
-                    b.ToTable("LocationCustomName", "production");
+                    b.ToTable("LineLocationCustomName", "production");
                 });
 
             modelBuilder.Entity("ZoneRV.Models.Location.LocationInventoryName", b =>
@@ -103,6 +92,9 @@ namespace ZoneRV.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
 
+                    b.Property<int?>("LineLocationId")
+                        .HasColumnType("int");
+
                     b.Property<int>("LocationId")
                         .HasColumnType("int");
 
@@ -113,9 +105,42 @@ namespace ZoneRV.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("LineLocationId");
+
                     b.HasIndex("LocationId");
 
                     b.ToTable("LocationInventoryName", "production");
+                });
+
+            modelBuilder.Entity("ZoneRV.Models.Location.WorkspaceLocation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1024)
+                        .HasColumnType("nvarchar(1024)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<int>("WorkspaceId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WorkspaceId");
+
+                    b.ToTable("WorkspaceLocation", "production");
                 });
 
             modelBuilder.Entity("ZoneRV.Models.Production.AreaOfOrigin", b =>
@@ -186,40 +211,96 @@ namespace ZoneRV.Migrations
                         .HasMaxLength(24)
                         .HasColumnType("nvarchar(24)");
 
+                    b.Property<int>("WorkspaceId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("WorkspaceId");
 
                     b.ToTable("Line", "production");
                 });
 
-            modelBuilder.Entity("ZoneRV.Models.Location.Location", b =>
+            modelBuilder.Entity("ZoneRV.Models.Production.ProductionWorkspace", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1024)
+                        .HasColumnType("nvarchar(1024)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Workspace", "production");
+                });
+
+            modelBuilder.Entity("ZoneRV.Models.Location.LineLocation", b =>
                 {
                     b.HasOne("ZoneRV.Models.Production.ProductionLine", "Line")
                         .WithMany()
-                        .HasForeignKey("LineId");
-
-                    b.Navigation("Line");
-                });
-
-            modelBuilder.Entity("ZoneRV.Models.Location.LocationCustomName", b =>
-                {
-                    b.HasOne("ZoneRV.Models.Location.Location", "Location")
-                        .WithMany("CustomLocationNames")
-                        .HasForeignKey("LocationId")
+                        .HasForeignKey("LineId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Location");
+                    b.HasOne("ZoneRV.Models.Location.WorkspaceLocation", "WorkspaceLocation")
+                        .WithMany("LineLocations")
+                        .HasForeignKey("WorkspaceLocationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Line");
+
+                    b.Navigation("WorkspaceLocation");
+                });
+
+            modelBuilder.Entity("ZoneRV.Models.Location.LineLocationCustomName", b =>
+                {
+                    b.HasOne("ZoneRV.Models.Location.LineLocation", "LineLocation")
+                        .WithMany("CustomLocationNames")
+                        .HasForeignKey("LineLocationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("LineLocation");
                 });
 
             modelBuilder.Entity("ZoneRV.Models.Location.LocationInventoryName", b =>
                 {
-                    b.HasOne("ZoneRV.Models.Location.Location", "Location")
+                    b.HasOne("ZoneRV.Models.Location.LineLocation", null)
                         .WithMany("InventoryLocations")
+                        .HasForeignKey("LineLocationId");
+
+                    b.HasOne("ZoneRV.Models.Location.WorkspaceLocation", "Location")
+                        .WithMany()
                         .HasForeignKey("LocationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Location");
+                });
+
+            modelBuilder.Entity("ZoneRV.Models.Location.WorkspaceLocation", b =>
+                {
+                    b.HasOne("ZoneRV.Models.Production.ProductionWorkspace", "Workspace")
+                        .WithMany("WorkspaceLocations")
+                        .HasForeignKey("WorkspaceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Workspace");
                 });
 
             modelBuilder.Entity("ZoneRV.Models.Production.AreaOfOrigin", b =>
@@ -235,20 +316,36 @@ namespace ZoneRV.Migrations
 
             modelBuilder.Entity("ZoneRV.Models.Production.Model", b =>
                 {
-                    b.HasOne("ZoneRV.Models.Production.ProductionLine", "ProductionLine")
+                    b.HasOne("ZoneRV.Models.Production.ProductionLine", "Line")
                         .WithMany("Models")
                         .HasForeignKey("LineId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("ProductionLine");
+                    b.Navigation("Line");
                 });
 
-            modelBuilder.Entity("ZoneRV.Models.Location.Location", b =>
+            modelBuilder.Entity("ZoneRV.Models.Production.ProductionLine", b =>
+                {
+                    b.HasOne("ZoneRV.Models.Production.ProductionWorkspace", "Workspace")
+                        .WithMany("Lines")
+                        .HasForeignKey("WorkspaceId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Workspace");
+                });
+
+            modelBuilder.Entity("ZoneRV.Models.Location.LineLocation", b =>
                 {
                     b.Navigation("CustomLocationNames");
 
                     b.Navigation("InventoryLocations");
+                });
+
+            modelBuilder.Entity("ZoneRV.Models.Location.WorkspaceLocation", b =>
+                {
+                    b.Navigation("LineLocations");
                 });
 
             modelBuilder.Entity("ZoneRV.Models.Production.ProductionLine", b =>
@@ -256,6 +353,13 @@ namespace ZoneRV.Migrations
                     b.Navigation("AreaOfOrigins");
 
                     b.Navigation("Models");
+                });
+
+            modelBuilder.Entity("ZoneRV.Models.Production.ProductionWorkspace", b =>
+                {
+                    b.Navigation("Lines");
+
+                    b.Navigation("WorkspaceLocations");
                 });
 #pragma warning restore 612, 618
         }

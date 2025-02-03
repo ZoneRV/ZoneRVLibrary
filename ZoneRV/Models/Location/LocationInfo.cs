@@ -9,17 +9,21 @@ namespace ZoneRV.Models.Location;
 /// Provides utilities to track and retrieve location change data over time.
 /// </summary>
 [DebuggerDisplay("{CurrentLocation}")]
-public class LocationInfo : IEnumerable<(DateTimeOffset moveDate, Location location)>
+public class LocationInfo : IEnumerable<(DateTimeOffset moveDate, OrderedLineLocation lineLocation)>
 {
-    [OptionalJsonField] private List<(DateTimeOffset moveDate, Location location)> _locationHistory;
+    [OptionalJsonField] private List<(DateTimeOffset moveDate, OrderedLineLocation lineLocation)> _locationHistory;
+    
+    private ProductionLine _line { get; init; }
 
-    public LocationInfo(IEnumerable<(DateTimeOffset moveDate, Location location)> history)
+    public LocationInfo(ProductionLine line, IEnumerable<(DateTimeOffset moveDate, OrderedLineLocation lineLocation)> history)
     {
+        _line = line;
         _locationHistory = history.ToList();
     }
     
-    public LocationInfo()
+    public LocationInfo(ProductionLine line)
     {
+        _line = line;
         _locationHistory = [];
     }
 
@@ -28,33 +32,31 @@ public class LocationInfo : IEnumerable<(DateTimeOffset moveDate, Location locat
     /// in the location history. If no location history exists, it defaults to the pre-production location.
     /// </summary>
     /// <value>
-    /// The latest <see cref="Location"/> based on the move date in the history or
+    /// The latest <see cref="WorkspaceLocation"/> based on the move date in the history or
     /// a default pre-production location if the history is empty.
     /// </value>
-    public Location CurrentLocation =>
-        _locationHistory.Count == 0 ? LocationFactory.PreProduction : _locationHistory.MaxBy(x => x.moveDate).location;
+    public OrderedLineLocation CurrentLocation =>
+        _locationHistory.Count == 0 ? LocationFactory.PreProduction(_line) : _locationHistory.MaxBy(x => x.moveDate).lineLocation;
 
     /// <exception cref="ArgumentException">Location info already contains location.</exception>
     /// <exception cref="ArgumentException">Non-bay locations Cannot be added as a location change.</exception>
     /// <exception cref="ArgumentException">Locations from different production lines cant be added to one van.</exception>
     /// <exception cref="ArgumentException">Location information already contains a location move for a date.</exception>
-    private bool CheckPositionChangesValid(List<(DateTimeOffset date, Location location)> changes)
+    private bool CheckPositionChangesValid(List<(DateTimeOffset date, OrderedLineLocation lineLocation)> changes)
     {
         foreach (var change in changes)
         {
-            if (_locationHistory.Any(x => x.location == change.location))
-                throw new ArgumentException("Location already exists", nameof(change.location));
+            if (_locationHistory.Any(x => x.lineLocation == change.lineLocation))
+                throw new ArgumentException("Location already exists", nameof(change.lineLocation));
 
-            if (change.location.Type != ProductionLocationType.Bay && change.location != LocationFactory.PreProduction &&
-                change.location != LocationFactory.PostProduction)
+            if (change.lineLocation.Location.WorkspaceLocation.Type != ProductionLocationType.Bay && change.lineLocation.Type == LineLocationType.Production)
                 throw new ArgumentException("Non bay locations Cannot be added as a location change.",
-                    nameof(change.location.Type));
+                    nameof(change.lineLocation.Type));
 
-            if (change.location.Line is not null &&
-                _locationHistory.Where(x => x.location.Line is not null)
-                    .Any(x => x.location.Line != change.location.Line))
+            if (change.lineLocation.Line is not null && _locationHistory
+                    .Any(x => x.lineLocation.Line != change.lineLocation.Line))
                 throw new ArgumentException("Location information cannot contain multiple production lines",
-                    nameof(change.location.Line));
+                    nameof(change.lineLocation.Line));
 
             if (_locationHistory.Any(x => x.moveDate == change.date))
                 throw new ArgumentException(
@@ -73,9 +75,9 @@ public class LocationInfo : IEnumerable<(DateTimeOffset moveDate, Location locat
     /// <exception cref="ArgumentException">Thrown when a non-bay location is added as a position change, unless it is pre or post-production.</exception>
     /// <exception cref="ArgumentException">Thrown when trying to add locations from different production lines.</exception>
     /// <exception cref="ArgumentException">Thrown when a position change already exists for the specified date.</exception>
-    public void AddPositionChange(DateTimeOffset date, Location location)
+    public void AddPositionChange(DateTimeOffset date, OrderedLineLocation location)
     {
-        if (CheckPositionChangesValid([(date, location)]))
+        if (CheckPositionChangesValid([(date, lineLocation: location)]))
         {
             _locationHistory.Add((date, location));
             _locationHistory = _locationHistory.OrderBy(x => x.moveDate).ToList();
@@ -91,7 +93,7 @@ public class LocationInfo : IEnumerable<(DateTimeOffset moveDate, Location locat
     /// <exception cref="ArgumentException">Non-bay locations cannot be added as a location change.</exception>
     /// <exception cref="ArgumentException">Locations from different production lines cannot be added to one van.</exception>
     /// <exception cref="ArgumentException">Location information already contains a location move for a date.</exception>
-    public void AddPositionChangeRange(List<(DateTimeOffset date, Location location)> changes)
+    public void AddPositionChangeRange(List<(DateTimeOffset date, OrderedLineLocation lineLocation)> changes)
     {
         if (CheckPositionChangesValid(changes))
         {
@@ -105,12 +107,12 @@ public class LocationInfo : IEnumerable<(DateTimeOffset moveDate, Location locat
     /// </summary>
     /// <param name="date">The date for which the location is to be retrieved.</param>
     /// <returns>The location associated with the specified date. If the date is earlier than the first movement in the history, returns the pre-production location.</returns>
-    public Location GetPositionFromDate(DateTimeOffset date)
+    public OrderedLineLocation GetPositionFromDate(DateTimeOffset date)
     {
         if (_locationHistory.Count == 0 || date < _locationHistory.First().moveDate)
-            return LocationFactory.PreProduction;
+            return LocationFactory.PreProduction(_line);
 
-        return _locationHistory.SkipWhile(x => date < x.moveDate).First().location;
+        return _locationHistory.SkipWhile(x => date < x.moveDate).First().lineLocation;
     }
 
     /// <summary>
@@ -119,14 +121,14 @@ public class LocationInfo : IEnumerable<(DateTimeOffset moveDate, Location locat
     /// <param name="position">The location to retrieve the active date range for.</param>
     /// <returns>A tuple containing the start date and, if available, the end date during which the location was active.
     /// Returns <c>null</c> if the location is not present in the location history.</returns>
-    public (DateTimeOffset start, DateTimeOffset? end)? GetDateRange(Location position)
+    public (DateTimeOffset start, DateTimeOffset? end)? GetDateRange(OrderedLineLocation position)
     {
-        if (_locationHistory.All(x => x.location != position))
+        if (_locationHistory.All(x => x.lineLocation != position))
             return null;
 
         (DateTimeOffset start, DateTimeOffset? end) result;
         
-        var remainingPos = _locationHistory.SkipWhile(x => x.location < position).ToList();
+        var remainingPos = _locationHistory.SkipWhile(x => x.lineLocation < position).ToList();
 
         result.start = remainingPos.First().moveDate;
 
@@ -149,13 +151,13 @@ public class LocationInfo : IEnumerable<(DateTimeOffset moveDate, Location locat
     /// </returns>
     public bool ExitedAfterDate(DateTimeOffset end)
     {
-        if (_locationHistory.All(x => x.location != LocationFactory.PostProduction))
+        if (_locationHistory.All(x => x.lineLocation.Type != LineLocationType.PostProduction))
             return true;
 
-        return _locationHistory.First(x => x.location == LocationFactory.PostProduction).moveDate > end;
+        return _locationHistory.First(x => x.lineLocation.Type == LineLocationType.PostProduction).moveDate > end;
     }
 
-    public IEnumerator<(DateTimeOffset moveDate, Location location)> GetEnumerator()
+    public IEnumerator<(DateTimeOffset moveDate, OrderedLineLocation lineLocation)> GetEnumerator()
     {
         return _locationHistory.GetEnumerator();
     }

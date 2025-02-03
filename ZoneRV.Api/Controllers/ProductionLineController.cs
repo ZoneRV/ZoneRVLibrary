@@ -34,14 +34,19 @@ public class ProductionLineController : ControllerBase
     }
 
     [HttpPost("add/{name}")]
-    public async Task<ActionResult<ProductionLine>> AddLine(string name)
+    public async Task<ActionResult<ProductionLine>> AddLine(int workspaceId, string name)
     {
-        var newLine = await ProductionService.CreateProductionLine(name);
+        var workspace = ProductionService.Workspaces.SingleOrDefault(x => x.Id == workspaceId);
+
+        if (workspace is null)
+            return NotFound();
+        
+        var newLine = await ProductionService.CreateProductionLine(workspace, name);
 
         return Ok(newLine);
     }
 
-    [HttpGet("area-of-origins")]
+    /*[HttpGet("area-of-origins")]
     public ActionResult<IEnumerable<AreaOfOrigin>> AddAreaOfOrigin() //TODO Add better way of requesting fields
     {
         var areas = ProductionService.ProductionLines
@@ -60,7 +65,7 @@ public class ProductionLineController : ControllerBase
                                                         }));
 
         return Ok(areas);
-    }
+    }*/
 
     [HttpGet("area-of-origin/{id}")]
     public ActionResult<AreaOfOrigin> AddAreaOfOrigin(int id)
@@ -89,10 +94,10 @@ public class ProductionLineController : ControllerBase
         return Ok(area);
     }
 
-    [HttpPost("location/add-custom-name/{locationId}/{customName}")]
-    public async Task<ActionResult<LocationCustomName>> AddCustomNameToLoation(int locationId, string customName)
+    /*[HttpPost("location/add-custom-name/{locationId}/{customName}")]
+    public async Task<ActionResult<LineLocationCustomName>> AddCustomNameToLoation(int locationId, string customName)
     {
-        var location = ProductionService.LocationFactory.Locations.SingleOrDefault(x => x.Id == locationId);
+        var location = ProductionService.LocationFactory.LineLocations.SingleOrDefault(x => x.Id == locationId);
 
         if (location is null)
             return NotFound();
@@ -100,5 +105,5 @@ public class ProductionLineController : ControllerBase
         var customNameO = await ProductionService.CreateCustomNameToLocation(location, customName);
 
         return Ok(customNameO);
-    }
+    }*/
 }

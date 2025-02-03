@@ -37,7 +37,7 @@ public class SalesOrder : IEqualityComparer<SalesOrder>
     public void AddHandoverHistory(DateTimeOffset changeDate, DateTimeOffset handoverDate)
         => _handoverHistory.Add((changeDate, handoverDate));
 
-    public LocationInfo LocationInfo { get; init; } = new LocationInfo();
+    public required LocationInfo OrderedLineLocationInfo { get; init; }
 
     public bool Equals(SalesOrder? x, SalesOrder? y)
     {

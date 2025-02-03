@@ -3,14 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ZoneRV.Models.Location;
 
-/// <summary>
-/// Represents a customized name for a specific service type in a production line or location.
-/// </summary>
-/// <remarks>
-/// This class is used to define custom names for a service type and associates it with a production line.
-/// It aids in identifying services with user-defined names within a production system.
-/// </remarks>
-public class LocationCustomName
+public class LineLocationCustomName
 {
     [Key, Required]
     public int Id { get; set; }
@@ -24,5 +17,8 @@ public class LocationCustomName
     [Required, MaxLength(128)]
     public required string CustomName { get; set; }
     
-    [ForeignKey("LocationId"), Required] public required Location Location { get; set; }
+    [Column(TypeName = "decimal(18,2)"), Required] 
+    public decimal Order { get; set; }
+    
+    [ForeignKey("LineLocationId"), Required] public required LineLocation LineLocation { get; set; }
 }

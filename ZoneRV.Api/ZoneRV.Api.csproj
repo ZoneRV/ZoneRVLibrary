@@ -36,6 +36,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\ZoneRV.Services.Trello\ZoneRV.Services.Trello.csproj" />
+      <ProjectReference Include="..\ZoneRV.Migrations\ZoneRV.Migrations.csproj" />
       <ProjectReference Include="..\ZoneRV\ZoneRV.csproj" />
     </ItemGroup>
 

@@ -13,11 +13,12 @@ namespace ZoneRV.Services.Production;
 [SuppressMessage("ReSharper", "InconsistentNaming")]
 public abstract partial class IProductionService
 {
-    public          List<ProductionLine> ProductionLines  { get; init; }
-    public          List<Model>          Models           => ProductionLines.SelectMany(x => x.Models).ToList();
-    public          List<AreaOfOrigin>   AreaOfOrigins    => ProductionLines.SelectMany(x => x.AreaOfOrigins).ToList();
-    public          ModelNameMatcher     ModelNameMatcher { get; init; }
-    public abstract LocationFactory      LocationFactory  { get; init; }
+    public required List<ProductionWorkspace>   Workspaces       { get; init; }
+    public          IEnumerable<ProductionLine> ProductionLines  => Workspaces.SelectMany(x => x.Lines);
+    public          IEnumerable<Model>          Models           => ProductionLines.SelectMany(x => x.Models).ToList();
+    public          IEnumerable<AreaOfOrigin>   AreaOfOrigins    => ProductionLines.SelectMany(x => x.AreaOfOrigins).ToList();
+    public          ModelNameMatcher            ModelNameMatcher { get; init; }
+    public abstract LocationFactory             LocationFactory  { get; init; }
 
     protected IServiceScopeFactory ScopeFactory { get; set;  }
 
@@ -31,15 +32,18 @@ public abstract partial class IProductionService
         Configuration = configuration;
         ScopeFactory  = scopeFactory;
         
-        using (var scope = ScopeFactory.CreateScope())
+        using (var scope = scopeFactory.CreateScope())
         {
             var productionContext = scope.ServiceProvider.GetRequiredService<ProductionContext>();
-
-
-            ProductionLines = productionContext.Lines
-                .Include(l => l.Models)
-                .Include(l => l.AreaOfOrigins)
-                .ToList();
+            
+            Workspaces = productionContext.Workspaces
+                  .Include(x => x.WorkspaceLocations)
+                      .ThenInclude(x => x.LineLocations)
+                        .ThenInclude(x => x.CustomLocationNames)
+                  .Include(x => x.WorkspaceLocations)
+                      .ThenInclude(x => x.LineLocations)
+                        .ThenInclude(x => x.InventoryLocations)
+                  .ToList();
         }
 
         var models = ProductionLines.SelectMany(x => x.Models).ToList();
