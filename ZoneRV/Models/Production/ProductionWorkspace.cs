@@ -12,8 +12,8 @@ public class ProductionWorkspace
     [Required, MaxLength(128)]
     public required string Name        { get; set; }
     
-    [Required, MaxLength(1024)]
-    public required string Description { get; set; }
+    [MaxLength(1024)]
+    public string? Description { get; set; }
     
     public virtual ICollection<ProductionLine> Lines { get; set; } = default!;
     public virtual ICollection<WorkspaceLocation> WorkspaceLocations { get; set; } = default!;

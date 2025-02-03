@@ -12,7 +12,7 @@ using ZoneRV.Services.Trello;
 namespace ZoneRV.Services.Trello.Migrations
 {
     [DbContext(typeof(TrelloContext))]
-    [Migration("20250202204736_Initial")]
+    [Migration("20250203205923_Initial")]
     partial class Initial
     {
         /// <inheritdoc />

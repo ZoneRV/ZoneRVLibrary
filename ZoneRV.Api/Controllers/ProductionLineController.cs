@@ -4,7 +4,7 @@ using ZoneRV.Services.Production;
 
 namespace ZoneRV.Api.Controllers;
 
-[Route("api/production-line"), ApiController]
+[Route("api/production-workspace"), ApiController]
 public class ProductionLineController : ControllerBase
 {
     private IProductionService ProductionService { get; set; }
@@ -13,8 +13,35 @@ public class ProductionLineController : ControllerBase
     {
         ProductionService = productionService;
     }
-    
+
     [HttpGet]
+    public ActionResult<IEnumerable<ProductionWorkspace>> GetWorkspaces()
+    {
+        var workspaces = ProductionService.Workspaces;
+
+        return Ok(workspaces);
+    }
+
+    [HttpGet("{id}")]
+    public ActionResult<IEnumerable<ProductionWorkspace>> GetWorkspace(int id)
+    {
+        var workspace = ProductionService.Workspaces.SingleOrDefault(x => x.Id == id);
+
+        if (workspace is null)
+            return NotFound();
+
+        return Ok(workspace);
+    }
+
+    [HttpPost("add/{name}")]
+    public async Task<ActionResult<IEnumerable<ProductionWorkspace>>> GetWorkspace(string name, [FromQuery] string? description)
+    {
+        var workspace = await ProductionService.CreateProductionWorkspace(name, description);
+
+        return Ok(workspace);
+    }
+    
+    [HttpGet("production-line/")]
     public ActionResult<IEnumerable<ProductionLine>> GetLines()
     {
         var lines = ProductionService.ProductionLines;
@@ -22,7 +49,7 @@ public class ProductionLineController : ControllerBase
         return Ok(lines);
     }
     
-    [HttpGet("{id}")]
+    [HttpGet("production-line/{id}")]
     public ActionResult<ProductionLine?> GetLine(int id)
     {
         var line = ProductionService.ProductionLines.SingleOrDefault(x => x.Id == id);
@@ -33,41 +60,29 @@ public class ProductionLineController : ControllerBase
         return Ok(line);
     }
 
-    [HttpPost("add/{name}")]
-    public async Task<ActionResult<ProductionLine>> AddLine(int workspaceId, string name)
+    [HttpPost("production-line/add/{workspaceId}")]
+    public async Task<ActionResult<ProductionLine>> AddLine(int workspaceId, string name, string? description)
     {
         var workspace = ProductionService.Workspaces.SingleOrDefault(x => x.Id == workspaceId);
 
         if (workspace is null)
             return NotFound();
         
-        var newLine = await ProductionService.CreateProductionLine(workspace, name);
+        var newLine = await ProductionService.CreateProductionLine(workspace, name, description);
 
         return Ok(newLine);
     }
 
-    /*[HttpGet("area-of-origins")]
-    public ActionResult<IEnumerable<AreaOfOrigin>> AddAreaOfOrigin() //TODO Add better way of requesting fields
+    [HttpGet("production-line/area-of-origins")]
+    public ActionResult<IEnumerable<AreaOfOrigin>> AddAreaOfOrigin()
     {
         var areas = ProductionService.ProductionLines
-                                     .SelectMany(x => x.AreaOfOrigins
-                                                       .Select(x => new AreaOfOrigin()
-                                                        {
-                                                            Id = x.Id, 
-                                                            Name = x.Name,
-                                                            Line = new ProductionLine()
-                                                            {
-                                                                Name = x.Line.Name,
-                                                                Id = x.Line.Id,
-                                                                AreaOfOrigins = [],
-                                                                Models = []
-                                                            }
-                                                        }));
+                                     .SelectMany(x => x.AreaOfOrigins);
 
         return Ok(areas);
-    }*/
+    }
 
-    [HttpGet("area-of-origin/{id}")]
+    [HttpGet("production-line/area-of-origin/{id}")]
     public ActionResult<AreaOfOrigin> AddAreaOfOrigin(int id)
     {
         var area = ProductionService.ProductionLines
@@ -80,8 +95,8 @@ public class ProductionLineController : ControllerBase
         return Ok(area);
     }
 
-    [HttpPost("area-of-origin/add/{lineId}/{name}")]
-    public async Task<ActionResult<AreaOfOrigin>> AddAreaOfOrigin(int lineId, string name)
+    [HttpPost("production-line/area-of-origin/add/{lineId}")]
+    public async Task<ActionResult<AreaOfOrigin>> AddAreaOfOrigin(int lineId, [FromQuery] string name)
     {
         var line = ProductionService.ProductionLines
                                     .SingleOrDefault(x => x.Id == lineId);

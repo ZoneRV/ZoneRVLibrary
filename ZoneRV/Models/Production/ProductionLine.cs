@@ -13,7 +13,12 @@ namespace ZoneRV.Models.Production;
 public class ProductionLine
 {
     [Key, Required] public          int    Id   { get; set; }
-    [MaxLength(24)] public required string Name { get; set; }
+    
+    [Required, MaxLength(128)]
+    public required string Name { get; set; }
+    
+    [MaxLength(1024)]
+    public string? Description { get; set; }
 
     [OptionalJsonField, Required, ForeignKey("WorkspaceId"), DeleteBehavior(DeleteBehavior.NoAction)] // TODO: Figure out the deletion behaviour
     public required virtual ProductionWorkspace Workspace { get; init; }

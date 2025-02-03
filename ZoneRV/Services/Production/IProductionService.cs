@@ -37,6 +37,7 @@ public abstract partial class IProductionService
             var productionContext = scope.ServiceProvider.GetRequiredService<ProductionContext>();
             
             Workspaces = productionContext.Workspaces
+                  .Include(x => x.Lines)
                   .Include(x => x.WorkspaceLocations)
                       .ThenInclude(x => x.LineLocations)
                         .ThenInclude(x => x.CustomLocationNames)

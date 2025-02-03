@@ -25,26 +25,53 @@ public abstract partial class IProductionService
     protected ConcurrentDictionary<string, Attachment> Attachments { get; } = [];
     protected ConcurrentDictionary<string, User> Users { get; } = [];
 
-    public async Task<ProductionLine> CreateProductionLine(ProductionWorkspace workspace, string name)
+    public async Task<ProductionWorkspace> CreateProductionWorkspace(string name, string? description)
     {
-        if (ProductionLines.Any(x => x.Name.ToLower() == name.ToLower()))
-            throw new DuplicateNameException("Cannot create Production line with name {name}, Already exists.");
+        if (Workspaces.Any(x => x.Name.ToLower() == name.ToLower()))
+            throw new DuplicateNameException($"Workspace with name {name} already exists.");
+
+        using (var scope = ScopeFactory.CreateScope())
+        {
+            var productionContext = scope.ServiceProvider.GetRequiredService<ProductionContext>();
+
+            var newWorkspace =
+                productionContext.Workspaces.Add(new ProductionWorkspace()
+                {
+                    Name = name, 
+                    Description = description
+                });
+
+            await productionContext.SaveChangesAsync();
+            
+            Workspaces.Add(newWorkspace.Entity);
+
+            return newWorkspace.Entity;
+        }
+    }
+
+    public async Task<ProductionLine> CreateProductionLine(ProductionWorkspace workspace, string name, string? description)
+    {
+        if (ProductionLines.Any(x => x.Name.ToLower() == name.ToLower() && x.Workspace.Id == workspace.Id))
+            throw new DuplicateNameException($"Cannot create Production line with name {name} in workspace {workspace.Name}, Already exists.");
         
         using (var scope = ScopeFactory.CreateScope())
         {
             var productionContext = scope.ServiceProvider.GetRequiredService<ProductionContext>();
 
-            var line = productionContext.Lines.Add(new ProductionLine()
+            var line = new ProductionLine()
             {
-                Workspace = workspace,
-                Name = name
-            });
+                Workspace = workspace, Name = name, Description = description
+            };
+            
+            workspace.Lines.Add(line);
 
+            productionContext.Workspaces.Update(workspace);
+            
             await productionContext.SaveChangesAsync();
             
-            workspace.Lines.Add(line.Entity);
-
-            return line.Entity;
+            // TODO load line on creation
+            
+            return line;
         }
     }
 
@@ -66,7 +93,7 @@ public abstract partial class IProductionService
             line.AreaOfOrigins.Add(area);
 
             productionContext.Update(line);
-
+            
             await productionContext.SaveChangesAsync();
             
             MarkSOsUnloaded(x => x.Model.LineId == line.Id);
