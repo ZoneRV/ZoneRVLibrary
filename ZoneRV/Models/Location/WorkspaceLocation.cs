@@ -11,12 +11,12 @@ public class WorkspaceLocation : IEquatable<WorkspaceLocation>
     [Key, Required] public int Id { get; init; }
     
     [OptionalJsonField, Required] public virtual required ProductionWorkspace Workspace { get; init; }
+    public virtual required ICollection<OrderedLineLocation> OrderedLineLocations { get; set; }
     
     [MaxLength(128)] public required string Name { get; set; }
     
     [MaxLength(1024)] public string? Description { get; set; }
 
-    public virtual ICollection<LineLocation>  LineLocations { get; set; } = default!;
 
     public required ProductionLocationType Type { get; init; }
 
@@ -49,7 +49,6 @@ public class WorkspaceLocation : IEquatable<WorkspaceLocation>
         return Name == other.Name && 
                Workspace.Id == other.Workspace.Id &&
                Description == other.Description && 
-               LineLocations.Equals(other.LineLocations) &&
                Type == other.Type;
     }
     public override bool Equals(object? obj)

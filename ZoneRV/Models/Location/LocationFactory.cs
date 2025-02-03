@@ -11,7 +11,7 @@ public class LocationFactory
     public required List<ProductionWorkspace> Workspaces { get; set; }
 
     public IEnumerable<WorkspaceLocation> WorkspaceLocations => Workspaces.SelectMany(x => x.WorkspaceLocations);
-    public IEnumerable<LineLocation>      LineLocations      => WorkspaceLocations.SelectMany(x => x.LineLocations);
+    public IEnumerable<OrderedLineLocation> LineLocations => WorkspaceLocations.SelectMany(x => x.OrderedLineLocations);
     
     public List<string> IgnoredListNames { get; set; } = [];
 
@@ -19,51 +19,25 @@ public class LocationFactory
     {
         if (IgnoredListNames.Contains(name))
             return null;
-        
-        var lineLocation = LineLocations.FirstOrDefault(x => 
-            x.Line.Id == line.Id && 
-            x.CustomLocationNames.Any(l => l.CustomName == name));
 
-        if (lineLocation is null)
-            return null;
-        
-        return new OrderedLineLocation()
-        {
-            Line = line,
-            LineLocation = lineLocation,
-            Order = lineLocation.CustomLocationNames.First(l => l.CustomName == name).Order
-        };
+        return LineLocations.SingleOrDefault(x 
+                                                 => x.Line == line && x.CustomNames
+                                                                       .Any(y => y.CustomName.ToLower() == name.ToLower())
+                                                                        );
     }
 
     /// <summary>
     /// Default location for new vans
     /// </summary>
     public static OrderedLineLocation PreProduction(ProductionLine line)
-    => new()
-    {
-        Order = decimal.MinValue,
-        Line  = line,
-        LineLocation = new LineLocation()
-        {
-            WorkspaceLocation = new WorkspaceLocation()
-            {
-            Name        = "Pre Production",
-            Description = "Production has not yet started",
-            Type        = ProductionLocationType.Prep,
-            Workspace   = line.Workspace
-        }, 
-        Line                = line, 
-        CustomLocationNames = [], 
-        InventoryLocations  = []
-        }
-    };
+    => throw new NotImplementedException();
 
     /// <summary>
     /// Default location for vans after completion
     /// </summary>
     public static OrderedLineLocation PostProduction(ProductionLine line) 
-        => new()
-    {
+        => throw new NotImplementedException();
+    /*{
         Order = decimal.MaxValue,
         Line = line,
         LineLocation = new LineLocation()
@@ -79,7 +53,7 @@ public class LocationFactory
             CustomLocationNames = [], 
             InventoryLocations = []
         }
-    };
+    };*/
     
     public WorkspaceLocation CreateWorkspaceLocation(
         ProductionWorkspace    workspace,
@@ -95,7 +69,8 @@ public class LocationFactory
             Name = locationName,
             Description = locationDescription,
             Type = type,
-            Workspace = workspace
+            Workspace = workspace,
+            OrderedLineLocations = []
         };
         
         workspace.WorkspaceLocations.Add(newLocation);

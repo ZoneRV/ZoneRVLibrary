@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ZoneRV.Models.Location;
 
-public class LineLocationCustomName
+public class LocationCustomName
 {
     [Key, Required]
     public int Id { get; set; }
@@ -17,8 +17,5 @@ public class LineLocationCustomName
     [Required, MaxLength(128)]
     public required string CustomName { get; set; }
     
-    [Column(TypeName = "decimal(18,2)"), Required] 
-    public decimal Order { get; set; }
-    
-    [ForeignKey("LineLocationId"), Required] public required LineLocation LineLocation { get; set; }
+    [ForeignKey("LineLocationId"), Required] public required OrderedLineLocation LineLocation { get; set; }
 }

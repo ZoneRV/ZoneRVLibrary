@@ -39,11 +39,10 @@ public abstract partial class IProductionService
             Workspaces = productionContext.Workspaces
                   .Include(x => x.Lines)
                   .Include(x => x.WorkspaceLocations)
-                      .ThenInclude(x => x.LineLocations)
-                        .ThenInclude(x => x.CustomLocationNames)
+                      .ThenInclude(x => x.OrderedLineLocations)
                   .Include(x => x.WorkspaceLocations)
-                      .ThenInclude(x => x.LineLocations)
-                        .ThenInclude(x => x.InventoryLocations)
+                      .ThenInclude(x => x.OrderedLineLocations)
+                        .ThenInclude(x => x.CustomNames)
                   .ToList();
         }
 

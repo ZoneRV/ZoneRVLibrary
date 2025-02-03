@@ -1,15 +1,26 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using ZoneRV.Serialization;
 
 namespace ZoneRV.Models.Location;
 
 public class OrderedLineLocation : IEquatable<OrderedLineLocation>
 {
-    public required ProductionLine    Line              { get; set; }
-    public required LineLocation      LineLocation      { get; set; }
-    public          WorkspaceLocation WorkspaceLocation => LineLocation.WorkspaceLocation;
+    [Key, Required] public int Id { get; init; }
+
+    public required ProductionLine    Line     { get; set; }
+    public required WorkspaceLocation Location { get; set; }
     
     public required decimal Order { get; set; }
+
+    /// <summary>
+    /// Gets or sets the Service Type associated with the location.
+    /// </summary>
+    [Required, MaxLength(24), OptionalJsonField]
+    public required string ServiceType { get; set; }
+    
+    public required virtual ICollection<LocationCustomName>    CustomNames    { get; set; }
+    public required virtual ICollection<LocationInventoryName> InventoryNames { get; set; }
 
     [JsonIgnore] public LineLocationType Type 
         => Order == decimal.MinValue ? LineLocationType.PreProduction : 

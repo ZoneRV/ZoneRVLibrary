@@ -9,7 +9,7 @@ public abstract partial class IProductionService
         => Vans.Values.Count(x =>
             x.HandoverDate.HasValue &&
             x.HandoverState == HandoverState.UnhandedOver &&
-            x.OrderedLineLocationInfo.CurrentLocation.LineLocation.WorkspaceLocation.Type == ProductionLocationType.Finishing);
+            x.OrderedLineLocationInfo.CurrentLocation.Location.Type == ProductionLocationType.Finishing);
     
     public int VansHandoverOverdue
         => Vans.Values.Count(x =>
