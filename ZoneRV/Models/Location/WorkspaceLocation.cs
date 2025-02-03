@@ -14,7 +14,7 @@ public class WorkspaceLocation : IEquatable<WorkspaceLocation>
     
     [MaxLength(128)] public required string Name { get; set; }
     
-    [MaxLength(1024)] public required string Description { get; set; }
+    [MaxLength(1024)] public string? Description { get; set; }
 
     public virtual ICollection<LineLocation>  LineLocations { get; set; } = default!;
 

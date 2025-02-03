@@ -4,12 +4,12 @@ using ZoneRV.Services.Production;
 
 namespace ZoneRV.Api.Controllers;
 
-[Route("api/production-workspace"), ApiController]
-public class ProductionWorkspaceController : ControllerBase
+[Route("api/workspace"), ApiController]
+public class WorkspaceController : ControllerBase
 {
     private IProductionService ProductionService { get; set; }
     
-    public ProductionWorkspaceController(IProductionService productionService)
+    public WorkspaceController(IProductionService productionService)
     {
         ProductionService = productionService;
     }
@@ -108,17 +108,4 @@ public class ProductionWorkspaceController : ControllerBase
 
         return Ok(area);
     }
-
-    /*[HttpPost("location/add-custom-name/{locationId}/{customName}")]
-    public async Task<ActionResult<LineLocationCustomName>> AddCustomNameToLoation(int locationId, string customName)
-    {
-        var location = ProductionService.LocationFactory.LineLocations.SingleOrDefault(x => x.Id == locationId);
-
-        if (location is null)
-            return NotFound();
-
-        var customNameO = await ProductionService.CreateCustomNameToLocation(location, customName);
-
-        return Ok(customNameO);
-    }*/
 }

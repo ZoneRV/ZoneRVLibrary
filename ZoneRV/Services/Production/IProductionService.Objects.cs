@@ -49,6 +49,25 @@ public abstract partial class IProductionService
         }
     }
 
+    public async Task<WorkspaceLocation> CreateWorkspaceLocation(ProductionWorkspace workspace, string name, string? description, ProductionLocationType type)
+    {
+        if (workspace.Lines.Any(x => x.Name.ToLower() == name.ToLower()))
+            throw new DuplicateNameException($"Cannot create workspace location with name {name} in workspace {workspace.Name}, already exists.");
+        
+        using (var scope = ScopeFactory.CreateScope())
+        {
+            var productionContext = scope.ServiceProvider.GetRequiredService<ProductionContext>();
+
+            var newLocation = LocationFactory.CreateWorkspaceLocation(workspace, name, description, type);
+
+            productionContext.Workspaces.Update(workspace);
+
+            await productionContext.SaveChangesAsync();
+
+            return newLocation;
+        }
+    }
+
     public async Task<ProductionLine> CreateProductionLine(ProductionWorkspace workspace, string name, string? description)
     {
         if (ProductionLines.Any(x => x.Name.ToLower() == name.ToLower() && x.Workspace.Id == workspace.Id))
@@ -78,7 +97,7 @@ public abstract partial class IProductionService
     public async Task<AreaOfOrigin> CreateAreaOfOrigin(ProductionLine line, string name)
     {
         if (line.AreaOfOrigins.Any(x => x.Name.ToLower() == name.ToLower()))
-            throw new DuplicateNameException("Cannot create Area of Origin with name {name}, Already exists.");
+            throw new DuplicateNameException($"Cannot create Area of Origin with name {name}, Already exists.");
         
         using (var scope = ScopeFactory.CreateScope())
         {

@@ -84,7 +84,7 @@ public class LocationFactory
     public WorkspaceLocation CreateWorkspaceLocation(
         ProductionWorkspace    workspace,
         string                 locationName,
-        string                 locationDescription,
+        string?                locationDescription,
         ProductionLocationType type)
     {
         if (workspace.WorkspaceLocations.Any(x => x.Name == locationName))
