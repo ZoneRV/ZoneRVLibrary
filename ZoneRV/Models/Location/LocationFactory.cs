@@ -30,7 +30,7 @@ public class LocationFactory
         return new OrderedLineLocation()
         {
             Line = line,
-            Location = lineLocation,
+            LineLocation = lineLocation,
             Order = lineLocation.CustomLocationNames.First(l => l.CustomName == name).Order
         };
     }
@@ -43,7 +43,7 @@ public class LocationFactory
     {
         Order = decimal.MinValue,
         Line  = line,
-        Location = new LineLocation()
+        LineLocation = new LineLocation()
         {
             WorkspaceLocation = new WorkspaceLocation()
             {
@@ -66,7 +66,7 @@ public class LocationFactory
     {
         Order = decimal.MaxValue,
         Line = line,
-        Location = new LineLocation()
+        LineLocation = new LineLocation()
         {
             WorkspaceLocation = new WorkspaceLocation()
             {

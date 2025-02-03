@@ -5,11 +5,11 @@ using ZoneRV.Services.Production;
 namespace ZoneRV.Api.Controllers;
 
 [Route("api/production-workspace"), ApiController]
-public class ProductionLineController : ControllerBase
+public class ProductionWorkspaceController : ControllerBase
 {
     private IProductionService ProductionService { get; set; }
     
-    public ProductionLineController(IProductionService productionService)
+    public ProductionWorkspaceController(IProductionService productionService)
     {
         ProductionService = productionService;
     }

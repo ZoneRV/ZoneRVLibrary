@@ -334,13 +334,13 @@ public class TrelloService : IProductionService
             var vansInLine = Vans.Where(x => x.Value.Model.Line == productionLine).Select(x => x.Value).ToList();
 
             int prepCount = vansInLine.Count(x =>
-                x.OrderedLineLocationInfo.CurrentLocation.Location.WorkspaceLocation.Type is ProductionLocationType.Prep && x.HandoverState is HandoverState.HandedOver);
+                x.OrderedLineLocationInfo.CurrentLocation.LineLocation.WorkspaceLocation.Type is ProductionLocationType.Prep && x.HandoverState is HandoverState.HandedOver);
 
             int prodCount = vansInLine.Count(x =>
-                x.OrderedLineLocationInfo.CurrentLocation.Location.WorkspaceLocation.Type is ProductionLocationType.Bay or ProductionLocationType.Module or ProductionLocationType.Subassembly);
+                x.OrderedLineLocationInfo.CurrentLocation.LineLocation.WorkspaceLocation.Type is ProductionLocationType.Bay or ProductionLocationType.Module or ProductionLocationType.Subassembly);
 
             int finishingCount = vansInLine.Count(x =>
-                x.OrderedLineLocationInfo.CurrentLocation.Location.WorkspaceLocation.Type is ProductionLocationType.Finishing && x.HandoverState is not HandoverState.HandedOver);
+                x.OrderedLineLocationInfo.CurrentLocation.LineLocation.WorkspaceLocation.Type is ProductionLocationType.Finishing && x.HandoverState is not HandoverState.HandedOver);
 
             int handoverDueCount = vansInLine.Count(x =>
                 x.HandoverDate < DateTimeOffset.Now && x.HandoverState is HandoverState.UnhandedOver);

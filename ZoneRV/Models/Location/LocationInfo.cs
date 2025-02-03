@@ -49,7 +49,7 @@ public class LocationInfo : IEnumerable<(DateTimeOffset moveDate, OrderedLineLoc
             if (_locationHistory.Any(x => x.lineLocation == change.lineLocation))
                 throw new ArgumentException("Location already exists", nameof(change.lineLocation));
 
-            if (change.lineLocation.Location.WorkspaceLocation.Type != ProductionLocationType.Bay && change.lineLocation.Type == LineLocationType.Production)
+            if (change.lineLocation.LineLocation.WorkspaceLocation.Type != ProductionLocationType.Bay && change.lineLocation.Type == LineLocationType.Production)
                 throw new ArgumentException("Non bay locations Cannot be added as a location change.",
                     nameof(change.lineLocation.Type));
 
