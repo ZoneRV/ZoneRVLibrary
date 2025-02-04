@@ -2,17 +2,20 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ZoneRV.DBContexts;
 
 #nullable disable
 
-namespace ZoneRV.Api.Migrations
+namespace ZoneRV.Migrations.Migrations
 {
     [DbContext(typeof(ProductionContext))]
-    partial class ProductionContextModelSnapshot : ModelSnapshot
+    [Migration("20250204012129_FixedLocations")]
+    partial class FixedLocations
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -94,6 +97,11 @@ namespace ZoneRV.Api.Migrations
 
                     b.Property<decimal>("Order")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("ServiceType")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("nvarchar(24)");
 
                     b.HasKey("Id");
 

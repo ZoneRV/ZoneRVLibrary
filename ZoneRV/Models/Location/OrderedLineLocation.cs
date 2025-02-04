@@ -11,13 +11,9 @@ public class OrderedLineLocation : IEquatable<OrderedLineLocation>
     public required ProductionLine    Line     { get; set; }
     public required WorkspaceLocation Location { get; set; }
     
+    [Required, OptionalJsonField, ]
     public required decimal Order { get; set; }
 
-    /// <summary>
-    /// Gets or sets the Service Type associated with the location.
-    /// </summary>
-    [Required, MaxLength(24), OptionalJsonField]
-    public required string ServiceType { get; set; }
     
     public required virtual ICollection<LocationCustomName>    CustomNames    { get; set; }
     public required virtual ICollection<LocationInventoryName> InventoryNames { get; set; }

@@ -28,7 +28,7 @@ public class TrelloService : IProductionService
     
     public static List<string> TrelloActionFilters => ["commentCard", "updateCustomFieldItem", "createCard", "updateCheckItemStateOnCard"];
     
-    protected override string       LocationTypeName { get => "trello"; }
+    protected override string ServiceTypeName { get => "trello"; }
     
     private            TrelloClient TrelloClient     { get; }
     private            string       TrelloApiKey     { get; }
@@ -55,9 +55,9 @@ public class TrelloService : IProductionService
                         throw new ArgumentNullException(nameof(ProHoDashboardId), "ProHo Dashboard board id required");
         
 
-        LocationFactory = new LocationFactory
+        LocationFactory = new LocationFactory(ServiceTypeName)
         {
-            Workspaces = Workspaces!, // TODO: Check if this actually loads in correct oreder
+            Workspaces = Workspaces!, // TODO: Check if this actually loads in correct order
             IgnoredListNames = [] // TODO: fill out
         };
         

@@ -19,5 +19,5 @@ public class LocationInventoryName
     [Required, MaxLength(128)]
     public required string CustomName { get; set; }
     
-    [ForeignKey("LocationId"), Required] public required WorkspaceLocation Location { get; set; }
+    [ForeignKey("LocationId"), Required] public required OrderedLineLocation LineLocation { get; set; }
 }

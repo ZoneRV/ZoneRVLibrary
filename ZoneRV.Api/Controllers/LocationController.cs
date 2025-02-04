@@ -30,4 +30,26 @@ public class LocationController : ControllerBase
 
         return Ok(location);
     }
+
+    [HttpPost("line/add/{lineId}")]
+    public async Task<ActionResult<OrderedLineLocation>> AddOrderedLineLocation(
+        int lineId, 
+        [FromQuery] int locationId, 
+        [FromQuery] decimal order, 
+        [FromQuery] string? customName, 
+        [FromQuery] string? inventoryName)
+    {
+        var line     = ProductionService.ProductionLines.SingleOrDefault(x => x.Id == lineId);
+        var location = ProductionService.LocationFactory.WorkspaceLocations.SingleOrDefault(x => x.Id == locationId);
+
+        if (line is null)
+            return NotFound();
+
+        if (location is null)
+            return NotFound();
+
+        var newLocation = await ProductionService.CreateOrderedLocation(line, location, order, customName, inventoryName);
+
+        return Ok(newLocation);
+    }
 }

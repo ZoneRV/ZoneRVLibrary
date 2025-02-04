@@ -24,7 +24,7 @@ public abstract partial class IProductionService
 
     public             IConfiguration Configuration    { get; set; }
     public             bool           WebhooksEnabled  { get; set; }
-    protected abstract string         LocationTypeName { get; }
+    protected abstract string         ServiceTypeName { get; }
     
     
     public IProductionService(IServiceScopeFactory scopeFactory, IConfiguration configuration)
@@ -38,11 +38,14 @@ public abstract partial class IProductionService
             
             Workspaces = productionContext.Workspaces
                   .Include(x => x.Lines)
+                      .ThenInclude(x => x.OrderedLineLocations)
+                  .Include(x => x.Lines)
+                      .ThenInclude(x => x.Models)
                   .Include(x => x.WorkspaceLocations)
                       .ThenInclude(x => x.OrderedLineLocations)
                   .Include(x => x.WorkspaceLocations)
                       .ThenInclude(x => x.OrderedLineLocations)
-                        .ThenInclude(x => x.CustomNames)
+                          .ThenInclude(x =>  x.CustomNames.Where(cn => cn.ServiceType == ServiceTypeName))
                   .ToList();
         }
 

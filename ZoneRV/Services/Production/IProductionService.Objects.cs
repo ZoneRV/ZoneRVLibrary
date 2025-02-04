@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using Azure.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Mysqlx.Crud;
 using ZoneRV.DBContexts;
 
 namespace ZoneRV.Services.Production;
@@ -79,7 +80,7 @@ public abstract partial class IProductionService
 
             var line = new ProductionLine()
             {
-                Workspace = workspace, Name = name, Description = description
+                Workspace = workspace, Name = name, Description = description, OrderedLineLocations = []
             };
             
             workspace.Lines.Add(line);
@@ -91,6 +92,27 @@ public abstract partial class IProductionService
             // TODO load line on creation
             
             return line;
+        }
+    }
+
+    public async Task<OrderedLineLocation> CreateOrderedLocation(ProductionLine line, WorkspaceLocation location, decimal order, string? customName, string? inventoryName)
+    {
+        using (var scope = ScopeFactory.CreateScope())
+        {
+            var productionContext = scope.ServiceProvider.GetRequiredService<ProductionContext>();
+
+            var newLocation = LocationFactory.CreateOrderedLineLocation(line, location, order, customName, inventoryName);
+            
+            location.OrderedLineLocations.Add(newLocation);
+            line.OrderedLineLocations.Add(newLocation);
+
+            productionContext.WorkSpaceLocations.Update(location);
+            
+            await productionContext.SaveChangesAsync();
+            
+            MarkSOsUnloaded(x => x.Model.LineId == line.Id);
+            
+            return newLocation;
         }
     }
 
