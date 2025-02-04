@@ -15,8 +15,8 @@ public class OrderedLineLocation : IEquatable<OrderedLineLocation>
     public required decimal Order { get; set; }
 
     
-    public required virtual ICollection<LocationCustomName>    CustomNames    { get; set; }
-    public required virtual ICollection<LocationInventoryName> InventoryNames { get; set; }
+    [JsonIgnore] public required virtual ICollection<LocationCustomName>    CustomNames    { get; set; }
+    [JsonIgnore] public required virtual ICollection<LocationInventoryName> InventoryNames { get; set; }
 
     [JsonIgnore] public LineLocationType Type 
         => Order == decimal.MinValue ? LineLocationType.PreProduction : 
