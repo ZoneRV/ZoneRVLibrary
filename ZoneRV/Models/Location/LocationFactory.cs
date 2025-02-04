@@ -33,35 +33,6 @@ public class LocationFactory
                                                                        .Any(y => y.CustomName.ToLower() == name.ToLower())
                                                                         );
     }
-
-    /// <summary>
-    /// Default location for new vans
-    /// </summary>
-    public static OrderedLineLocation PreProduction(ProductionLine line)
-        => throw new NotImplementedException();
-
-    /// <summary>
-    /// Default location for vans after completion
-    /// </summary>
-    public static OrderedLineLocation PostProduction(ProductionLine line) 
-        => throw new NotImplementedException();
-    /*{
-        Order = decimal.MaxValue,
-        Line = line,
-        LineLocation = new LineLocation()
-        {
-            WorkspaceLocation = new WorkspaceLocation()
-            {
-                Name        = "Post Production",
-                Description = "Production has finished",
-                Type        = ProductionLocationType.Finishing,
-                Workspace   = line.Workspace
-            }, 
-            Line = line, 
-            CustomLocationNames = [], 
-            InventoryLocations = []
-        }
-    };*/
     
     public WorkspaceLocation CreateWorkspaceLocation(
         ProductionWorkspace    workspace,

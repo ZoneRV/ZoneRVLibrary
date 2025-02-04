@@ -24,6 +24,9 @@ public class JobCard : Card
     {
         get
         {
+            if (this.SalesOrder.OrderedLineLocationInfo.CurrentLocation is null)
+                return DueStatus.NotDue;
+            
             if (this.LineLocation > this.SalesOrder.OrderedLineLocationInfo.CurrentLocation)
                 return DueStatus.NotDue;
                 

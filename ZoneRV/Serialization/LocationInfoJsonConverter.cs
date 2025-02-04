@@ -6,7 +6,7 @@ public class LocationInfoJsonConverter : JsonConverter<LocationInfo>
 {
     public override void WriteJson(JsonWriter writer, LocationInfo? value, JsonSerializer serializer)
     {
-        if(value is null)
+        if(value is null || value.CurrentLocation is null)
             return;
 
         var jsonObject = new JObject();

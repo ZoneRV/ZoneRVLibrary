@@ -19,12 +19,6 @@ public class OrderedLineLocationCollection : IEnumerable<OrderedLineLocation>
     {
         _lines     = lines.ToList();
         _locations = [];
-
-        foreach (var line in _lines)
-        {
-            _locations.Add(LocationFactory.PreProduction(line));
-            _locations.Add(LocationFactory.PostProduction(line));
-        }
         
         _locations.AddRange(initialLocations);
     }
@@ -33,12 +27,6 @@ public class OrderedLineLocationCollection : IEnumerable<OrderedLineLocation>
     {
         _lines     = lines.ToList();
         _locations = [];
-
-        foreach (var line in _lines)
-        {
-            _locations.Add(LocationFactory.PreProduction(line));
-            _locations.Add(LocationFactory.PostProduction(line));
-        }
     }
 
     /// <summary>

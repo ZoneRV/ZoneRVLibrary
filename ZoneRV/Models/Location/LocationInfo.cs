@@ -35,8 +35,8 @@ public class LocationInfo : IEnumerable<(DateTimeOffset moveDate, OrderedLineLoc
     /// The latest <see cref="WorkspaceLocation"/> based on the move date in the history or
     /// a default pre-production location if the history is empty.
     /// </value>
-    public OrderedLineLocation CurrentLocation =>
-        _locationHistory.Count == 0 ? LocationFactory.PreProduction(_line) : _locationHistory.MaxBy(x => x.moveDate).lineLocation;
+    public OrderedLineLocation? CurrentLocation =>
+        _locationHistory.Count == 0 ? null : _locationHistory.MaxBy(x => x.moveDate).lineLocation;
 
     /// <exception cref="ArgumentException">Location info already contains location.</exception>
     /// <exception cref="ArgumentException">Non-bay locations Cannot be added as a location change.</exception>
@@ -107,10 +107,10 @@ public class LocationInfo : IEnumerable<(DateTimeOffset moveDate, OrderedLineLoc
     /// </summary>
     /// <param name="date">The date for which the location is to be retrieved.</param>
     /// <returns>The location associated with the specified date. If the date is earlier than the first movement in the history, returns the pre-production location.</returns>
-    public OrderedLineLocation GetPositionFromDate(DateTimeOffset date)
+    public OrderedLineLocation? GetPositionFromDate(DateTimeOffset date)
     {
         if (_locationHistory.Count == 0 || date < _locationHistory.First().moveDate)
-            return LocationFactory.PreProduction(_line);
+            return null;
 
         return _locationHistory.SkipWhile(x => date < x.moveDate).First().lineLocation;
     }

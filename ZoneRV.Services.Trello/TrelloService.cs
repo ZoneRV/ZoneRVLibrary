@@ -230,32 +230,11 @@ public class TrelloService : IProductionService
 
                     string listName = list.Name;
 
-                    // Map predefined lists to specific production locations
-                    if (listName == "SCHEDULED VANS (50x)" || listName == "SCHEDULED EXPO VANS")
-                    {
-                        if (locationHistory.All(x => x.location != LocationFactory.PreProduction(model.Line)))
-                            locationHistory.Add((moveAction.Date, LocationFactory.PreProduction(model.Line)));
-                        continue;
-                    }
-
-                    if (listName == "OUTSIDE - Carpark GEN2 WIP" || listName == "OUTSIDE - Carpark GEN2 Ready For Transport")
-                    {
-                        if (locationHistory.All(x => x.location != LocationFactory.PostProduction(model.Line)))
-                            locationHistory.Add((moveAction.Date, LocationFactory.PostProduction(model.Line)));
-                        continue;
-                    }
-
-                    if (listName == "OUTSIDE - Carpark EXPO Ready For Transport" || listName == "OUTSIDE - Carpark EXPO - WIP")
-                    {
-                        if (locationHistory.All(x => x.location != LocationFactory.PostProduction(model.Line)))
-                            locationHistory.Add((moveAction.Date, LocationFactory.PostProduction(model.Line)));
-                        continue;
-                    }
-
                     // Attempt to resolve a custom location for the current production line based on the list name
                     var location = LocationFactory.GetLocationFromCustomName(model.Line, listName);
 
-                    if (location is null) continue;
+                    if (location is null) 
+                        continue;
 
                     locationHistory.Add((moveAction.Date, location));
                 }
@@ -334,13 +313,13 @@ public class TrelloService : IProductionService
             var vansInLine = Vans.Where(x => x.Value.Model.Line == productionLine).Select(x => x.Value).ToList();
 
             int prepCount = vansInLine.Count(x =>
-                x.OrderedLineLocationInfo.CurrentLocation.Location.Type is ProductionLocationType.Prep && x.HandoverState is HandoverState.HandedOver);
+                x.OrderedLineLocationInfo.CurrentLocation is not null && x.OrderedLineLocationInfo.CurrentLocation.Location.Type is ProductionLocationType.Prep && x.HandoverState is HandoverState.HandedOver);
 
             int prodCount = vansInLine.Count(x =>
-                x.OrderedLineLocationInfo.CurrentLocation.Location.Type is ProductionLocationType.Bay or ProductionLocationType.Module or ProductionLocationType.Subassembly);
+                x.OrderedLineLocationInfo.CurrentLocation is not null && x.OrderedLineLocationInfo.CurrentLocation.Location.Type is ProductionLocationType.Bay or ProductionLocationType.Module or ProductionLocationType.Subassembly);
 
             int finishingCount = vansInLine.Count(x =>
-                x.OrderedLineLocationInfo.CurrentLocation.Location.Type is ProductionLocationType.Finishing && x.HandoverState is not HandoverState.HandedOver);
+                x.OrderedLineLocationInfo.CurrentLocation is not null && x.OrderedLineLocationInfo.CurrentLocation.Location.Type is ProductionLocationType.Finishing && x.HandoverState is not HandoverState.HandedOver);
 
             int handoverDueCount = vansInLine.Count(x =>
                 x.HandoverDate < DateTimeOffset.Now && x.HandoverState is HandoverState.UnhandedOver);
