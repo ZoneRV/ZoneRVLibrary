@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNetCore.Mvc;
+using ZoneRV.Api.Models;
 using ZoneRV.Serialization;
 using ZoneRV.Services.Production;
 
@@ -20,6 +22,48 @@ public class SalesOrderController : ControllerBase
         if (!ProductionService.TryGetInfoByName(name, out var info))
             return NotFound();
 
+        var json = await SerializeSaleOrder(info, includedFields);
+        return Ok(json);
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<SalesOrder>>> Get(GroupRequestById requests)
+    {
+        var infos = ProductionService.GetInfos(x => requests.Names.Contains(x.Name));
+
+        var json = await SerializeSalesOrders(infos, requests.OptionalFields);
+
+        return Ok(json);
+    }
+
+    private async Task<string> SerializeSalesOrders(IEnumerable<SalesOrder> salesOrders, List<string>? includedFields = null)
+    {
+        bool productionReloadNeeded = false;
+        
+        foreach (var field in includedFields ?? [])
+        {
+            SerializationUtils.CheckForRequired(field, out var prod, out _);
+
+            if (prod)
+            {
+                productionReloadNeeded = true;
+                break;
+            }
+        }
+        
+        if(productionReloadNeeded)
+            await ProductionService.LoadVanBoardsAsync(salesOrders);
+
+        var json = JsonConvert.SerializeObject(
+            salesOrders, 
+            ZoneJsonSerializerSettings.GetOptionalSerializerSettings(includedFields)
+        );
+        
+        return json;
+    }
+
+    private async Task<string> SerializeSaleOrder(SalesOrder info, List<string>? includedFields = null)
+    {
         includedFields = includedFields ?? [];
 
         bool productionReloadNeeded = false;
@@ -39,10 +83,10 @@ public class SalesOrderController : ControllerBase
             await ProductionService.LoadVanBoardAsync(info);
         
         var json = JsonConvert.SerializeObject(
-                            info, 
-                            ZoneJsonSerializerSettings.GetOptionalSerializerSettings(includedFields)
-                            );
+            info, 
+            ZoneJsonSerializerSettings.GetOptionalSerializerSettings(includedFields)
+        );
         
-        return Ok(json);
+        return json;
     }
 }

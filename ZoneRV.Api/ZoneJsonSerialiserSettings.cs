@@ -60,12 +60,12 @@ public static class ZoneJsonSerializerSettings
         }
     }
 
-    public static JsonSerializerSettings GetOptionalSerializerSettings(IEnumerable<string> includedFields)
+    public static JsonSerializerSettings GetOptionalSerializerSettings(IEnumerable<string>? includedFields = null)
     {
         var settings = new JsonSerializerSettings()
         {
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-            ContractResolver = new JsonFieldContractResolver(includedFields)
+            ContractResolver = new JsonFieldContractResolver(includedFields ?? [])
         };
         
         settings.Converters.Add(new StringEnumConverter(new CamelCaseNamingStrategy()));

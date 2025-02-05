@@ -99,7 +99,7 @@ public abstract partial class IProductionService
     }
 
     public abstract int MaxDegreeOfParallelism { get; protected set; }
-    public async Task<IEnumerable<SalesOrder>> GetVanBoardsAsync(IEnumerable<SalesOrder> infos, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<SalesOrder>> LoadVanBoardsAsync(IEnumerable<SalesOrder> infos, CancellationToken cancellationToken = default)
     {
         ConcurrentBag<SalesOrder> boards = [];
         
