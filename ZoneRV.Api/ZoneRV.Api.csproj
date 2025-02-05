@@ -6,6 +6,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <UserSecretsId>aspnet-ZoneRV-ef38a072-92f8-4bf0-be7a-e3cdcb3d671d</UserSecretsId>
         <RootNamespace>ZoneRV.Api</RootNamespace>
+        <GenerateDocumentationFile>True</GenerateDocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>

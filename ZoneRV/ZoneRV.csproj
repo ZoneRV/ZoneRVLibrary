@@ -8,6 +8,7 @@
         <Title>ZoneRV Standard Library</Title>
         <PackageIcon>zone-rv-social-logo.png</PackageIcon>
         <Version>1.0.0-preview1</Version>
+        <GenerateDocumentationFile>True</GenerateDocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
