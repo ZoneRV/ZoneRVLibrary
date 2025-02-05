@@ -49,9 +49,9 @@ public class LocationInfo : IEnumerable<(DateTimeOffset moveDate, OrderedLineLoc
             if (_locationHistory.Any(x => x.lineLocation == change.lineLocation))
                 throw new ArgumentException("Location already exists", nameof(change.lineLocation));
 
-            if (change.lineLocation.Location.Type != ProductionLocationType.Bay && change.lineLocation.Type == LineLocationType.Production)
+            if (change.lineLocation.Location.LocationType != ProductionLocationType.Bay )
                 throw new ArgumentException("Non bay locations Cannot be added as a location change.",
-                    nameof(change.lineLocation.Type));
+                    nameof(change.lineLocation.Location.LocationType));
 
             if (change.lineLocation.Line is not null && _locationHistory
                     .Any(x => x.lineLocation.Line != change.lineLocation.Line))
@@ -139,22 +139,6 @@ public class LocationInfo : IEnumerable<(DateTimeOffset moveDate, OrderedLineLoc
             result.end = null;
 
         return result;
-    }
-
-    /// <summary>
-    /// Determines whether the van exited the production line after the specified date.
-    /// </summary>
-    /// <param name="end">The date to check against.</param>
-    /// <returns>
-    /// Returns true if the van has not yet reached the "Post Production" location or exited it after the specified date;
-    /// otherwise, false.
-    /// </returns>
-    public bool ExitedAfterDate(DateTimeOffset end)
-    {
-        if (_locationHistory.All(x => x.lineLocation.Type != LineLocationType.PostProduction))
-            return true;
-
-        return _locationHistory.First(x => x.lineLocation.Type == LineLocationType.PostProduction).moveDate > end;
     }
 
     public IEnumerator<(DateTimeOffset moveDate, OrderedLineLocation lineLocation)> GetEnumerator()

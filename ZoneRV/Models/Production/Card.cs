@@ -17,12 +17,14 @@ public abstract class Card
         Name = info.Name;
         CardStatus = info.CardStatus;
         Url = info.Url;
-        CardStatusLastUpdated = info.CardStatusLastUpdated;
+        CardLastUpdated = info.CardStatusLastUpdated;
     }
     
     public string Name { get; set; }
     public string Id { get; init; }
     public string Url { get; init; }
+
+    public abstract CardType Type { get; }
     
     [OptionalJsonField] public SalesOrder SalesOrder { get; init; }
     
@@ -36,8 +38,8 @@ public abstract class Card
     
     
     public int TotalChecks => AllChecks.Count();
-    public int CompletedCheckCount => AllChecks.Count(x => x.IsChecked);
-    public int UncompletedCheckCount => AllChecks.Count(x => !x.IsChecked);
+    public int CompletedChecks => AllChecks.Count(x => x.IsChecked);
+    public int UncompletedChecks => AllChecks.Count(x => !x.IsChecked);
     
     [JsonIgnore] public IEnumerable<Check> AllChecks => Checklists.SelectMany(x => x.Checks);
 
@@ -49,7 +51,7 @@ public abstract class Card
     {
         get
         {
-            var completionRate = GetCompletionRate();
+            var completionRate = CardProgress;
             
             if ( completionRate > .999f)
                 return CardStatus.Completed;
@@ -66,7 +68,7 @@ public abstract class Card
         init => _cardStatus = value;
     }
     
-    public DateTimeOffset? CardStatusLastUpdated
+    public DateTimeOffset? CardLastUpdated
     {
         get => AllChecks
             .Select(x => x.LastModified)
@@ -82,18 +84,20 @@ public abstract class Card
         _cardStatusLastUpdated = timeUpdated;
     }
     
-    public float GetCompletionRate()
-    {
-        if (_cardStatus == CardStatus.Completed)
-            return 1f;
-            
-        if (TotalChecks == 0)
+    public float CardProgress {
+        get
         {
-            return 0f;
-        }
+            if (_cardStatus == CardStatus.Completed)
+                return 1f;
+                
+            if (TotalChecks == 0)
+            {
+                return 0f;
+            }
 
-        else
-            return (float)CompletedCheckCount / (float)TotalChecks;
+            else
+                return (float)CompletedChecks / (float)TotalChecks;
+        }
     }
 }
 

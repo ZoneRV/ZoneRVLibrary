@@ -11,8 +11,8 @@ public class LocationInfoJsonConverter : JsonConverter<LocationInfo>
 
         var jsonObject = new JObject();
         
-        jsonObject.Add("CurrentLocation", JToken.FromObject(value.CurrentLocation, serializer));
-        jsonObject.Add("LocationHistory", JToken.FromObject(value.ToArray(), serializer));
+        jsonObject.Add("currentLocation", JToken.FromObject(value.CurrentLocation, serializer));
+        jsonObject.Add("locationHistory", JToken.FromObject(value.ToArray(), serializer));
 
         jsonObject.WriteTo(writer);
     }

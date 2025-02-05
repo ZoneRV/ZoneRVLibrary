@@ -40,6 +40,8 @@ public abstract partial class IProductionService
                   .Include(x => x.Lines)
                       .ThenInclude(x => x.OrderedLineLocations)
                   .Include(x => x.Lines)
+                      .ThenInclude(x => x.AreaOfOrigins)
+                  .Include(x => x.Lines)
                       .ThenInclude(x => x.Models)
                   .Include(x => x.WorkspaceLocations)
                       .ThenInclude(x => x.OrderedLineLocations)

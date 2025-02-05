@@ -12,7 +12,7 @@ namespace ZoneRV.Models.Production;
 [Table("Line")]
 public class ProductionLine
 {
-    [Key, Required] public          int    Id   { get; set; }
+    [Key, Required] public int Id { get; set; }
     
     [Required, MaxLength(128)]
     public required string Name { get; set; }
@@ -25,9 +25,9 @@ public class ProductionLine
     
     public virtual required ICollection<OrderedLineLocation> OrderedLineLocations { get; set; }
     
-    public List<Model>         Models    { get; set; } = [];
+    [OptionalJsonField] public List<Model>         Models    { get; set; } = [];
 
-    public List<AreaOfOrigin> AreaOfOrigins { get; set; } = [];
+    [OptionalJsonField] public List<AreaOfOrigin> AreaOfOrigins { get; set; } = [];
 
     public static bool operator ==(ProductionLine? first, ProductionLine? second)
         => (first is null && second is null) || 

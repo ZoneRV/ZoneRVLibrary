@@ -8,20 +8,15 @@ public class OrderedLineLocation : IEquatable<OrderedLineLocation>
 {
     [Key, Required] public int Id { get; init; }
 
-    public required ProductionLine    Line     { get; set; }
-    public required WorkspaceLocation Location { get; set; }
+    [OptionalJsonField] public required ProductionLine    Line     { get; set; }
+    [OptionalJsonField] public required WorkspaceLocation Location { get; set; }
     
-    [Required, OptionalJsonField, ]
+    [Required]
     public required decimal Order { get; set; }
 
     
     [JsonIgnore] public required virtual ICollection<LocationCustomName>    CustomNames    { get; set; }
     [JsonIgnore] public required virtual ICollection<LocationInventoryName> InventoryNames { get; set; }
-
-    [JsonIgnore] public LineLocationType Type 
-        => Order == decimal.MinValue ? LineLocationType.PreProduction : 
-           Order == decimal.MaxValue ? LineLocationType.PostProduction : 
-           LineLocationType.Production;
     
     public static bool operator <(OrderedLineLocation first, OrderedLineLocation second)
     {

@@ -47,7 +47,7 @@ public class LocationFactory
         {
             Name = locationName,
             Description = locationDescription,
-            Type = type,
+            LocationType = type,
             Workspace = workspace,
             OrderedLineLocations = []
         };

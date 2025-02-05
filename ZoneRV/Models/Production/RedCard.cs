@@ -8,6 +8,10 @@
 [DebuggerDisplay("{Name} - {SalesOrder.Name}")]
 public class RedCard : Card
 {
+    public override CardType Type
+    {
+        get => CardType.RedCard;
+    }
     public RedCard(SalesOrder van, RedCardCreationInfo info, AreaOfOrigin? areaOfOrigin) : base(van, info, areaOfOrigin)
     {
         RedFlagIssue = info.RedFlagIssue;

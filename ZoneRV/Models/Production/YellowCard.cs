@@ -7,6 +7,10 @@
 [DebuggerDisplay("{Name} - {SalesOrder.Name}")]
 public class YellowCard : Card
 {
+    public override CardType Type
+    {
+        get => CardType.YellowCard;
+    }
     public YellowCard(SalesOrder van, YellowCardInfo info, AreaOfOrigin? areaOfOrigin) : base(van, info, areaOfOrigin)
     {
         CreationDate = info.CreationDate;

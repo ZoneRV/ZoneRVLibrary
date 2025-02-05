@@ -23,21 +23,21 @@ public class SalesOrder : IEqualityComparer<SalesOrder>
     [JsonIgnore]
     public IEnumerable<Card> Cards => JobCards.Select(Card (x) => x).Concat(RedCards).Concat(YellowCards);
 
-    [OptionalJsonField(true)] public double CompletionRate => Cards.Any() ? Cards.Average(x => x.GetCompletionRate()) : 0;
+    [OptionalJsonField(true)] public double CompletionRate => Cards.Any() ? Cards.Average(x => x.CardProgress) : 0;
     
     public required Model  Model  { get; init; }
     public required string Number { get; init; }
     
-    private List<(DateTimeOffset ChangeDate, DateTimeOffset HandoverDate)> _handoverHistory = []; 
-    public DateTimeOffset? HandoverDate => _handoverHistory.Count > 0 ? _handoverHistory.MaxBy(x => x.ChangeDate).HandoverDate : null;
-    public TimeSpan? TimeToHandover => HandoverDate.HasValue ? HandoverDate.Value - DateTimeOffset.Now : null;
+    private List<(DateTimeOffset ChangeDate, DateTimeOffset RedlineDate)> _redlineHistory = []; 
+    public DateTimeOffset? RedlineDate => _redlineHistory.Count > 0 ? _redlineHistory.MaxBy(x => x.ChangeDate).RedlineDate : null;
+    public TimeSpan? TimeToHandover => RedlineDate.HasValue ? RedlineDate.Value - DateTimeOffset.Now : null;
     public HandoverState HandoverState { get; set; } = HandoverState.Unknown;
     public DateTimeOffset? HandoverStateLastUpdated { get; set; }
     
     public void AddHandoverHistory(DateTimeOffset changeDate, DateTimeOffset handoverDate)
-        => _handoverHistory.Add((changeDate, handoverDate));
+        => _redlineHistory.Add((changeDate, handoverDate));
 
-    public required LocationInfo OrderedLineLocationInfo { get; init; }
+    public required LocationInfo LocationInfo { get; init; }
 
     public bool Equals(SalesOrder? x, SalesOrder? y)
     {

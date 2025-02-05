@@ -246,7 +246,7 @@ public class TrelloService : IProductionService
                     Model = model,
                     Url = urlString,
                     Id = idString,
-                    OrderedLineLocationInfo = new LocationInfo(model.Line, locationHistory)
+                    LocationInfo = new LocationInfo(model.Line, locationHistory)
                 });
 
                 Log.Logger.Debug("New van information added");
@@ -305,7 +305,7 @@ public class TrelloService : IProductionService
         }
 
         // Log the count of vans with updated handover dates
-        Log.Logger.Information("{vanCount} handover dates added", Vans.Count(x => x.Value.HandoverDate.HasValue));
+        Log.Logger.Information("{vanCount} handover dates added", Vans.Count(x => x.Value.RedlineDate.HasValue));
 
         // Generate logs for the current production statistics across all production lines
         foreach (var productionLine in ProductionLines)
@@ -313,16 +313,16 @@ public class TrelloService : IProductionService
             var vansInLine = Vans.Where(x => x.Value.Model.Line == productionLine).Select(x => x.Value).ToList();
 
             int prepCount = vansInLine.Count(x =>
-                x.OrderedLineLocationInfo.CurrentLocation is not null && x.OrderedLineLocationInfo.CurrentLocation.Location.Type is ProductionLocationType.Prep && x.HandoverState is HandoverState.HandedOver);
+                x.LocationInfo.CurrentLocation is not null && x.LocationInfo.CurrentLocation.Location.LocationType is ProductionLocationType.Prep && x.HandoverState is HandoverState.HandedOver);
 
             int prodCount = vansInLine.Count(x =>
-                x.OrderedLineLocationInfo.CurrentLocation is not null && x.OrderedLineLocationInfo.CurrentLocation.Location.Type is ProductionLocationType.Bay or ProductionLocationType.Module or ProductionLocationType.Subassembly);
+                x.LocationInfo.CurrentLocation is not null && x.LocationInfo.CurrentLocation.Location.LocationType is ProductionLocationType.Bay or ProductionLocationType.Module or ProductionLocationType.Subassembly);
 
             int finishingCount = vansInLine.Count(x =>
-                x.OrderedLineLocationInfo.CurrentLocation is not null && x.OrderedLineLocationInfo.CurrentLocation.Location.Type is ProductionLocationType.Finishing && x.HandoverState is not HandoverState.HandedOver);
+                x.LocationInfo.CurrentLocation is not null && x.LocationInfo.CurrentLocation.Location.LocationType is ProductionLocationType.Finishing && x.HandoverState is not HandoverState.HandedOver);
 
             int handoverDueCount = vansInLine.Count(x =>
-                x.HandoverDate < DateTimeOffset.Now && x.HandoverState is HandoverState.UnhandedOver);
+                x.RedlineDate < DateTimeOffset.Now && x.HandoverState is HandoverState.UnhandedOver);
 
             int handedOverCount = vansInLine.Count(x =>
                 x.HandoverState is HandoverState.HandedOver);
@@ -396,11 +396,11 @@ public class TrelloService : IProductionService
 
             foreach (var card in cards)
             {
-                var cardActions = cachedActions.Where(x => x.BoardId == van.Id).ToList();
+                var cardActions = cachedActions.Where(x => x.CardId == card.Id).ToList();
                 var cardFields  = customFields.Where(x => x.ModelId == van.Id).ToList();
 
                 CardType     cardType = TrelloUtils.GetCardType(card, cardFields);
-                AreaOfOrigin? area     = TrelloUtils.ToAreaOfOrigin(card, cardFields, AreaOfOrigins);
+                AreaOfOrigin? area    = TrelloUtils.ToAreaOfOrigin(card, cardFields, AreaOfOrigins);
 
                 switch (cardType)
                 {

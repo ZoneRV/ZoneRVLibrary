@@ -18,7 +18,7 @@ public class WorkspaceLocation : IEquatable<WorkspaceLocation>
     [MaxLength(1024)] public string? Description { get; set; }
 
 
-    public required ProductionLocationType Type { get; init; }
+    public required ProductionLocationType LocationType { get; init; }
 
     /// <summary>
     ///Use <see cref="LocationFactory"/>  to create locations
@@ -49,7 +49,7 @@ public class WorkspaceLocation : IEquatable<WorkspaceLocation>
         return Name == other.Name && 
                Workspace.Id == other.Workspace.Id &&
                Description == other.Description && 
-               Type == other.Type;
+               LocationType == other.LocationType;
     }
     public override bool Equals(object? obj)
     {

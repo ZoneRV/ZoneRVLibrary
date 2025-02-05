@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using ZoneRV.Serialization;
 
 namespace ZoneRV.Models.Production;
 
@@ -15,6 +16,6 @@ public class ProductionWorkspace
     [MaxLength(1024)]
     public string? Description { get; set; }
     
-    public virtual ICollection<ProductionLine> Lines { get; set; } = default!;
-    public virtual ICollection<WorkspaceLocation> WorkspaceLocations { get; set; } = default!;
+    [OptionalJsonField] public virtual ICollection<ProductionLine> Lines { get; set; } = default!;
+    [OptionalJsonField] public virtual ICollection<WorkspaceLocation> WorkspaceLocations { get; set; } = default!;
 }

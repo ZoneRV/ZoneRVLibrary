@@ -7,7 +7,8 @@ public class JsonFieldContractResolver : DefaultContractResolver
 {
     public JsonFieldContractResolver(IEnumerable<string> fieldNames)
     {
-        _fieldNames = fieldNames.ToList();
+        _fieldNames    = fieldNames.ToList();
+        NamingStrategy = new CamelCaseNamingStrategy();
     }
     
     private readonly List<string> _fieldNames;

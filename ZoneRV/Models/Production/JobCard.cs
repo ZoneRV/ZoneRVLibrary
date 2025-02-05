@@ -12,25 +12,30 @@
 [DebuggerDisplay("{Name} - {SalesOrder.Name}")]
 public class JobCard : Card
 {
+    public override CardType Type
+    {
+        get => CardType.JobCard;
+    }
+    
     public JobCard(SalesOrder van, JobCardCreationInfo info, AreaOfOrigin? areaOfOrigin, OrderedLineLocation lineLocation) : base(van, info, areaOfOrigin)
     {
-        LineLocation = lineLocation;
+        Location = lineLocation;
         _taskTime = info.TaskTime;
     }
     
-    public OrderedLineLocation LineLocation { get; set; }
+    public OrderedLineLocation Location { get; set; }
 
     public DueStatus DueStatus
     {
         get
         {
-            if (this.SalesOrder.OrderedLineLocationInfo.CurrentLocation is null)
+            if (this.SalesOrder.LocationInfo.CurrentLocation is null)
                 return DueStatus.NotDue;
             
-            if (this.LineLocation > this.SalesOrder.OrderedLineLocationInfo.CurrentLocation)
+            if (this.Location > this.SalesOrder.LocationInfo.CurrentLocation)
                 return DueStatus.NotDue;
                 
-            if (this.LineLocation < this.SalesOrder.OrderedLineLocationInfo.CurrentLocation)
+            if (this.Location < this.SalesOrder.LocationInfo.CurrentLocation)
                 return DueStatus.OverDue;
             
             return DueStatus.Due;
@@ -50,7 +55,7 @@ public class JobCard : Card
         set => _taskTime = value;
     } 
     
-    public TimeSpan RemainingTaskTime => TaskTime - TaskTime * GetCompletionRate();
+    public TimeSpan RemainingTaskTime => TaskTime - TaskTime * CardProgress;
 
 }
 
