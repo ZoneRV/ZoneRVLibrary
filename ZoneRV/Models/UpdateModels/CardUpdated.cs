@@ -2,5 +2,5 @@
 
 public class CardUpdated : IBaseUpdate
 {
-    
+    public required string Id { get; set; }
 }
