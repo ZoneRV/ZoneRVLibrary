@@ -14,13 +14,28 @@ public class SalesOrderController : ControllerBase
         ProductionService = productionService;
     }
     
-    [HttpGet("{name}/{loadProduction}")]
-    public async Task<ActionResult<SalesOrder>> Get(string name, bool loadProduction, [FromBody] List<string> includedFields)
+    [HttpGet("{name}")]
+    public async Task<ActionResult<SalesOrder>> Get(string name, [FromBody] List<string>? includedFields = null)
     {
         if (!ProductionService.TryGetInfoByName(name, out var info))
             return NotFound();
 
-        if (loadProduction && !info.ProductionInfoLoaded)
+        includedFields = includedFields ?? [];
+
+        bool productionReloadNeeded = false;
+        
+        foreach (var field in includedFields)
+        {
+            SerializationUtils.CheckForRequired(field, out var prod, out _);
+
+            if (prod)
+            {
+                productionReloadNeeded = true;
+                break;
+            }
+        }
+        
+        if (productionReloadNeeded && !info.ProductionInfoLoaded)
             await ProductionService.LoadVanBoardAsync(info);
         
         var json = JsonConvert.SerializeObject(
