@@ -18,7 +18,7 @@ public class RedCard : Card
         CreationDate = info.CreationDate;
     }
     
-    public RedFlagIssue? RedFlagIssue { get; set; }
+    public RedFlagIssue RedFlagIssue { get; set; }
     public DateTimeOffset? CreationDate { get; init; }
 
     [JsonIgnore] public TimeSpan Age => CreationDate.HasValue ? DateTimeOffset.Now - CreationDate.Value : TimeSpan.Zero;
@@ -32,6 +32,6 @@ public class RedCard : Card
 [DebuggerDisplay("{Name}")]
 public class RedCardCreationInfo : CardCreationInfo
 {
-    public required RedFlagIssue? RedFlagIssue { get; set; }
+    public required RedFlagIssue RedFlagIssue { get; set; }
     public required DateTimeOffset? CreationDate { get; set; }
 }
