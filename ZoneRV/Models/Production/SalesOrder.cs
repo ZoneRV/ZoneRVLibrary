@@ -23,7 +23,12 @@ public class SalesOrder : IEqualityComparer<SalesOrder>
     [JsonIgnore]
     public IEnumerable<Card> Cards => JobCards.Select(Card (x) => x).Concat(RedCards).Concat(YellowCards);
 
-    [OptionalJsonField(true)] public double CompletionRate => Cards.Any() ? Cards.Average(x => x.CardProgress) : 0;
+    [OptionalJsonField(true)] public int JobCardsDue           => JobCards.Count(x => x.CardStatus != CardStatus.Completed && x.DueStatus == DueStatus.Due);
+    [OptionalJsonField(true)] public int JobCardsOutStanding   => JobCards.Count(x => x.CardStatus != CardStatus.Completed && x.DueStatus == DueStatus.OverDue);
+    [OptionalJsonField(true)] public int RedCardsIncomplete    => RedCards.Count(x => x.CardStatus != CardStatus.Completed);
+    [OptionalJsonField(true)] public int YellowCardsIncomplete => YellowCards.Count(x => x.CardStatus != CardStatus.Completed);
+
+    [OptionalJsonField(true)] public double Progress => Cards.Any() ? Cards.Average(x => x.CardProgress) : 0;
     
     public required Model  Model  { get; init; }
     public required string Number { get; init; }
