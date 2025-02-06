@@ -27,12 +27,29 @@ public class SalesOrderController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<SalesOrder>>> Get(GroupRequestById requests)
+    public async Task<ActionResult<IEnumerable<SalesOrder>>> Get(SalesOrderOptions options)
     {
-        var infos = ProductionService.GetInfos(x => requests.Names.Contains(x.Name));
+        var infos =
+            ProductionService.GetInfos(x =>
+                (options.WorkspaceIds is null || options.WorkspaceIds.Contains(x.Model.Line.Workspace.Id)) &&
+                (options.LineIds is null || options.LineIds.Contains(x.Model.Line.Id)) &&
+                (options.ModelIds is null || options.ModelIds.Contains(x.Model.Id)) &&
+                (options.Names is null || options.Names.Contains(x.Name)) &&
+                (options.Ids is null || x.Id is null || options.Ids.Contains(x.Id)) &&
+                (options.OrderedLocationId is null || x.LocationInfo.CurrentLocation is not null && options.OrderedLocationId.Contains(x.LocationInfo.CurrentLocation.Id)) &&
+                (options.WorkspaceLocationId is null || x.LocationInfo.CurrentLocation is not null && options.WorkspaceLocationId.Contains(x.LocationInfo.CurrentLocation.Location.Id))
+            ).ToList();
 
-        var json = await SerializeSalesOrders(infos, requests.OptionalFields);
+        if (options.OptionalFields is not null && BoardNeedsLoading(options.OptionalFields) && infos.Count(x => !x.ProductionInfoLoaded) > 10)
+        {
+            return BadRequest("Too many unloaded vans requested, try loading less at once.");
+        }
 
+        var json = await SerializeSalesOrders(infos, options.OptionalFields);
+
+        if (json.Length > 10000000)
+            return BadRequest("Request too large");
+        
         return Ok(json);
     }
 
@@ -62,24 +79,26 @@ public class SalesOrderController : ControllerBase
         return json;
     }
 
-    private async Task<string> SerializeSaleOrder(SalesOrder info, List<string>? includedFields = null)
+    private bool BoardNeedsLoading(IEnumerable<string> includedFields)
     {
-        includedFields = includedFields ?? [];
-
-        bool productionReloadNeeded = false;
-        
         foreach (var field in includedFields)
         {
             SerializationUtils.CheckForRequired(field, out var prod, out _);
 
             if (prod)
             {
-                productionReloadNeeded = true;
-                break;
+                return true;
             }
         }
-        
-        if (productionReloadNeeded && !info.ProductionInfoLoaded)
+
+        return false;
+    }
+
+    private async Task<string> SerializeSaleOrder(SalesOrder info, List<string>? includedFields = null)
+    {
+        includedFields = includedFields ?? [];
+
+        if (BoardNeedsLoading(includedFields) && !info.ProductionInfoLoaded)
             await ProductionService.LoadVanBoardAsync(info);
         
         var json = JsonConvert.SerializeObject(
