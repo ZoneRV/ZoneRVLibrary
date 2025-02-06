@@ -1,4 +1,5 @@
 using MartinCostello.OpenApi;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
@@ -6,6 +7,7 @@ using ZoneRV.Api;
 using ZoneRV.DBContexts;
 using ZoneRV.Services.Production;
 using Scalar.AspNetCore;
+using ZoneRV.Api.SignalR;
 using ZoneRV.Serialization;
 
 ZoneJsonSerializerSettings.GetOptionalSerializerSettings([]);
@@ -32,7 +34,18 @@ try
                 options.SerializerSettings.Converters.Add(new LocationInfoJsonConverter());
             });
     
+    builder.Services.AddSignalR(options =>
+    {
+        options.EnableDetailedErrors = Debugger.IsAttached;
+    });
+
+    builder.Services.AddResponseCompression(options =>
+    {
+        options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "application/octet-stream" });
+    });
+    
     builder.Services.AddOpenApi();
+
     builder.Services.AddOpenApiExtensions((options) =>
     {
         options.AddXmlComments<Program>();
@@ -71,6 +84,7 @@ try
     }
 
     app.MapControllers();
+    app.MapHub<ProductionServiceHub>("/production-hub");
     app.UseHttpsRedirection();
 
     app.Run();

@@ -6,8 +6,9 @@ namespace ZoneRV.Services.Production;
 [SuppressMessage("ReSharper", "InconsistentNaming")]
 public abstract partial class IProductionService
 {
-    public static event EventHandler<VanUpdated>?  VanUpdated;
-    public static event EventHandler<VanUpdated>?  VanAddedToProduction;
+    public event EventHandler<VanUpdated>?  VanUpdated;
+    public event EventHandler<CardUpdated>?  CardUpdated;
+    public event EventHandler<VanUpdated>?  VanAddedToProduction;
 
     public void UpdateCheck(object? sender, CheckUpdated data)
     {
@@ -21,6 +22,7 @@ public abstract partial class IProductionService
     
     public void UpdateCard(object? sender, CardUpdated data)
     {
+        CardUpdated?.Invoke(this, data);
         throw new NotImplementedException();
     }
     
