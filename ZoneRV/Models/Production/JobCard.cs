@@ -1,4 +1,6 @@
-﻿namespace ZoneRV.Models.Production;
+﻿using ZoneRV.Serialization;
+
+namespace ZoneRV.Models.Production;
 
 /// <summary>
 /// Represents a job card in the production system, inheriting from the <see cref="Card"/> base class.
@@ -23,7 +25,7 @@ public class JobCard : Card
         _taskTime = info.TaskTime;
     }
     
-    public OrderedLineLocation Location { get; set; }
+    [OptionalJsonField(true)] public OrderedLineLocation Location { get; set; }
 
     public DueStatus DueStatus
     {
