@@ -45,6 +45,7 @@ try
     });
     
     builder.Services.AddOpenApi();
+
     builder.Services.AddOpenApiExtensions((options) =>
     {
         options.AddXmlComments<Program>();
