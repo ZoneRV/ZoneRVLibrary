@@ -195,11 +195,9 @@ public static class TrelloUtils
     {
         if (RedCardListNames.Contains(card.List.Name) && !IgnoredRedAndYellowCardNames.Contains(card.Name))
         {
-            var desiredField = customFields.SingleOrDefault(x => x.Name == "Yellow Card Issue");
+            var yellowFileds = customFields.Where(x => x.Name == "Yellow Card Issue");
 
-            CustomFieldItem desiredFieldItem;
-
-            if (desiredField is not null && card.CustomFieldItems.Any(x => x.CustomFieldId == desiredField.Id))
+            if (card.CustomFieldItems.Any(x => yellowFileds.Any(f => f.Id == x.CustomFieldId)))
                 return CardType.YellowCard;
 
             else
