@@ -8,7 +8,7 @@ namespace ZoneRV.Models.Production;
 /// and other production-centric data for a specific sales production unit.
 /// </summary>
 [DebuggerDisplay("{Name} - {Id}")]
-public class SalesOrder : IEqualityComparer<SalesOrder>
+public class SalesOrder : IEqualityComparer<SalesOrder>, ICloneable
 {
     public string? Id { get; set; }
     public string Name => Model.Prefix + Number;
@@ -16,17 +16,14 @@ public class SalesOrder : IEqualityComparer<SalesOrder>
     [JsonIgnore] public bool InventoryInfoLoaded { get; internal set; } = false;
     public string? Url { get; set; }
     
-    [OptionalJsonField(true)] public List<JobCard> JobCards { get; } = [];
-    [OptionalJsonField(true)] public List<RedCard> RedCards { get; } = [];
-    [OptionalJsonField(true)] public List<YellowCard> YellowCards { get; } = [];
+    [OptionalJsonField(true)] public List<JobCard>    JobCards    { get; init; } = [];
+    [OptionalJsonField(true)] public List<RedCard>    RedCards    { get; init; } = [];
+    [OptionalJsonField(true)] public List<YellowCard> YellowCards { get; init; } = [];
 
     [JsonIgnore]
     public IEnumerable<Card> Cards => JobCards.Select(Card (x) => x).Concat(RedCards).Concat(YellowCards);
 
-    [OptionalJsonField(true)] public int JobCardsDue           => JobCards.Count(x => x.CardStatus != CardStatus.Completed && x.DueStatus == DueStatus.Due);
-    [OptionalJsonField(true)] public int JobCardsOutStanding   => JobCards.Count(x => x.CardStatus != CardStatus.Completed && x.DueStatus == DueStatus.OverDue);
-    [OptionalJsonField(true)] public int RedCardsIncomplete    => RedCards.Count(x => x.CardStatus != CardStatus.Completed);
-    [OptionalJsonField(true)] public int YellowCardsIncomplete => YellowCards.Count(x => x.CardStatus != CardStatus.Completed);
+    [OptionalJsonField(true)] public SalesOrderStats? Stats { get; set; }
 
     [OptionalJsonField(true)] public double Progress => Cards.Any() ? Cards.Average(x => x.CardProgress) : 0;
     
@@ -56,5 +53,25 @@ public class SalesOrder : IEqualityComparer<SalesOrder>
     public int GetHashCode(SalesOrder obj)
     {
         return StringComparer.InvariantCultureIgnoreCase.GetHashCode(obj.Name);
+    }
+
+    public object Clone()
+    {
+        return new SalesOrder()
+        {
+            Number = this.Number,
+            Model = this.Model,
+            _redlineHistory = this._redlineHistory,
+            JobCards = this.JobCards,
+            RedCards = this.RedCards,
+            YellowCards = this.YellowCards,
+            LocationInfo = LocationInfo,
+            HandoverState = this.HandoverState, 
+            HandoverStateLastUpdated = this.HandoverStateLastUpdated,
+            InventoryInfoLoaded = this.InventoryInfoLoaded,
+            ProductionInfoLoaded = this.ProductionInfoLoaded, 
+            Id = this.Id, 
+            Url = this.Url
+        };
     }
 }

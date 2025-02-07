@@ -29,34 +29,25 @@ public class SalesOrderController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<SalesOrder>>> Get(SalesOrderOptions options)
     {
-        IEnumerable<SalesOrder> infos =
-            from so in ProductionService
-                where 
-                    (options.WorkspaceIds is null || options.WorkspaceIds.Contains(so.Model.Line.Workspace.Id)) &&
-                      (options.LineIds is null || options.LineIds.Contains(so.Model.Line.Id)) &&
-                      (options.ModelIds is null || options.ModelIds.Contains(so.Model.Id)) &&
-                      (options.Names is null || options.Names.Contains(so.Name)) &&
-                      (options.Ids is null || so.Id is null || options.Ids.Contains(so.Id)) &&
-                      (options.OrderedLocationIds is null || so.LocationInfo.CurrentLocation is not null && options.OrderedLocationIds.Contains(so.LocationInfo.CurrentLocation.Id)) && 
-                      (options.WorkspaceLocationIds is null || so.LocationInfo.CurrentLocation is not null && options.WorkspaceLocationIds.Contains(so.LocationInfo.CurrentLocation.Location.Id))
-                orderby so.LocationInfo.CurrentLocation
-            select so;
+        IEnumerable<SalesOrder> infos = ProductionService.Where(options.FilterFunction());
 
+        var infosList = infos.ToList();
+
+        infosList = options.OrderFunction(infosList).ToList(); // TODO ideally vans should be loaded before sorting and after paging =(
+        
         if (options.Pagination is not null)
         {
             if (options.Pagination.PageCount < 1)
                 return BadRequest($"{nameof(options.Pagination.PageCount)} must be at least 1");
             
-            infos = infos.Skip((int)options.Pagination.PageStartIndex).Take((int)options.Pagination.PageLimit);
+            infosList = infosList.Skip((int)options.Pagination.PageStartIndex).Take((int)options.Pagination.PageLimit).ToList();
         }
-
-        var infosList = infos.ToList();
 
         if (options.OptionalFields is not null && BoardNeedsLoading(options.OptionalFields) && infosList.Count(x => !x.ProductionInfoLoaded) > 10)
         {
             return BadRequest("Too many unloaded vans requested, try loading less at once.");
         }
-
+        
         var json = await SerializeSalesOrders(infosList, options.OptionalFields);
 
         if (json.Length > 10000000)
@@ -83,8 +74,25 @@ public class SalesOrderController : ControllerBase
         if(productionReloadNeeded)
             await ProductionService.LoadVanBoardsAsync(salesOrders);
 
+        List<SalesOrder> clones = [];
+
+        if(includedFields is not null && includedFields.Any(x => x.ToLower() == "salesorder_stats"))
+        {
+            foreach (var salesOrder in salesOrders)
+            {
+                SalesOrder clone = (SalesOrder)salesOrder.Clone();
+                clone.Stats = new SalesOrderStats(clone);
+
+                clones.Add(clone);
+            }
+        }
+        else
+        {
+            clones = salesOrders.ToList();
+        }
+
         var json = JsonConvert.SerializeObject(
-            salesOrders, 
+            clones, 
             ZoneJsonSerializerSettings.GetOptionalSerializerSettings(includedFields)
         );
         

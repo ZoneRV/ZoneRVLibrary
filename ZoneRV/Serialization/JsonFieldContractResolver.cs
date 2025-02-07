@@ -15,6 +15,7 @@ public class JsonFieldContractResolver : DefaultContractResolver
 
     protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
     {
+        // TODO Fixed property reflected type returning base type instead of implemented one
         var filterAttribute = member.CustomAttributes.FirstOrDefault(x => x.AttributeType == typeof(OptionalJsonFieldAttribute));
         
         var property = base.CreateProperty(member, memberSerialization);
