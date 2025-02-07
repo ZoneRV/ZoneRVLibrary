@@ -74,6 +74,17 @@ public abstract partial class IProductionService : IEnumerable<SalesOrder>
 
     private ConcurrentDictionary<SalesOrder, Task<SalesOrder>> _currentBoardTasks { get; init; } = [];
 
+    public async Task LoadRequiredSalesOrdersAsync()
+    {
+        var salesOrders = this.Where(x => 
+            x.LocationInfo.CurrentLocation is not null &&
+            x.HandoverState is HandoverState.UnhandedOver).ToArray();
+        
+        await LoadVanBoardsAsync(salesOrders);
+        
+        Log.Logger.Information("Finished loading {count} Sales order", salesOrders.Count());
+    }
+    
     protected abstract Task<SalesOrder> _loadVanFromSourceAsync(SalesOrder info);
 
     public async Task<SalesOrder> LoadVanBoardAsync(SalesOrder info)
@@ -111,6 +122,9 @@ public abstract partial class IProductionService : IEnumerable<SalesOrder>
     public abstract int MaxDegreeOfParallelism { get; protected set; }
     public async Task<IEnumerable<SalesOrder>> LoadVanBoardsAsync(IEnumerable<SalesOrder> infos, CancellationToken cancellationToken = default)
     {
+        
+        Log.Logger.Information("Loading {count} Sales order", infos.Count());
+        
         ConcurrentBag<SalesOrder> boards = [];
         
         ParallelOptions parallelOptions = new ParallelOptions

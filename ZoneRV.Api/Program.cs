@@ -1,3 +1,4 @@
+using Figgle;
 using MartinCostello.OpenApi;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
@@ -10,13 +11,60 @@ using Scalar.AspNetCore;
 using ZoneRV.Api.SignalR;
 using ZoneRV.Serialization;
 
-ZoneJsonSerializerSettings.GetOptionalSerializerSettings([]);
-
 try
 {
     var builder = WebApplication.CreateBuilder(args);
     
     builder.Configuration.AddJsonFile("appsettings.json");
+    
+    var startupText = FiggleFonts.Standard.Render("Zone RV API");
+    var startupSplits = startupText.Split("\r\n");
+    
+    string[] camp =
+    [
+        @"       ______                    ",
+        @"      /     /\",
+        @"     /     /  \",
+        @"    /_____/----\_",
+        @"",
+        @""
+    ];
+
+    string[] fire =
+    [
+                                          "",
+                       "             (     ",
+                        "            ).    ",
+                          "       o (:') o ",
+        @"                       o ~/~~\~ o",
+         "                        o  o  o  "
+    ];
+
+    if (Debugger.IsAttached)
+    {
+        fire[4] = @"    Debug Enabled      o ~/~~\~ o";
+    }
+    
+    if (bool.TryParse(builder.Configuration["enableWebhooks"], out var result) && !result)
+    {
+        fire[5] =  "    Webhooks disabled   o  o  o  ";
+    }
+    
+    var startupTextBorder = new string(Enumerable.Repeat('#', startupSplits[0].Length + 4 + camp[0].Length).ToArray());
+  
+    Console.WriteLine(startupTextBorder);
+    for (var i = 0; i < startupSplits.Length - 1; i++)
+    {
+        Console.Write("| ");
+        Console.Write(startupSplits[i]);
+        Console.Write(camp[i]);
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.Write(fire[i]);
+        Console.ResetColor();
+        Console.WriteLine(" |");
+    }
+    Console.WriteLine(startupTextBorder);
+    Console.WriteLine();
 
     Log.Logger =
         new LoggerConfiguration()
@@ -66,11 +114,6 @@ try
     builder.Services.AddZoneService(builder.Configuration);
 
     var app = builder.Build();
-    
-    IProductionService? productionService = app.Services.GetService<IProductionService>();
-            
-    ArgumentNullException.ThrowIfNull(productionService);
-    await productionService.InitialiseService();
 
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
@@ -86,17 +129,30 @@ try
     app.MapControllers();
     app.MapHub<ProductionServiceHub>("/production-hub");
     app.UseHttpsRedirection();
+    
+    // Continue without waiting
+#pragma warning disable CS4014
+    app.RunAsync();
+#pragma warning restore CS4014
 
-    app.Run();
+    IProductionService productionService = app.Services.GetRequiredService<IProductionService>();
+    
+    await productionService.InitialiseService();
+    await productionService.LoadRequiredSalesOrdersAsync();
+    
+    await app.WaitForShutdownAsync();
 }
 catch (Exception e)
 {
-    Log.Logger.Fatal(e, "Fatal exception during startup.");
+    Log.Logger.Fatal(e, "Exception during startup.");
     throw;
 }
 finally
 {
     Log.CloseAndFlush();
+    Console.BackgroundColor = ConsoleColor.Red;
+    Console.WriteLine("Api has shut down.");
+    Console.ResetColor();
 }
 
 
