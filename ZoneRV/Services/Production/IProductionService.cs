@@ -11,7 +11,7 @@ using ZoneRV.DBContexts;
 namespace ZoneRV.Services.Production;
 
 [SuppressMessage("ReSharper", "InconsistentNaming")]
-public abstract partial class IProductionService
+public abstract partial class IProductionService : IEnumerable<SalesOrder>
 {
     public required List<ProductionWorkspace>   Workspaces       { get; init; }
     public          IEnumerable<ProductionLine> ProductionLines  => Workspaces.SelectMany(x => x.Lines);
@@ -25,6 +25,16 @@ public abstract partial class IProductionService
     public             IConfiguration Configuration    { get; set; }
     public             bool           WebhooksEnabled  { get; set; }
     protected abstract string         ServiceTypeName { get; }
+
+    public IEnumerator<SalesOrder> GetEnumerator()
+    {
+        return Vans.Values.GetEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
+    }
     
     
     public IProductionService(IServiceScopeFactory scopeFactory, IConfiguration configuration)

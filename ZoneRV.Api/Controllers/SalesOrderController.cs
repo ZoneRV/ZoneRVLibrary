@@ -29,23 +29,35 @@ public class SalesOrderController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<SalesOrder>>> Get(SalesOrderOptions options)
     {
-        var infos =
-            ProductionService.GetInfos(x =>
-                (options.WorkspaceIds is null || options.WorkspaceIds.Contains(x.Model.Line.Workspace.Id)) &&
-                (options.LineIds is null || options.LineIds.Contains(x.Model.Line.Id)) &&
-                (options.ModelIds is null || options.ModelIds.Contains(x.Model.Id)) &&
-                (options.Names is null || options.Names.Contains(x.Name)) &&
-                (options.Ids is null || x.Id is null || options.Ids.Contains(x.Id)) &&
-                (options.OrderedLocationId is null || x.LocationInfo.CurrentLocation is not null && options.OrderedLocationId.Contains(x.LocationInfo.CurrentLocation.Id)) &&
-                (options.WorkspaceLocationId is null || x.LocationInfo.CurrentLocation is not null && options.WorkspaceLocationId.Contains(x.LocationInfo.CurrentLocation.Location.Id))
-            ).ToList();
+        IEnumerable<SalesOrder> infos =
+            from so in ProductionService
+                where 
+                    (options.WorkspaceIds is null || options.WorkspaceIds.Contains(so.Model.Line.Workspace.Id)) &&
+                      (options.LineIds is null || options.LineIds.Contains(so.Model.Line.Id)) &&
+                      (options.ModelIds is null || options.ModelIds.Contains(so.Model.Id)) &&
+                      (options.Names is null || options.Names.Contains(so.Name)) &&
+                      (options.Ids is null || so.Id is null || options.Ids.Contains(so.Id)) &&
+                      (options.OrderedLocationIds is null || so.LocationInfo.CurrentLocation is not null && options.OrderedLocationIds.Contains(so.LocationInfo.CurrentLocation.Id)) && 
+                      (options.WorkspaceLocationIds is null || so.LocationInfo.CurrentLocation is not null && options.WorkspaceLocationIds.Contains(so.LocationInfo.CurrentLocation.Location.Id))
+                orderby so.LocationInfo.CurrentLocation
+            select so;
 
-        if (options.OptionalFields is not null && BoardNeedsLoading(options.OptionalFields) && infos.Count(x => !x.ProductionInfoLoaded) > 10)
+        if (options.Pagination is not null)
+        {
+            if (options.Pagination.PageCount < 1)
+                return BadRequest($"{nameof(options.Pagination.PageCount)} must be at least 1");
+            
+            infos = infos.Skip((int)options.Pagination.PageStartIndex).Take((int)options.Pagination.PageLimit);
+        }
+
+        var infosList = infos.ToList();
+
+        if (options.OptionalFields is not null && BoardNeedsLoading(options.OptionalFields) && infosList.Count(x => !x.ProductionInfoLoaded) > 10)
         {
             return BadRequest("Too many unloaded vans requested, try loading less at once.");
         }
 
-        var json = await SerializeSalesOrders(infos, options.OptionalFields);
+        var json = await SerializeSalesOrders(infosList, options.OptionalFields);
 
         if (json.Length > 10000000)
             return BadRequest("Request too large");

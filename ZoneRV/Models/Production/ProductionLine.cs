@@ -23,9 +23,9 @@ public class ProductionLine
     [OptionalJsonField, Required, ForeignKey("WorkspaceId"), DeleteBehavior(DeleteBehavior.NoAction)] // TODO: Figure out the deletion behaviour
     public required virtual ProductionWorkspace Workspace { get; init; }
     
-    public virtual required ICollection<OrderedLineLocation> OrderedLineLocations { get; set; }
+    [OptionalJsonField] public virtual required ICollection<OrderedLineLocation> OrderedLineLocations { get; set; }
     
-    [OptionalJsonField] public List<Model>         Models    { get; set; } = [];
+    [OptionalJsonField] public List<Model> Models { get; set; } = [];
 
     [OptionalJsonField] public List<AreaOfOrigin> AreaOfOrigins { get; set; } = [];
 

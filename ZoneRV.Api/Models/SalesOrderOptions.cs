@@ -9,6 +9,8 @@ public class SalesOrderOptions
     public List<int>?    ModelIds;
     public List<string>? Names;
     public List<string>? Ids;
-    public List<int>?    OrderedLocationId;
-    public List<int>?    WorkspaceLocationId;
+    public List<int>?    OrderedLocationIds;
+    public List<int>?    WorkspaceLocationIds;
+
+    public PaginationOptions? Pagination { get; set; }
 }
