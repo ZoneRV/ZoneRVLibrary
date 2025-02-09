@@ -11,10 +11,10 @@ public abstract partial class IProductionService
         => TryGetSingleInfo(x => string.Equals(x.Name, name, StringComparison.CurrentCultureIgnoreCase), out info);
     
     public bool TryGetInfoById(string id, [NotNullWhen(true)] out SalesOrder? info)
-        => Vans.TryGetValue(id.ToLower(), out info);
+        => SalesOrders.TryGetValue(id.ToLower(), out info);
     
     public IEnumerable<SalesOrder> GetInfos(Func<SalesOrder, bool> predicate)
-        => Vans.Values.Where(predicate);
+        => SalesOrders.Values.Where(predicate);
 
     public bool TryGetSingleInfo(Func<SalesOrder, bool> predicate, [NotNullWhen(true)] out SalesOrder? info)
     {

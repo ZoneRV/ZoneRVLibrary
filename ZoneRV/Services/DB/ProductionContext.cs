@@ -25,8 +25,14 @@ public class ProductionContext : DbContext
         modelBuilder.Entity<ProductionWorkspace>()
                     .HasMany<ProductionLine>(x => x.Lines)
                     .WithOne(x => x.Workspace);
+
+        modelBuilder.Entity<OrderedLineLocation>()
+                    .Property(o => o.Order)
+                    .HasPrecision(12, 10);
         
         //Configure default schema
         modelBuilder.HasDefaultSchema("production");
+        
+        base.OnModelCreating(modelBuilder);
     }
 }

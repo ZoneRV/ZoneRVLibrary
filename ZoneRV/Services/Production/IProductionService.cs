@@ -28,7 +28,7 @@ public abstract partial class IProductionService : IEnumerable<SalesOrder>
 
     public IEnumerator<SalesOrder> GetEnumerator()
     {
-        return Vans.Values.GetEnumerator();
+        return SalesOrders.Values.GetEnumerator();
     }
 
     IEnumerator IEnumerable.GetEnumerator()
@@ -70,60 +70,94 @@ public abstract partial class IProductionService : IEnumerable<SalesOrder>
     /// and preparing resources for operation. This method is intended to be overridden in derived classes
     /// with specific implementation details for different production service types.
     /// </summary>
-    public abstract Task InitialiseService();
+    public virtual Task InitialiseService()
+    {
+        foreach (var productionLine in ProductionLines)
+        {
+            var salesOrders = SalesOrders.Where(x => x.Value.Model.Line == productionLine).Select(x => x.Value).ToList();
+
+            int preProd = salesOrders
+               .Count(x => 
+                          x.LocationInfo.CurrentLocation is null && x.HandoverState is HandoverState.UnhandedOver);
+
+            int prodCount = salesOrders
+               .Count(x =>
+                          x.LocationInfo.CurrentLocation is not null && x.LocationInfo.CurrentLocation.Location.LocationType is ProductionLocationType.Bay or ProductionLocationType.Module or ProductionLocationType.Subassembly);
+
+            int finishingCount = salesOrders
+               .Count(x =>
+                          x.LocationInfo.CurrentLocation is not null && x.LocationInfo.CurrentLocation.Location.LocationType is ProductionLocationType.Finishing && x.HandoverState is not HandoverState.HandedOver);
+
+            int handoverDueCount = salesOrders
+               .Count(x =>
+                          x.RedlineDate < DateTimeOffset.Now && x.HandoverState is HandoverState.UnhandedOver);
+
+            int handedOverCount = salesOrders
+               .Count(x =>
+                          x.HandoverState is HandoverState.HandedOver);
+
+            int unknownHandoverCount = salesOrders
+               .Count(x =>
+                          x.HandoverState is HandoverState.Unknown);
+
+            Log.Logger.Information(
+                "{line} - {workspace}: Pre-Production: {preProd} - In Production: {prodCount} - In Finishing: {finishingCount} - Over Due: {overdueCount} - Handed Over: {handoverCount} - Unknown Handover: {unknownHandoverCount}",
+                productionLine.Name, productionLine.Workspace.Name, preProd, prodCount, finishingCount, handoverDueCount, handedOverCount, unknownHandoverCount);
+        }
+        
+        return Task.CompletedTask;
+    }
 
     private ConcurrentDictionary<SalesOrder, Task<SalesOrder>> _currentBoardTasks { get; init; } = [];
 
-    public async Task LoadRequiredSalesOrdersAsync()
+    public async Task LoadRequiredSalesOrdersAsync(CancellationToken cancellationToken = default)
     {
         var salesOrders = this.Where(x => 
             x.LocationInfo.CurrentLocation is not null &&
             x.HandoverState is HandoverState.UnhandedOver).ToArray();
         
-        await LoadVanBoardsAsync(salesOrders);
-        
-        Log.Logger.Information("Finished loading {count} Sales order", salesOrders.Count());
+        await LoadSalesOrderBoardsAsync(salesOrders, cancellationToken);
     }
     
-    protected abstract Task<SalesOrder> _loadVanFromSourceAsync(SalesOrder info);
+    protected abstract Task<SalesOrder> _loadSalesOrderFromSourceAsync(SalesOrder salesOrder, CancellationToken cancellationToken = default);
 
-    public async Task<SalesOrder> LoadVanBoardAsync(SalesOrder info)
+    public async Task<SalesOrder> LoadSalesOrderBoardAsync(SalesOrder salesOrder, CancellationToken cancellationToken = default)
     {
-        if (info.ProductionInfoLoaded)
-            return info;
+        if (salesOrder.ProductionInfoLoaded)
+            return salesOrder;
         
-        if (_currentBoardTasks.TryGetValue(info, out Task<SalesOrder>? existingTask))
+        if (_currentBoardTasks.TryGetValue(salesOrder, out Task<SalesOrder>? existingTask))
         {
-            await Task.WhenAll([existingTask]);
+            await Task.WhenAny(existingTask);
 
             return existingTask.Result;
         }
         else
         {
-            Task<SalesOrder> newTask = _loadVanFromSourceAsync(info);
+            Task<SalesOrder> newTask = _loadSalesOrderFromSourceAsync(salesOrder, cancellationToken);
 
-            _currentBoardTasks.TryAdd(info, newTask);
+            _currentBoardTasks.TryAdd(salesOrder, newTask);
 
-            await newTask.WaitAsync(CancellationToken.None);
+            await newTask.WaitAsync(cancellationToken);
 
-            info.ProductionInfoLoaded = true;
+            salesOrder.ProductionInfoLoaded = true;
 
             await Task.Delay(100); // TODO: fix so delay isn't needed
 
-            _currentBoardTasks.TryRemove(info, out _);
+            _currentBoardTasks.TryRemove(salesOrder, out _);
             
-            Log.Logger.Information("{name} production information loaded. Jobs:{jobs} Red Cards:{redCards} Yellow Cards:{yellowCards}", 
-                info.Name, info.JobCards.Count, info.RedCards.Count, info.YellowCards.Count);
+            Log.Logger.Information("{name} loaded. Jobs:{jobs} Red Cards:{redCards} Yellow Cards:{yellowCards}.", 
+                salesOrder.Name.ToUpper(), salesOrder.JobCards.Count, salesOrder.RedCards.Count, salesOrder.YellowCards.Count);
 
             return newTask.Result;
         }
     }
 
     public abstract int MaxDegreeOfParallelism { get; protected set; }
-    public async Task<IEnumerable<SalesOrder>> LoadVanBoardsAsync(IEnumerable<SalesOrder> infos, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<SalesOrder>> LoadSalesOrderBoardsAsync(IEnumerable<SalesOrder> salesOrders, CancellationToken cancellationToken = default)
     {
-        
-        Log.Logger.Information("Loading {count} Sales order", infos.Count());
+        var enumerable = salesOrders as SalesOrder[] ?? salesOrders.ToArray();
+        Log.Logger.Information("Loading {count} Sales order/s.", enumerable.Length);
         
         ConcurrentBag<SalesOrder> boards = [];
         
@@ -133,33 +167,35 @@ public abstract partial class IProductionService : IEnumerable<SalesOrder>
             CancellationToken      = cancellationToken
         };
         
-        await Parallel.ForEachAsync(infos, parallelOptions, async (info, _) =>
+        await Parallel.ForEachAsync(enumerable, parallelOptions, async (salesOrder, ct) =>
         {
             try
             {
-                await LoadVanBoardAsync(info);
+                await LoadSalesOrderBoardAsync(salesOrder, ct);
                 
-                boards.Add(info);
+                boards.Add(salesOrder);
             }
             catch (Exception ex)
             {
-                Log.Logger.Error(ex, "Exception while trying to load {name}:{id}", info.Name, info.Id);
+                Log.Logger.Error(ex, "Exception while trying to load {name}:{id}", salesOrder.Name, salesOrder.Id);
             }
         });
+        
+        Log.Logger.Information("Finished loading {count} Sales order/s.", enumerable.Length);
 
         return boards;
     }
 
-    public void MarkSOsUnloaded(Func<SalesOrder, bool> predicate)
+    public void MarkSalesOrdersUnloaded(Func<SalesOrder, bool> predicate)
     {
-        foreach (SalesOrder? info in Vans.Values)
+        foreach (SalesOrder? salesOrder in SalesOrders.Values)
         {
-            if (!predicate(info) || !info.ProductionInfoLoaded)
+            if (!predicate(salesOrder) || !salesOrder.ProductionInfoLoaded)
                 continue;
 
-            var jobIds    = info.JobCards.Select(x => x.Id).ToList();
-            var redIds    = info.RedCards.Select(x => x.Id).ToList();
-            var yellowIds = info.YellowCards.Select(x => x.Id).ToList();
+            var jobIds    = salesOrder.JobCards.Select(x => x.Id).ToList();
+            var redIds    = salesOrder.RedCards.Select(x => x.Id).ToList();
+            var yellowIds = salesOrder.YellowCards.Select(x => x.Id).ToList();
 
             List<string> checkListIds = [];
             List<string> commentIds = [];
@@ -172,7 +208,7 @@ public abstract partial class IProductionService : IEnumerable<SalesOrder>
                 {
                     checkListIds.AddRange(job.Checklists.Select(x => x.Id));
                     job.Checklists.Clear();
-                    info.JobCards.Remove(job);
+                    salesOrder.JobCards.Remove(job);
                 }
             }
 
@@ -184,7 +220,7 @@ public abstract partial class IProductionService : IEnumerable<SalesOrder>
                 {
                     checkListIds.AddRange(red.Checklists.Select(x => x.Id));
                     red.Checklists.Clear();
-                    info.RedCards.Remove(red);
+                    salesOrder.RedCards.Remove(red);
                 }
             }
 
@@ -196,7 +232,7 @@ public abstract partial class IProductionService : IEnumerable<SalesOrder>
                 {
                     checkListIds.AddRange(yellow.Checklists.Select(x => x.Id));
                     yellow.Checklists.Clear();
-                    info.YellowCards.Remove(yellow);
+                    salesOrder.YellowCards.Remove(yellow);
                 }
             }
 
@@ -216,12 +252,12 @@ public abstract partial class IProductionService : IEnumerable<SalesOrder>
             
             // TODO Comments
 
-            Debug.Assert(!info.Cards.Any());
+            Debug.Assert(!salesOrder.Cards.Any());
             
-            Log.Logger.Information("{name} production information unloaded. Jobs:{jobs} Red Cards:{redCards} Yellow Cards:{yellowCards}", 
-                                   info.Name, jobIds.Count, redIds.Count, yellowIds.Count);
+            Log.Logger.Information("{name} unloaded. Jobs:{jobs} Red Cards:{redCards} Yellow Cards:{yellowCards}", 
+                                   salesOrder.Name.ToUpper(), jobIds.Count, redIds.Count, yellowIds.Count);
             
-            info.ProductionInfoLoaded = false;
+            salesOrder.ProductionInfoLoaded = false;
         }
     }
 }

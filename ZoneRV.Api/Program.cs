@@ -150,9 +150,7 @@ catch (Exception e)
 finally
 {
     Log.CloseAndFlush();
-    Console.BackgroundColor = ConsoleColor.Red;
     Console.WriteLine("Api has shut down.");
-    Console.ResetColor();
 }
 
 

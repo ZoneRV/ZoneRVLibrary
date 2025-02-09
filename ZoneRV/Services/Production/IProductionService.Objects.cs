@@ -13,9 +13,9 @@ namespace ZoneRV.Services.Production;
 public abstract partial class IProductionService
 {
     /// <summary>
-    /// Key is the van name
+    /// Key is the Sales Order name
     /// </summary>
-    protected ConcurrentDictionary<string, SalesOrder> Vans { get; } = [];
+    protected ConcurrentDictionary<string, SalesOrder> SalesOrders { get; } = [];
     
     protected ConcurrentDictionary<string, Check> Checks { get; } = [];
     protected ConcurrentDictionary<string, Checklist> Checklists { get; } = [];
@@ -110,7 +110,7 @@ public abstract partial class IProductionService
             
             await productionContext.SaveChangesAsync();
             
-            MarkSOsUnloaded(x => x.Model.LineId == line.Id);
+            MarkSalesOrdersUnloaded(x => x.Model.LineId == line.Id);
             
             return newLocation;
         }
@@ -137,19 +137,19 @@ public abstract partial class IProductionService
             
             await productionContext.SaveChangesAsync();
             
-            MarkSOsUnloaded(x => x.Model.LineId == line.Id);
+            MarkSalesOrdersUnloaded(x => x.Model.LineId == line.Id);
             
             return area;
         }
     }
 
-    protected JobCard BuildJobCard(SalesOrder van, JobCardCreationInfo info, AreaOfOrigin? areaOfOrigin, OrderedLineLocation location)
+    protected JobCard BuildJobCard(SalesOrder salesOrder, JobCardCreationInfo info, AreaOfOrigin? areaOfOrigin, OrderedLineLocation location)
     {
-        var jobcard = new JobCard(van, info, areaOfOrigin, location);
+        var jobcard = new JobCard(salesOrder, info, areaOfOrigin, location);
 
         foreach (var commentInfo in info.CommentInfos)
         {
-            BuildComment(van, commentInfo, jobcard);
+            BuildComment(commentInfo, jobcard);
         }
 
         foreach (var checklistInfo in info.ChecklistInfos)
@@ -159,22 +159,22 @@ public abstract partial class IProductionService
 
         foreach (var attachment in info.AttachmentInfos)
         {
-            BuildAttachment(van, attachment, jobcard);
+            BuildAttachment(attachment, jobcard);
         }
 
         JobCards.TryAdd(info.Id, jobcard);
-        van.JobCards.Add(jobcard);
+        salesOrder.JobCards.Add(jobcard);
 
         return jobcard;
     }
 
-     protected RedCard BuildRedCard(SalesOrder van, RedCardCreationInfo info, AreaOfOrigin? areaOfOrigin)
+     protected RedCard BuildRedCard(SalesOrder salesOrder, RedCardCreationInfo info, AreaOfOrigin? areaOfOrigin)
      {
-         var redCard = new RedCard(van, info, areaOfOrigin);
+         var redCard = new RedCard(salesOrder, info, areaOfOrigin);
 
         foreach (var commentInfo in info.CommentInfos)
         {
-            BuildComment(van, commentInfo, redCard);
+            BuildComment(commentInfo, redCard);
         }
 
         foreach (var checklistInfo in info.ChecklistInfos)
@@ -184,22 +184,22 @@ public abstract partial class IProductionService
 
         foreach (var attachmentInfo in info.AttachmentInfos)
         {
-            BuildAttachment(van, attachmentInfo, redCard);
+            BuildAttachment(attachmentInfo, redCard);
         }
 
         RedCards.TryAdd(info.Id, redCard);
-        van.RedCards.Add(redCard);
+        salesOrder.RedCards.Add(redCard);
 
         return redCard;
     }
 
-     protected YellowCard BuildYellowCard(SalesOrder van, YellowCardInfo info, AreaOfOrigin? areaOfOrigin)
+     protected YellowCard BuildYellowCard(SalesOrder salesOrder, YellowCardInfo info, AreaOfOrigin? areaOfOrigin)
      {
-         var yellowCard = new YellowCard(van, info, areaOfOrigin);
+         var yellowCard = new YellowCard(salesOrder, info, areaOfOrigin);
 
         foreach (var commentInfo in info.CommentInfos)
         {
-            BuildComment(van, commentInfo, yellowCard);
+            BuildComment(commentInfo, yellowCard);
         }
 
         foreach (var checklistInfo in info.ChecklistInfos)
@@ -209,11 +209,11 @@ public abstract partial class IProductionService
 
         foreach (var attachmentInfo in info.AttachmentInfos)
         {
-            BuildAttachment(van, attachmentInfo, yellowCard);
+            BuildAttachment(attachmentInfo, yellowCard);
         }
 
         YellowCards.TryAdd(info.Id, yellowCard);
-        van.YellowCards.Add(yellowCard);
+        salesOrder.YellowCards.Add(yellowCard);
 
         return yellowCard;
     }
@@ -256,7 +256,7 @@ public abstract partial class IProductionService
         return check;
     }
 
-    protected Comment BuildComment(SalesOrder van, CommentInfo info, Card card)
+    protected Comment BuildComment(CommentInfo info, Card card)
     {
         Users.TryGetValue(info.AuthorId, out var user);
 
@@ -275,7 +275,7 @@ public abstract partial class IProductionService
         return comment;
     }
 
-    protected Attachment BuildAttachment(SalesOrder van, AttachmentInfo info, Card card)
+    protected Attachment BuildAttachment(AttachmentInfo info, Card card)
     {
         var attachment = new Attachment()
         {

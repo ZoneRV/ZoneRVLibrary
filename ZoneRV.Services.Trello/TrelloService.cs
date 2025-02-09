@@ -5,6 +5,7 @@ using Serilog;
 using TrelloDotNet;
 using TrelloDotNet.Model;
 using TrelloDotNet.Model.Actions;
+using TrelloDotNet.Model.Batch;
 using TrelloDotNet.Model.Options;
 using TrelloDotNet.Model.Options.GetActionsOptions;
 using TrelloDotNet.Model.Options.GetCardOptions;
@@ -92,6 +93,8 @@ public class TrelloService : IProductionService
         await LoadUsers(organisations);
 
         await LoadBasicProductionInfo();
+
+        await base.InitialiseService();
     }
 
     private async Task LoadUsers(IEnumerable<Organization> organisations)
@@ -129,33 +132,26 @@ public class TrelloService : IProductionService
         }
     }
 
-    private async Task LoadBasicProductionInfo()
+    private async Task LoadBasicProductionInfo(CancellationToken cancellationToken = default)
     {
-        // Fetch all the cards and actions on the Line Move Board
-        List<Card> lineMoveBoardCards = await TrelloClient.GetCardsOnBoardAsync(LineMoveBoardId, new GetCardOptions() { IncludeList = true });
-        List<TrelloAction> lineMoveActions = await TrelloClient.GetActionsOfBoardAsync(LineMoveBoardId, new GetActionsOptions() { Limit = 1000, Filter = ["updateCard:idList"] });
+        List<Card>         lineMoveBoardCards = await TrelloClient.GetCardsOnBoardAsync(LineMoveBoardId, new GetCardOptions() { IncludeList = true }, cancellationToken);
+        List<TrelloAction> lineMoveActions    = await TrelloClient.GetActionsOfBoardAsync(LineMoveBoardId, new GetActionsOptions() { Limit  = 1000, Filter = ["updateCard:idList"] }, cancellationToken);
 
-        // Fetch all the cards and actions on the "ProHo Dashboard"
-        List<Card> prohoCards = await TrelloClient.GetCardsOnBoardAsync(ProHoDashboardId, new GetCardOptions());
-        var prohoCachedActions = await GetTrelloActionsWithCache(ProHoDashboardId, ["updateCard"]);
+        List<Card> prohoCards         = await TrelloClient.GetCardsOnBoardAsync(ProHoDashboardId, new GetCardOptions(), cancellationToken);
+        var        prohoCachedActions = await GetTrelloActionsWithCache(ProHoDashboardId, cancellationToken, ["updateCard"]);
 
-        // Fetch the lists on the "Line Move Board"
-        List<List>? lists = await TrelloClient.GetListsOnBoardAsync(LineMoveBoardId);
+        List<List>? lists = await TrelloClient.GetListsOnBoardAsync(LineMoveBoardId, cancellationToken);
 
-        // Build a list of model prefixes used to match card names
         List<string> modelPrefixes = ProductionLines.SelectMany(x => x.Models.Select(y => y.Prefix.ToLower())).ToList();
 
-        // Filter cards on the Line Move and ProHo Boards to match relevant vehicle model prefixes
         lineMoveBoardCards = lineMoveBoardCards
             .Where(c => modelPrefixes.Any(vm => c.Name.ToLower().Contains(vm.ToLower()))).ToList();
 
         prohoCards = prohoCards
             .Where(c => modelPrefixes.Any(vm => c.Name.ToLower().Contains(vm.ToLower()))).ToList();
 
-        // Temporary list to store duplicate (or blocked) formatted names to avoid reprocessing and ambiguity between cards with same names
         List<string> tempBlockedNames = [];
 
-        // Retrieve stored van information from the database
         List<VanId> storedVanIds;
 
         using (var scope = _scopeFactory.CreateScope())
@@ -165,64 +161,50 @@ public class TrelloService : IProductionService
             storedVanIds = trelloContext.VanIds.ToList();
         }
 
-        // Iterate through every card in the filtered "Line Move Board" cards
         foreach (Card lineMoveCard in lineMoveBoardCards)
         {
-            // Attempt to extract the model, number, and formatted name from the card name
             if (ModelNameMatcher.TryGetSingleName(lineMoveCard.Name, out var model, out var number, out string? formattedName))
             {
-                // Skip processing if the card's formatted name is already in the blocked list
                 if (tempBlockedNames.Contains(formattedName))
                     continue;
 
-                // If the van is already in the dictionary, handle duplicates
-                if (Vans.ContainsKey(formattedName))
+                if (SalesOrders.ContainsKey(formattedName))
                 {
-                    // Remove the duplicate van and block its processing
-                    Vans.TryRemove(formattedName, out _);
+                    SalesOrders.TryRemove(formattedName, out _);
                     tempBlockedNames.Add(formattedName);
 
                     Log.Logger.Error("{name} found at least twice in line move board. Ignoring both until issue is resolved.", formattedName);
                     continue;
                 }
 
-                // Retrieve the van ID and associated URL if it exists in the database
                 VanId? vanId = storedVanIds.SingleOrDefault(x => x.VanName == formattedName);
                 string? idString;
                 string? urlString;
 
-                // Skip blocked van IDs
                 if (vanId is not null && vanId.Blocked) continue;
 
-                // If the van doesn't exist or its ID/URL is missing, attempt to search for it
                 if (vanId is null || string.IsNullOrEmpty(vanId.Id) || string.IsNullOrEmpty(vanId.Url))
                 {
                     TimeSpan lastUpdated = DateTimeOffset.UtcNow - lineMoveCard.LastActivity.UtcDateTime;
                     var search = await TrySearchForVanId(formattedName, lastUpdated);
 
-                    // Skip further processing if the van search failed
                     if (!search.Success) continue;
 
-                    // Otherwise, populate ID and URL from the search results
                     idString = search.Object.Id;
                     urlString = search.Object.Url;
                 }
                 else
                 {
-                    // Use the existing ID and URL in the database
                     idString = vanId.Id;
                     urlString = vanId.Url;
                 }
 
-                // Track location history for the current van
                 List<(DateTimeOffset moveDate, OrderedLineLocation location)> locationHistory = [];
 
-                // Process move actions for the current card to build location history
                 foreach (var moveAction in lineMoveActions.Where(x => x.Data.Card.Id == lineMoveCard.Id))
                 {
                     List list;
 
-                    // Find the list after the card was moved
                     if (lists.Count(x => x.Id == moveAction.Data.ListAfter.Id) == 1)
                         list = lists.Single(x => x.Id == moveAction.Data.ListAfter.Id);
                     else
@@ -230,7 +212,6 @@ public class TrelloService : IProductionService
 
                     string listName = list.Name;
 
-                    // Attempt to resolve a custom location for the current production line based on the list name
                     var location = LocationFactory.GetLocationFromCustomName(model.Line, listName);
 
                     if (location is null) 
@@ -239,8 +220,7 @@ public class TrelloService : IProductionService
                     locationHistory.Add((moveAction.Date, location));
                 }
 
-                // Add the new van information to the dictionary with its location history
-                Vans.TryAdd(formattedName, new SalesOrder()
+                SalesOrders.TryAdd(formattedName, new SalesOrder()
                 {
                     Number = number,
                     Model = model,
@@ -257,22 +237,16 @@ public class TrelloService : IProductionService
             }
         }
 
-        // Log the total number of vans added to the production service
-        Log.Logger.Information("{vanCount} Vans added to the production service. Adding handover dates...", Vans.Count);
+        Log.Logger.Information("{vanCount} Vans added to the production service. Adding handover dates...", SalesOrders.Count);
 
-        // Process "ProHo Dashboard" cards to add handover information to vans
         foreach (Card card in prohoCards)
         {
-            // Attempt to extract the van's name from the card's name
             if (ModelNameMatcher.TryGetSingleName(card.Name, out string? formattedName))
             {
-                // Skip cards without a due date
                 if (!card.Due.HasValue) continue;
 
-                // Find and update the corresponding van's handover information
-                if (Vans.TryGetValue(formattedName, out SalesOrder? value))
+                if (SalesOrders.TryGetValue(formattedName, out SalesOrder? value))
                 {
-                    // Get actions with due dates for the current card
                     List<CachedTrelloAction> actions = prohoCachedActions.Where(x => x.CardId == card.Id && x.DueDate.HasValue).ToList();
 
                     foreach (CachedTrelloAction action in actions.OrderBy(x => x.DateOffset))
@@ -280,7 +254,6 @@ public class TrelloService : IProductionService
                         value.AddHandoverHistory(action.DateOffset, action.DueDate!.Value);
                     }
 
-                    // Update the handover state based on the card's due completion status
                     if (card.Due.HasValue)
                     {
                         value.HandoverState = card.DueComplete ? HandoverState.HandedOver : HandoverState.UnhandedOver;
@@ -303,37 +276,9 @@ public class TrelloService : IProductionService
                 Log.Logger.Debug("Does not represent a van, ignoring.");
             }
         }
-
-        // Log the count of vans with updated handover dates
-        Log.Logger.Information("{vanCount} handover dates added", Vans.Count(x => x.Value.RedlineDate.HasValue));
-
-        // Generate logs for the current production statistics across all production lines
-        foreach (var productionLine in ProductionLines)
-        {
-            var vansInLine = Vans.Where(x => x.Value.Model.Line == productionLine).Select(x => x.Value).ToList();
-
-            int prepCount = vansInLine.Count(x =>
-                x.LocationInfo.CurrentLocation is not null && x.LocationInfo.CurrentLocation.Location.LocationType is ProductionLocationType.Prep && x.HandoverState is HandoverState.HandedOver);
-
-            int prodCount = vansInLine.Count(x =>
-                x.LocationInfo.CurrentLocation is not null && x.LocationInfo.CurrentLocation.Location.LocationType is ProductionLocationType.Bay or ProductionLocationType.Module or ProductionLocationType.Subassembly);
-
-            int finishingCount = vansInLine.Count(x =>
-                x.LocationInfo.CurrentLocation is not null && x.LocationInfo.CurrentLocation.Location.LocationType is ProductionLocationType.Finishing && x.HandoverState is not HandoverState.HandedOver);
-
-            int handoverDueCount = vansInLine.Count(x =>
-                x.RedlineDate < DateTimeOffset.Now && x.HandoverState is HandoverState.UnhandedOver);
-
-            int handedOverCount = vansInLine.Count(x =>
-                x.HandoverState is HandoverState.HandedOver);
-
-            Log.Logger.Information(
-                "{line}: Prep: {prepCount} - In Production: {prodCount} - In Finishing: {finishingCount} - Over Due: {overdueCount} - Handed Over: {handoverCount}",
-                productionLine.Name, prepCount, prodCount, finishingCount, handoverDueCount, handedOverCount);
-        }
     }
 
-    protected override async Task<SalesOrder> _loadVanFromSourceAsync(SalesOrder van)
+    protected override async Task<SalesOrder> _loadSalesOrderFromSourceAsync(SalesOrder van, CancellationToken cancellationToken = default)
     {
         using (var scope = _scopeFactory.CreateScope())
         {
@@ -362,7 +307,7 @@ public class TrelloService : IProductionService
             List<Card> cards;
             try
             {
-                cards = await TrelloClient.GetCardsOnBoardAsync(van.Id, getCardOptions);
+                cards = await TrelloClient.GetCardsOnBoardAsync(van.Id, getCardOptions, cancellationToken);
             }
             catch (Exception ex) //TODO: Handle "TrelloDotNet.Model.TrelloApiException: The requested resource was not found" exception
             {
@@ -373,7 +318,7 @@ public class TrelloService : IProductionService
                     var oldId = trelloContext.VanIds.Single(x => x.VanName == van.Name);
 
                     trelloContext.VanIds.Entry(oldId).State = EntityState.Deleted;
-                    trelloContext.SaveChanges();
+                    await trelloContext.SaveChangesAsync(cancellationToken);
 
                     var newId = await TrySearchForVanId(van.Name);
 
@@ -382,7 +327,7 @@ public class TrelloService : IProductionService
 
                     van.Id  = newId.Object.Id;
                     van.Url = newId.Object.Url;
-                    cards   = await TrelloClient.GetCardsOnBoardAsync(newId.Object.Id, getCardOptions);
+                    cards   = await TrelloClient.GetCardsOnBoardAsync(newId.Object.Id, getCardOptions, cancellationToken);
                 }
                 else
                 {
@@ -390,9 +335,9 @@ public class TrelloService : IProductionService
                 }
             }
 
-            List<CustomField> customFields = await TrelloClient.GetCustomFieldsOnBoardAsync(van.Id);
+            List<CustomField> customFields = await TrelloClient.GetCustomFieldsOnBoardAsync(van.Id, cancellationToken);
 
-            var cachedActions = await GetTrelloActionsWithCache(van.Id!);
+            var cachedActions = await GetTrelloActionsWithCache(van.Id!, cancellationToken);
 
             foreach (var card in cards)
             {
@@ -425,7 +370,7 @@ public class TrelloService : IProductionService
     }
 
 
-    private async Task<List<CachedTrelloAction>> GetTrelloActionsWithCache(string id, List<string>? actionFilters = null)
+    private async Task<List<CachedTrelloAction>> GetTrelloActionsWithCache(string id, CancellationToken cancellationToken = default, List<string>? actionFilters = null)
     {
         using (var scope = _scopeFactory.CreateScope())
         {
@@ -444,7 +389,7 @@ public class TrelloService : IProductionService
             if (cachedActions.Any())
                 getActionsOptions.Since = cachedActions.MaxBy(x => x.DateOffset)!.ActionId;
 
-            List<TrelloAction> newActions = await TrelloClient.GetActionsOfBoardAsync(id, getActionsOptions);
+            List<TrelloAction> newActions = await TrelloClient.GetActionsOfBoardAsync(id, getActionsOptions, cancellationToken);
 
             actionsToCache.AddRange(newActions);
 
@@ -463,7 +408,7 @@ public class TrelloService : IProductionService
                     getActionsOptions.Since  = cachedActions.Last().ActionId;
                 }
 
-                newActions = await TrelloClient.GetActionsOfBoardAsync(id, getActionsOptions);
+                newActions = await TrelloClient.GetActionsOfBoardAsync(id, getActionsOptions, cancellationToken);
 
                 actionsToCache.AddRange(newActions);
             }
@@ -472,8 +417,8 @@ public class TrelloService : IProductionService
             {
                 List<CachedTrelloAction> newCachedActions = actionsToCache.ToCachedTrelloActions().ToList();
 
-                await trelloContext.Actions.AddRangeAsync(newCachedActions);
-                await trelloContext.SaveChangesAsync();
+                await trelloContext.Actions.AddRangeAsync(newCachedActions, cancellationToken);
+                await trelloContext.SaveChangesAsync(cancellationToken);
 
                 cachedActions = newCachedActions.Concat(cachedActions);
             }
@@ -482,7 +427,7 @@ public class TrelloService : IProductionService
         }
     }
 
-    private async Task<List<TrelloAction>> GetTrelloActions(string id, List<string>? filteredActions = null)
+    private async Task<List<TrelloAction>> GetTrelloActions(string id, CancellationToken cancellationToken = default, List<string>? filteredActions = null)
     {
         GetActionsOptions getActionsOptions = new GetActionsOptions()
         {
@@ -492,7 +437,7 @@ public class TrelloService : IProductionService
         
         List<TrelloAction> actions = [];
        
-        List<TrelloAction> newActions = await TrelloClient.GetActionsOfBoardAsync(id, getActionsOptions);
+        List<TrelloAction> newActions = await TrelloClient.GetActionsOfBoardAsync(id, getActionsOptions, cancellationToken);
 
         actions.AddRange(newActions);
         
@@ -502,7 +447,7 @@ public class TrelloService : IProductionService
             
             getActionsOptions.Before = lastId;
             
-            newActions = await TrelloClient.GetActionsOfBoardAsync(id, getActionsOptions);
+            newActions = await TrelloClient.GetActionsOfBoardAsync(id, getActionsOptions, cancellationToken);
             
             actions.AddRange(newActions);
         }

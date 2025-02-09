@@ -72,7 +72,7 @@ public class SalesOrderController : ControllerBase
         }
         
         if(productionReloadNeeded)
-            await ProductionService.LoadVanBoardsAsync(salesOrders);
+            await ProductionService.LoadSalesOrderBoardsAsync(salesOrders);
 
         List<SalesOrder> clones = [];
 
@@ -119,7 +119,7 @@ public class SalesOrderController : ControllerBase
         includedFields = includedFields ?? [];
 
         if (BoardNeedsLoading(includedFields) && !info.ProductionInfoLoaded)
-            await ProductionService.LoadVanBoardAsync(info);
+            await ProductionService.LoadSalesOrderBoardAsync(info);
         
         var json = JsonConvert.SerializeObject(
             info, 
