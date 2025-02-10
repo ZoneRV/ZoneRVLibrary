@@ -110,7 +110,7 @@ public abstract partial class IProductionService
             
             await productionContext.SaveChangesAsync();
             
-            MarkSalesOrdersUnloaded(x => x.Model.LineId == line.Id);
+            MarkSalesOrdersUnloaded(x => x.Model.Line.Id == line.Id);
             
             return newLocation;
         }
@@ -137,7 +137,7 @@ public abstract partial class IProductionService
             
             await productionContext.SaveChangesAsync();
             
-            MarkSalesOrdersUnloaded(x => x.Model.LineId == line.Id);
+            MarkSalesOrdersUnloaded(x => x.Model.Line.Id == line.Id);
             
             return area;
         }

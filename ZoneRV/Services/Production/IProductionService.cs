@@ -13,12 +13,12 @@ namespace ZoneRV.Services.Production;
 [SuppressMessage("ReSharper", "InconsistentNaming")]
 public abstract partial class IProductionService : IEnumerable<SalesOrder>
 {
-    public required List<ProductionWorkspace>   Workspaces       { get; init; }
-    public          IEnumerable<ProductionLine> ProductionLines  => Workspaces.SelectMany(x => x.Lines);
-    public          IEnumerable<Model>          Models           => ProductionLines.SelectMany(x => x.Models).ToList();
-    public          IEnumerable<AreaOfOrigin>   AreaOfOrigins    => ProductionLines.SelectMany(x => x.AreaOfOrigins).ToList();
-    public          ModelNameMatcher            ModelNameMatcher { get; init; }
-    public abstract LocationFactory             LocationFactory  { get; init; }
+    public List<ProductionWorkspace>   Workspaces       { get; init; }
+    public IEnumerable<ProductionLine> ProductionLines  => Workspaces.SelectMany(x => x.Lines);
+    public IEnumerable<Model>          Models           => ProductionLines.SelectMany(x => x.Models).ToList();
+    public IEnumerable<AreaOfOrigin>   AreaOfOrigins    => ProductionLines.SelectMany(x => x.AreaOfOrigins).ToList();
+    public ModelNameMatcher            ModelNameMatcher { get; init; }
+    public LocationFactory             LocationFactory  { get; init; }
 
     protected IServiceScopeFactory ScopeFactory { get; set;  }
 
@@ -53,6 +53,8 @@ public abstract partial class IProductionService : IEnumerable<SalesOrder>
                       .ThenInclude(x => x.AreaOfOrigins)
                   .Include(x => x.Lines)
                       .ThenInclude(x => x.Models)
+                  .Include(x => x.Lines)
+                      .ThenInclude(x => x.OrderedLineLocations)
                   .Include(x => x.WorkspaceLocations)
                       .ThenInclude(x => x.OrderedLineLocations)
                   .Include(x => x.WorkspaceLocations)
@@ -63,6 +65,11 @@ public abstract partial class IProductionService : IEnumerable<SalesOrder>
 
         var models = ProductionLines.SelectMany(x => x.Models).ToList();
         ModelNameMatcher = new ModelNameMatcher(models);
+        
+        LocationFactory = new LocationFactory(ServiceTypeName)
+        {
+            Workspaces = Workspaces
+        };
     }
 
     /// <summary>
@@ -70,8 +77,12 @@ public abstract partial class IProductionService : IEnumerable<SalesOrder>
     /// and preparing resources for operation. This method is intended to be overridden in derived classes
     /// with specific implementation details for different production service types.
     /// </summary>
-    public virtual Task InitialiseService()
+    public async Task InitialiseService()
     {
+        await SetupService();
+        await LoadUsers();
+        await LoadProductionInfo();
+        
         foreach (var productionLine in ProductionLines)
         {
             var salesOrders = SalesOrders.Where(x => x.Value.Model.Line == productionLine).Select(x => x.Value).ToList();
@@ -104,10 +115,14 @@ public abstract partial class IProductionService : IEnumerable<SalesOrder>
                 "{line} - {workspace}: Pre-Production: {preProd} - In Production: {prodCount} - In Finishing: {finishingCount} - Over Due: {overdueCount} - Handed Over: {handoverCount} - Unknown Handover: {unknownHandoverCount}",
                 productionLine.Name, productionLine.Workspace.Name, preProd, prodCount, finishingCount, handoverDueCount, handedOverCount, unknownHandoverCount);
         }
-        
-        return Task.CompletedTask;
     }
 
+    protected abstract Task SetupService(CancellationToken cancellationToken = default);
+
+    protected abstract Task LoadUsers(CancellationToken cancellationToken = default);
+    
+    protected abstract Task LoadProductionInfo(CancellationToken cancellationToken = default);
+    
     private ConcurrentDictionary<SalesOrder, Task<SalesOrder>> _currentBoardTasks { get; init; } = [];
 
     public async Task LoadRequiredSalesOrdersAsync(CancellationToken cancellationToken = default)
@@ -142,7 +157,7 @@ public abstract partial class IProductionService : IEnumerable<SalesOrder>
 
             salesOrder.ProductionInfoLoaded = true;
 
-            await Task.Delay(100); // TODO: fix so delay isn't needed
+            await Task.Delay(100, cancellationToken); // TODO: fix so delay isn't needed
 
             _currentBoardTasks.TryRemove(salesOrder, out _);
             

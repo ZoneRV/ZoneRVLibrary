@@ -42,13 +42,13 @@ public static class TrelloUtils
             TaskTime = GetTaskTime(trelloCard, enumerable),
             CardStatus = ToCardStatus(trelloCard, enumerable, cachedTrelloActions, out var lastUpdated),
             CardStatusLastUpdated = lastUpdated,
-            ChecklistInfos = trelloCard.Checklists.Select(x => x.ToChecklistInfo(cachedTrelloActions)),
+            ChecklistInfos = trelloCard.Checklists.Select(x => x.ToChecklistInfo(cachedTrelloActions)).ToList(),
             CommentInfos = cachedTrelloActions
                 .Where(x => x.ActionType == "commentCard")
                 .Select(x => x.ToCommentInfo()).ToList(),
             AttachmentInfos = trelloCard.Attachments
                 .Where(x => x.MimeType is not null && x.MimeType.StartsWith("image/"))
-                .Select(x => x.ToAttachmentInfo()),
+                .Select(x => x.ToAttachmentInfo()).ToList(),
         };
     }
 
@@ -66,13 +66,13 @@ public static class TrelloUtils
             RedFlagIssue = ToRedFlagIssue(trelloCard, enumerable),
             CardStatus = ToCardStatus(trelloCard, enumerable, cachedTrelloActions, out var lastUpdated),
             CardStatusLastUpdated = lastUpdated,
-            ChecklistInfos = trelloCard.Checklists.Select(x => x.ToChecklistInfo(cachedTrelloActions)),
+            ChecklistInfos = trelloCard.Checklists.Select(x => x.ToChecklistInfo(cachedTrelloActions)).ToList(),
             CommentInfos = cachedTrelloActions
                 .Where(x => x.ActionType == "commentCard")
                 .Select(x => x.ToCommentInfo()).ToList(),
             AttachmentInfos = trelloCard.Attachments
                 .Where(x => x.MimeType.StartsWith("image/"))
-                .Select(x => x.ToAttachmentInfo()),
+                .Select(x => x.ToAttachmentInfo()).ToList(),
         };
     }
 
@@ -89,13 +89,13 @@ public static class TrelloUtils
             CreationDate = trelloCard.Created.HasValue ? trelloCard.Created.Value : null,
             CardStatus = ToCardStatus(trelloCard, enumerable, cachedTrelloActions, out var lastUpdated),
             CardStatusLastUpdated = lastUpdated,
-            ChecklistInfos = trelloCard.Checklists.Select(x => x.ToChecklistInfo(cachedTrelloActions)),
+            ChecklistInfos = trelloCard.Checklists.Select(x => x.ToChecklistInfo(cachedTrelloActions)).ToList(),
             CommentInfos = cachedTrelloActions
                 .Where(x => x.ActionType == "commentCard")
                 .Select(x => x.ToCommentInfo()).ToList(),
             AttachmentInfos = trelloCard.Attachments
                 .Where(x => x.MimeType.StartsWith("image/"))
-                .Select(x => x.ToAttachmentInfo()),
+                .Select(x => x.ToAttachmentInfo()).ToList(),
         };
     }
 
@@ -115,7 +115,7 @@ public static class TrelloUtils
             Id = trelloChecklist.Id,
             CheckInfos = trelloChecklist.Items
                 .Select(x => 
-                    x.ToCheckInfo(checkUpdates.TryGetValue(x.Id, out var update) ? update : null))
+                    x.ToCheckInfo(checkUpdates.TryGetValue(x.Id, out var update) ? update : null)).ToList()
         };
     }
 

@@ -21,19 +21,12 @@ public class LocationFactory
     public IEnumerable<WorkspaceLocation> WorkspaceLocations => Workspaces.SelectMany(x => x.WorkspaceLocations);
     public IEnumerable<OrderedLineLocation> LineLocations => WorkspaceLocations.SelectMany(x => x.OrderedLineLocations);
     
-    public List<string> IgnoredListNames { get; set; } = [];
+    public OrderedLineLocation? GetLocationFromCustomName(ProductionLine line, string name) =>
+        LineLocations.SingleOrDefault(x 
+                                          => x.Line == line && x.CustomNames
+                                                                .Any(y => y.CustomName.ToLower() == name.ToLower())
+        );
 
-    public OrderedLineLocation? GetLocationFromCustomName(ProductionLine line, string name)
-    {
-        if (IgnoredListNames.Contains(name))
-            return null;
-
-        return LineLocations.SingleOrDefault(x 
-                                                 => x.Line == line && x.CustomNames
-                                                                       .Any(y => y.CustomName.ToLower() == name.ToLower())
-                                                                        );
-    }
-    
     public WorkspaceLocation CreateWorkspaceLocation(
         ProductionWorkspace    workspace,
         string                 locationName,

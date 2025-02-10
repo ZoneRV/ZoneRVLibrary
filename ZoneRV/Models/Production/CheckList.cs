@@ -48,5 +48,5 @@ public class ChecklistCreationInfo
 {
     public required string Id { get; set; }
     public required string Name { get; set; }
-    public IEnumerable<CheckCreationInfo> CheckInfos { get; set; } = [];
+    public List<CheckCreationInfo> CheckInfos { get; set; } = [];
 }

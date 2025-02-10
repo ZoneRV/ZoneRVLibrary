@@ -109,12 +109,12 @@ public abstract class Card
 /// </summary>
 public abstract class CardCreationInfo
 {
-    public required CardStatus CardStatus { get; init; }
-    public required string Name { get; init; }
-    public required string Id { get; init; }
-    public required string Url { get; init; }
-    public required DateTimeOffset? CardStatusLastUpdated { get; init; }
-    public IEnumerable<ChecklistCreationInfo> ChecklistInfos { get; init; } = [];
-    public IEnumerable<CommentInfo> CommentInfos { get; init; } = [];
-    public IEnumerable<AttachmentInfo> AttachmentInfos { get; init; } = [];
+    public required CardStatus                  CardStatus            { get; init; }
+    public required string                      Name                  { get; init; }
+    public required string                      Id                    { get; init; }
+    public required string                      Url                   { get; init; }
+    public required DateTimeOffset?             CardStatusLastUpdated { get; set; }
+    public          List<ChecklistCreationInfo> ChecklistInfos        { get; init; } = [];
+    public          List<CommentInfo>           CommentInfos          { get; init; } = [];
+    public          List<AttachmentInfo> AttachmentInfos { get; init; } = [];
 }

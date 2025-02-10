@@ -32,6 +32,7 @@
 
     <ItemGroup>
         <InternalsVisibleTo Include="ZoneRv.Tests" />
+        <InternalsVisibleTo Include="ZoneRv.Services.Test" />
     </ItemGroup>
 
     <ItemGroup>

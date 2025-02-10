@@ -10,6 +10,7 @@ using ZoneRV.Services.Production;
 using Scalar.AspNetCore;
 using ZoneRV.Api.SignalR;
 using ZoneRV.Serialization;
+using ZoneRV.Services.Test;
 
 try
 {
@@ -42,12 +43,12 @@ try
 
     if (Debugger.IsAttached)
     {
-        fire[4] = @"    Debug Enabled      o ~/~~\~ o";
+        fire[4] = @"    Debugger Attached  o ~/~~\~ o";
     }
     
     if (bool.TryParse(builder.Configuration["enableWebhooks"], out var result) && !result)
     {
-        fire[5] =  "    Webhooks disabled   o  o  o  ";
+        fire[5] =  "    Webhooks Disabled   o  o  o  ";
     }
     
     var startupTextBorder = new string(Enumerable.Repeat('#', startupSplits[0].Length + 4 + camp[0].Length).ToArray());
@@ -98,20 +99,18 @@ try
     {
         options.AddXmlComments<Program>();
     });
+    
+    if(!bool.TryParse(builder.Configuration["useTestProductionService"], out var useTest) || !useTest)
+    {
+        builder.Services.AddZoneService(builder.Configuration);
+    }
 
-    builder.Services.AddDbContext<ProductionContext>
-    ((_, options ) =>
-        options
-           .UseSqlServer(builder.Configuration.GetConnectionString("MySqlConnectionsString"), 
-                 (serverOptionsBuilder =>
-                 {
-                     serverOptionsBuilder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-                     serverOptionsBuilder.MigrationsAssembly("ZoneRV.Migrations");
-                 }))
-           .LogTo(Log.Logger.Debug, LogLevel.Information)
-        );
-
-    builder.Services.AddZoneService(builder.Configuration);
+    else
+    {
+        var seedString = builder.Configuration["testProductionServiceSeed"];
+        
+        builder.Services.AddTestProductionService(false, seedString is null ? null : int.Parse(seedString));
+    }
 
     var app = builder.Build();
 

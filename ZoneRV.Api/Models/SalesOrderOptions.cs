@@ -70,7 +70,7 @@ public class SalesOrderOptions
                 return salesOrders.Where(x => x.ProductionInfoLoaded).OrderBy(x => (x.Stats ?? new SalesOrderStats(x, CardOptions is null ? null : CardOptions.FilterFunction())).YellowCardsIncomplete);
 
             default:
-                throw new ArgumentOutOfRangeException(nameof(SalesOrderSortingOptions), "Unsupported sorting option specified.");
+                throw new ArgumentOutOfRangeException(Enum.GetName((SalesOrderSortingOptions)SalesOrderSortingOptions), "Unsupported sorting option specified.");
         }
     }
 }

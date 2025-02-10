@@ -25,17 +25,17 @@ namespace ZoneRV.Services.Trello;
 public class TrelloService : IProductionService
 {
     private readonly       IServiceScopeFactory _scopeFactory;
-    public sealed override LocationFactory      LocationFactory { get; init; }
     
     public static List<string> TrelloActionFilters => ["commentCard", "updateCustomFieldItem", "createCard", "updateCheckItemStateOnCard"];
     
     protected override string ServiceTypeName { get => "trello"; }
     
-    private            TrelloClient TrelloClient     { get; }
-    private            string       TrelloApiKey     { get; }
-    private            string       TrelloUserToken  { get; }
-    private            string       LineMoveBoardId  { get; }
-    private            string       ProHoDashboardId { get; }
+    private TrelloClient TrelloClient     { get; }
+    private Member?      TrelloMember     { get; set; }
+    private string       TrelloApiKey     { get; }
+    private string       TrelloUserToken  { get; }
+    private string       LineMoveBoardId  { get; }
+    private string       ProHoDashboardId { get; }
 
     public override int MaxDegreeOfParallelism { get; protected set; } = 3;
     
@@ -55,13 +55,6 @@ public class TrelloService : IProductionService
         ProHoDashboardId = configuration["ProHoDashboardId"] ??
                         throw new ArgumentNullException(nameof(ProHoDashboardId), "ProHo Dashboard board id required");
         
-
-        LocationFactory = new LocationFactory(ServiceTypeName)
-        {
-            Workspaces = Workspaces!, // TODO: Check if this actually loads in correct order
-            IgnoredListNames = [] // TODO: fill out
-        };
-        
         var clientOptions = new TrelloClientOptions
         {
             AllowDeleteOfBoards = false,
@@ -72,14 +65,13 @@ public class TrelloService : IProductionService
         TrelloClient = new TrelloClient(TrelloApiKey, TrelloUserToken, clientOptions);
     }
 
-    public override async Task InitialiseService()
-    {
-        Member member;
 
+    protected override async Task SetupService(CancellationToken cancellationToken = default)
+    {
         try
         {
-            member = await TrelloClient.GetTokenMemberAsync();
-            Log.Logger.Information("Trello Successfully connected as {member}", member.Username);
+            TrelloMember = await TrelloClient.GetTokenMemberAsync(cancellationToken);
+            Log.Logger.Information("Trello Successfully connected as {member}", TrelloMember.Username);
         }
         catch (Exception ex)
         {
@@ -87,18 +79,14 @@ public class TrelloService : IProductionService
 
             throw;
         }
-
-        var organisations = await TrelloClient.GetOrganizationsForMemberAsync(member.Id);
-        
-        await LoadUsers(organisations);
-
-        await LoadBasicProductionInfo();
-
-        await base.InitialiseService();
     }
 
-    private async Task LoadUsers(IEnumerable<Organization> organisations)
+    protected override async Task LoadUsers(CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(TrelloMember);
+        
+        var organisations = await TrelloClient.GetOrganizationsForMemberAsync(TrelloMember.Id, cancellationToken);
+        
         foreach (Organization organization in organisations)
         {
             GetMemberOptions getMemberOptions = new GetMemberOptions
@@ -110,7 +98,7 @@ public class TrelloService : IProductionService
                 )
             };
 
-            List<Member> members = await TrelloClient.GetMembersOfOrganizationAsync(organization.Id, getMemberOptions);
+            List<Member> members = await TrelloClient.GetMembersOfOrganizationAsync(organization.Id, getMemberOptions, cancellationToken);
 
             foreach (Member orgMember in members)
             {
@@ -132,7 +120,7 @@ public class TrelloService : IProductionService
         }
     }
 
-    private async Task LoadBasicProductionInfo(CancellationToken cancellationToken = default)
+    protected override async Task LoadProductionInfo(CancellationToken cancellationToken = default)
     {
         List<Card>         lineMoveBoardCards = await TrelloClient.GetCardsOnBoardAsync(LineMoveBoardId, new GetCardOptions() { IncludeList = true }, cancellationToken);
         List<TrelloAction> lineMoveActions    = await TrelloClient.GetActionsOfBoardAsync(LineMoveBoardId, new GetActionsOptions() { Limit  = 1000, Filter = ["updateCard:idList"] }, cancellationToken);
@@ -368,8 +356,7 @@ public class TrelloService : IProductionService
             return van;
         }
     }
-
-
+    
     private async Task<List<CachedTrelloAction>> GetTrelloActionsWithCache(string id, CancellationToken cancellationToken = default, List<string>? actionFilters = null)
     {
         using (var scope = _scopeFactory.CreateScope())
