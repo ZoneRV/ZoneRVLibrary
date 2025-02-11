@@ -171,8 +171,8 @@ public abstract partial class IProductionService : IEnumerable<SalesOrder>
     public abstract int MaxDegreeOfParallelism { get; protected set; }
     public async Task<IEnumerable<SalesOrder>> LoadSalesOrderBoardsAsync(IEnumerable<SalesOrder> salesOrders, CancellationToken cancellationToken = default)
     {
-        var enumerable = salesOrders as SalesOrder[] ?? salesOrders.ToArray();
-        Log.Logger.Information("Loading {count} Sales order/s.", enumerable.Length);
+        var enumerable = salesOrders.ToList();
+        Log.Logger.Information("Loading {count} Sales order/s.", enumerable.Count(x => !x.ProductionInfoLoaded));
         
         ConcurrentBag<SalesOrder> boards = [];
         
@@ -196,7 +196,7 @@ public abstract partial class IProductionService : IEnumerable<SalesOrder>
             }
         });
         
-        Log.Logger.Information("Finished loading {count} Sales order/s.", enumerable.Length);
+        Log.Logger.Information("Finished loading {count} Sales order/s.", enumerable.Count);
 
         return boards;
     }
@@ -264,10 +264,22 @@ public abstract partial class IProductionService : IEnumerable<SalesOrder>
                     checklist.Checks.Clear();
                 }
             }
-            
-            // TODO Comments
+
+            foreach (var commentId in commentIds)
+            {
+                Comments.TryRemove(commentId, out _);
+            }
 
             Debug.Assert(!salesOrder.Cards.Any());
+            
+            Debug.Assert(JobCards.All(x => x.Value.SalesOrder.Id != salesOrder.Id));
+            Debug.Assert(RedCards.All(x => x.Value.SalesOrder.Id != salesOrder.Id));
+            Debug.Assert(YellowCards.All(x => x.Value.SalesOrder.Id != salesOrder.Id));
+            
+            Debug.Assert(Checks.All(x => x.Value.Checklist.Card.SalesOrder.Id != salesOrder.Id));
+            Debug.Assert(Checklists.All(x => x.Value.Card.SalesOrder.Id != salesOrder.Id));
+            
+            Debug.Assert(Comments.All(x => x.Value.Card.SalesOrder.Id != salesOrder.Id));
             
             Log.Logger.Information("{name} unloaded. Jobs:{jobs} Red Cards:{redCards} Yellow Cards:{yellowCards}", 
                                    salesOrder.Name.ToUpper(), jobIds.Count, redIds.Count, yellowIds.Count);

@@ -12,6 +12,7 @@ public class SalesOrderOptions
     public List<string>? Ids;
     public List<int>?    OrderedLocationIds;
     public List<int>?    WorkspaceLocationIds;
+    public TimeSpan?     HandedOverWithin;
 
     public SalesOrderSortingOptions? SalesOrderSortingOptions;
     public PaginationOptions?        Pagination  { get; set; }
@@ -26,7 +27,8 @@ public class SalesOrderOptions
             (this.Names is null || !this.Names.Any() || this.Names.Contains(so.Name)) &&
             (this.Ids is null || !this.Ids.Any() || so.Id is null || this.Ids.Contains(so.Id)) &&
             (this.OrderedLocationIds is null || !this.OrderedLocationIds.Any() || so.LocationInfo.CurrentLocation is not null && this.OrderedLocationIds.Contains(so.LocationInfo.CurrentLocation.Id)) &&
-            (this.WorkspaceLocationIds is null || !this.WorkspaceLocationIds.Any() || so.LocationInfo.CurrentLocation is not null && this.WorkspaceLocationIds.Contains(so.LocationInfo.CurrentLocation.Location.Id));
+            (this.WorkspaceLocationIds is null || !this.WorkspaceLocationIds.Any() || so.LocationInfo.CurrentLocation is not null && this.WorkspaceLocationIds.Contains(so.LocationInfo.CurrentLocation.Location.Id)) &&
+            (this.HandedOverWithin is null || so.HandoverStateLastUpdated is not null && so.HandoverState is HandoverState.HandedOver && (DateTimeOffset.Now - so.HandoverStateLastUpdated) < this.HandedOverWithin);
     }
 
     public IEnumerable<SalesOrder> OrderFunction(IEnumerable<SalesOrder> salesOrders)

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Text.RegularExpressions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -329,6 +330,23 @@ public class TrelloService : IProductionService
 
             foreach (var card in cards)
             {
+                if (card.Name.ToLower().StartsWith("vin"))
+                {
+                    var regex = Regex.Match(card.Name, @"6K9CARVANSC\d{6}|6K9CARVANRC\d{6}|6K9CARVANPC\d{6}");
+
+                    if (regex.Success)
+                    {
+                        van.Vin = regex.Value;
+                    }
+
+                    else
+                    {
+                        Log.Logger.Warning("Failed to find vin number in card {cardName} on {boardName}", card.Name, van.Name);
+                    }
+                    
+                    continue;
+                }
+                
                 var cardActions = cachedActions.Where(x => x.CardId == card.Id).ToList();
                 var cardFields  = customFields.Where(x => x.ModelId == van.Id).ToList();
 

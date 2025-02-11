@@ -11,6 +11,7 @@ namespace ZoneRV.Models.Production;
 public class SalesOrder : IEqualityComparer<SalesOrder>, ICloneable
 {
     public string? Id { get; set; }
+    [OptionalJsonField(true)] public string? Vin { get; set; }
     public string Name => Model.Prefix + Number;
     [JsonIgnore] public bool ProductionInfoLoaded { get; internal set; } = false;
     [JsonIgnore] public bool InventoryInfoLoaded { get; internal set; } = false;
