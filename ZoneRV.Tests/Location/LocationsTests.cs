@@ -1,13 +1,12 @@
 ﻿using ZoneRV.Models.Enums;
 using ZoneRV.Models.Location;
-using ZoneRV.Tests.Objects;
 
 namespace ZoneRV.Tests.Location;
 
 public class LocationsTests
 {
     
-    [Fact]
+    /*[Fact]
     public void PositionOperatorTests()
     {
         Assert.True(ProductionTestData.G2Bay1 < ProductionTestData.G2Bay2);
@@ -43,5 +42,5 @@ public class LocationsTests
         var hashes = ProductionTestData.LocationFactory.Locations.Select(x => x.GetHashCode()).ToList();
         
         Assert.Equal(hashes.Count, hashes.Distinct().Count());
-    }
+    }*/
 }

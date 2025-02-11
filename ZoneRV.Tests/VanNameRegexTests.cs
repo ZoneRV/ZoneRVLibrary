@@ -1,5 +1,4 @@
 using ZoneRV.Models.Production;
-using ZoneRV.Tests.Objects;
 
 namespace ZoneRV.Tests;
 
@@ -9,7 +8,37 @@ public class VanNameRegexTests
 
     public VanNameRegexTests()
     {
-        _nameMatcher = new ModelNameMatcher(ProductionTestData.VanModels);
+        _nameMatcher = new ModelNameMatcher(
+            [
+                new Model()
+                {
+                    Name = "",
+                    Description = null,
+                    Prefix = "zpp",
+                    Line = null!
+                },
+                new Model()
+                {
+                    Name = "",
+                    Description = null,
+                    Prefix = "zsp",
+                    Line = null!
+                },
+                new Model()
+                {
+                    Name = "",
+                    Description = null,
+                    Prefix = "zss",
+                    Line = null!
+                },
+                new Model()
+                {
+                    Name = "",
+                    Description = null,
+                    Prefix = "exp",
+                    Line = null!
+                }
+            ]);
     }
     
     [Theory]

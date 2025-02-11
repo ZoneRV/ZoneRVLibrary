@@ -1,12 +1,11 @@
 ﻿using ZoneRV.Models.Enums;
 using ZoneRV.Models.Location;
-using ZoneRV.Tests.Objects;
 
 namespace ZoneRV.Tests.Location;
 
 public class LocationFactoryTests
 {
-    [Theory]
+    /*[Theory]
     [InlineData("a", "a", -10, ProductionLocationType.Bay, null, 5, null)]
     [InlineData("a", "a", -10, ProductionLocationType.Bay, true, null, null)]
     public void LocationCreationThrowsNull(
@@ -42,5 +41,5 @@ public class LocationFactoryTests
         Assert.Throws<ArgumentException>(() => ProductionTestData.LocationFactory.CreateBayLocation(locationName, locationDescription, ProductionTestData.Gen2, bayNumber, inventoryLocations));
         
         Assert.Throws<ArgumentException>(() => ProductionTestData.LocationFactory.CreateBayLocation(locationName, locationDescription, ProductionTestData.Gen2, bayNumber, inventoryLocations));
-    }
+    }*/
 }

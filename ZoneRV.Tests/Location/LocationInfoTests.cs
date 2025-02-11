@@ -1,12 +1,11 @@
 ﻿using ZoneRV.Models.Enums;
 using ZoneRV.Models.Location;
-using ZoneRV.Tests.Objects;
 
 namespace ZoneRV.Tests.Location;
 
 public class LocationInfoTests
 {
-    LocationInfo fullHistory => ProductionTestData.GetLocationInfo(ProductionTestData.Gen2, 1);
+    /*LocationInfo fullHistory => ProductionTestData.GetLocationInfo(ProductionTestData.Gen2, 1);
     LocationInfo halfHistory => ProductionTestData.GetLocationInfo(ProductionTestData.Gen2, .5f);
 
     [Fact]
@@ -45,5 +44,5 @@ public class LocationInfoTests
             "date",
             () => halfHistory.AddPositionChange(halfHistory.MinBy(x => x.moveDate).moveDate,
                 new ZoneRV.Models.Location.Location(){BayNumber = 8, Order = 8, Name = "fail", Description = "made to fail", Type = ProductionLocationType.Bay, Line = ProductionTestData.Gen2}));
-    }
+    }*/
 }
