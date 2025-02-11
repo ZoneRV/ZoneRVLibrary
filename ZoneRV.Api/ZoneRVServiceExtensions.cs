@@ -13,7 +13,7 @@ public static class ZoneRVServiceExtensions
         services.AddDbContext<ProductionContext>
         ((_, options ) =>
              options
-                .UseSqlServer(configuration.GetConnectionString("MySqlConnectionsString"), 
+                .UseSqlServer(configuration.GetConnectionString("MsConnectionsString"), 
                               (serverOptionsBuilder =>
                               {
                                   serverOptionsBuilder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
@@ -25,7 +25,7 @@ public static class ZoneRVServiceExtensions
         services.AddDbContext<TrelloContext>(
             (_, options ) =>
                  options
-                    .UseSqlServer(configuration.GetConnectionString("MySqlConnectionsString"))
+                    .UseSqlServer(configuration.GetConnectionString("MsConnectionsString"))
                     .LogTo(Log.Logger.Debug, LogLevel.Information));
         
         services.AddSingleton<IProductionService, TrelloService>();

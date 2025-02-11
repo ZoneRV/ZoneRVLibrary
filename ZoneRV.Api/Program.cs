@@ -109,7 +109,7 @@ try
     {
         var seedString = builder.Configuration["testProductionServiceSeed"];
         
-        builder.Services.AddTestProductionService(false, seedString is null ? null : int.Parse(seedString));
+        builder.Services.AddTestProductionService(false, string.IsNullOrEmpty(seedString) ? null : int.Parse(seedString));
     }
 
     var app = builder.Build();
