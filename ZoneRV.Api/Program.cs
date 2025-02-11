@@ -97,7 +97,7 @@ try
 
     builder.Services.AddOpenApiExtensions((options) =>
     {
-        options.AddXmlComments<Program>();
+        //options.AddXmlComments<Program>();
     });
     
     if(!bool.TryParse(builder.Configuration["useTestProductionService"], out var useTest) || !useTest)
