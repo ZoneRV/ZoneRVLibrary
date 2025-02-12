@@ -3,10 +3,13 @@
 namespace ZoneRV.Models.Production;
 
 /// <summary>
-/// Represents production-related information for a sales unit.
-/// This class includes details about job, yellow, and red cards, completion rates, handover dates,
-/// and other production-centric data for a specific sales production unit.
+/// Represents a sales order, including information about job cards, order statistics,
+/// production and inventory state, and handover details.
 /// </summary>
+/// <remarks>
+/// A sales order serves as a central entity in production tracking, associating various cards and
+/// providing progress and handover state information. It implements cloning and equality comparison.
+/// </remarks>
 [DebuggerDisplay("{Name} - {Id}")]
 public class SalesOrder : IEqualityComparer<SalesOrder>, ICloneable
 {

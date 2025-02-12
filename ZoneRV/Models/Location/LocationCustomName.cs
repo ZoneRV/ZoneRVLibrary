@@ -3,6 +3,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ZoneRV.Models.Location;
 
+/// <summary>
+/// Represents a custom name associated with a specific ordered line location and service.
+/// </summary>
+[DebuggerDisplay("{LineLocation.Location.Name} - {CustomName}:{ServiceType}")]
 public class LocationCustomName
 {
     [Key, Required]
@@ -17,5 +21,6 @@ public class LocationCustomName
     [Required, MaxLength(128)]
     public required string CustomName { get; set; }
     
-    [ForeignKey("LineLocationId"), Required] public required OrderedLineLocation LineLocation { get; set; }
+    [ForeignKey("LineLocationId"), Required] 
+    public required OrderedLineLocation LineLocation { get; set; }
 }

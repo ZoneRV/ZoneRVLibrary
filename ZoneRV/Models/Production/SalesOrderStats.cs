@@ -1,5 +1,9 @@
 ﻿namespace ZoneRV.Models.Production;
 
+/// <summary>
+/// Represents statistical information about a sales order, including job and card completion statuses.
+/// </summary>
+[DebuggerDisplay("JobCompleted:{JobCompleted} JobCardsDue:{JobCardsDue} JobCardsOutStanding:{JobCardsOutStanding} RedCardsCompleted:{RedCardsCompleted} RedCardsIncomplete:{RedCardsIncomplete} YellowCardsCompleted:{YellowCardsCompleted} YellowCardsIncomplete:{YellowCardsIncomplete}")]
 public class SalesOrderStats
 {
     public SalesOrderStats(SalesOrder so, Func<Card, bool>? cardFilter = null)

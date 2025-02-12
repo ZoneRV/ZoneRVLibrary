@@ -193,7 +193,7 @@ public abstract partial class IProductionService
         return redCard;
     }
 
-     protected YellowCard BuildYellowCard(SalesOrder salesOrder, YellowCardInfo info, AreaOfOrigin? areaOfOrigin)
+     protected YellowCard BuildYellowCard(SalesOrder salesOrder, YellowCardCreationInfo info, AreaOfOrigin? areaOfOrigin)
      {
          var yellowCard = new YellowCard(salesOrder, info, areaOfOrigin);
 
@@ -256,7 +256,7 @@ public abstract partial class IProductionService
         return check;
     }
 
-    protected Comment BuildComment(CommentInfo info, Card card)
+    protected Comment BuildComment(CommentCreationInfo info, Card card)
     {
         Users.TryGetValue(info.AuthorId, out var user);
 
@@ -275,7 +275,7 @@ public abstract partial class IProductionService
         return comment;
     }
 
-    protected Attachment BuildAttachment(AttachmentInfo info, Card card)
+    protected Attachment BuildAttachment(AttachmentCreationInfo info, Card card)
     {
         var attachment = new Attachment()
         {

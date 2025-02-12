@@ -1,17 +1,17 @@
 ﻿namespace ZoneRV.Models.Production;
 
 /// <summary>
-/// Represents a specialized type of card, specifically a YellowCard, within the system.
-/// A YellowCard inherits from the base Card class and includes additional properties and behavior specific to this type of object.
+/// Represents a YellowCard that inherits from the Card class, providing specific functionality and behavioral traits associated with the YellowCard category.
+/// This includes classification, creation details, and age computation for the YellowCard entity.
 /// </summary>
-[DebuggerDisplay("{Name} - {SalesOrder.Name}")]
+[DebuggerDisplay("{SalesOrder.Name}:{Name}")]
 public class YellowCard : Card
 {
     public override CardType Type
     {
         get => CardType.YellowCard;
     }
-    public YellowCard(SalesOrder van, YellowCardInfo info, AreaOfOrigin? areaOfOrigin) : base(van, info, areaOfOrigin)
+    public YellowCard(SalesOrder van, YellowCardCreationInfo info, AreaOfOrigin? areaOfOrigin) : base(van, info, areaOfOrigin)
     {
         CreationDate = info.CreationDate;
     }
@@ -23,11 +23,12 @@ public class YellowCard : Card
 }
 
 /// <summary>
-/// Represents detailed information specific to the creation or configuration of a YellowCard within the system.
-/// This class includes attributes essential for initializing a YellowCard, such as its creation date and inherited properties from the CardCreationInfo base class.
+/// Represents the information required to create or describe a YellowCard.
+/// Inherits from the base class CardCreationInfo and includes additional details such as the creation date.
+/// This class serves as a blueprint for defining key attributes associated with a YellowCard.
 /// </summary>
 [DebuggerDisplay("{Name}")]
-public class YellowCardInfo : CardCreationInfo
+public class YellowCardCreationInfo : CardCreationInfo
 {
     public required DateTimeOffset? CreationDate { get; set; }
 }

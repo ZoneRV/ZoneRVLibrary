@@ -4,6 +4,15 @@ using ZoneRV.Serialization;
 
 namespace ZoneRV.Models.Production;
 
+/// <summary>
+/// Represents a production workspace entity in a manufacturing or production environment.
+/// </summary>
+/// <remarks>
+/// The ProductionWorkspace class is mapped to the database table "Workspace".
+/// It contains information about the workspace's details, including name, description,
+/// associated production lines, and workspace locations.
+/// </remarks>
+[DebuggerDisplay("{Name}")]
 [Table("Workspace")]
 public class ProductionWorkspace
 {

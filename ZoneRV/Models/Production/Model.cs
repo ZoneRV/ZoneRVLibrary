@@ -5,14 +5,9 @@ using ZoneRV.Serialization;
 namespace ZoneRV.Models.Production;
 
 /// <summary>
-/// Represents a specific production model within a production line.
+/// Represents a production model with attributes such as name, description, prefix,
+/// and its associated production line.
 /// </summary>
-/// <remarks>
-/// This class is used to define properties specific to a production model such as its name,
-/// description, prefix, and the associated production line.
-/// The class is mapped to a database table named "Model" and contains validation attributes
-/// for entity constraints.
-/// </remarks>
 [DebuggerDisplay("{Name} - {Line.Name}")]
 [Table("Model")]
 public class Model

@@ -17,7 +17,7 @@ public class Comment
 }
 
 [DebuggerDisplay("{Content} - AuthorId:{AuthorId}")]
-public class CommentInfo
+public class CommentCreationInfo
 {
     public required string Id { get; set; }
     public required string Content { get; set; }

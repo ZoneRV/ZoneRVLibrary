@@ -13,7 +13,7 @@ public class Attachment
 }
 
 [DebuggerDisplay("{Id} - {Url}")]
-public class AttachmentInfo
+public class AttachmentCreationInfo
 {
     public required string Id { get; init; }
     public required string Url { get; init; }

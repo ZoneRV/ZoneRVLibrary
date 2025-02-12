@@ -76,12 +76,12 @@ public static class TrelloUtils
         };
     }
 
-    internal static YellowCardInfo ToYellowCardInfo(this TrelloDotNet.Model.Card trelloCard, IEnumerable<CachedTrelloAction> cardActions, IEnumerable<CustomField> customFields)
+    internal static YellowCardCreationInfo ToYellowCardInfo(this TrelloDotNet.Model.Card trelloCard, IEnumerable<CachedTrelloAction> cardActions, IEnumerable<CustomField> customFields)
     {
         var cachedTrelloActions = cardActions.ToList();
         var enumerable = customFields.ToList();
 
-        return new YellowCardInfo()
+        return new YellowCardCreationInfo()
         {
             Id = trelloCard.Id,
             Name = trelloCard.Name,
@@ -130,9 +130,9 @@ public static class TrelloUtils
         };
     }
 
-    internal static CommentInfo ToCommentInfo(this CachedTrelloAction action)
+    internal static CommentCreationInfo ToCommentInfo(this CachedTrelloAction action)
     {
-        return new CommentInfo()
+        return new CommentCreationInfo()
         {
             AuthorId = action.MemberId,
             Content = action.Content ?? "",
@@ -141,9 +141,9 @@ public static class TrelloUtils
         };
     }
 
-    internal static AttachmentInfo ToAttachmentInfo(this Attachment attachment)
+    internal static AttachmentCreationInfo ToAttachmentInfo(this Attachment attachment)
     {
-        return new AttachmentInfo()
+        return new AttachmentCreationInfo()
         {
             Id = attachment.Id,
             Url = attachment.Url

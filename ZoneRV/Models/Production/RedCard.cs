@@ -1,11 +1,11 @@
 ﻿namespace ZoneRV.Models.Production;
 
 /// <summary>
-/// Represents a RedCard used in the production system.
-/// A RedCard is a specific type of <see cref="Card"/> that identifies production-related
-/// issues or concerns, such as those defined in <see cref="RedFlagIssue"/>.
+/// Represents a RedCard, a specific type of card used in the production system.
+/// It inherits from the base class <see cref="Card"/> and includes properties for
+/// <see cref="RedFlagIssue"/> and creation-related details.
 /// </summary>
-[DebuggerDisplay("{Name} - {SalesOrder.Name}")]
+[DebuggerDisplay("{SalesOrder.Name}:{Name}")]
 public class RedCard : Card
 {
     public override CardType Type
@@ -25,9 +25,10 @@ public class RedCard : Card
 }
 
 /// <summary>
-/// Represents the creation information for a RedCard in the production system.
-/// This class extends the base class <see cref="CardCreationInfo"/> and adds
-/// additional properties specific to a RedCard.
+/// Contains information necessary for the creation of a <see cref="RedCard"/>.
+/// Includes specific properties such as <see cref="RedFlagIssue"/> and optional <see cref="CreationDate"/>
+/// to represent the associated issue and the card's creation timestamp.
+/// Inherits common creation properties from <see cref="CardCreationInfo"/>.
 /// </summary>
 [DebuggerDisplay("{Name}")]
 public class RedCardCreationInfo : CardCreationInfo

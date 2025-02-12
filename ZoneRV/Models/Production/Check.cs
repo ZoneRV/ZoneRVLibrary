@@ -3,21 +3,19 @@
 namespace ZoneRV.Models.Production;
 
 /// <summary>
-/// Represents a specific item or task within a checklist that can be tracked for completion status.
+/// Represents an individual check within a checklist.
 /// </summary>
 /// <remarks>
-/// The Check class encapsulates properties and behavior associated with an individual task,
-/// such as its name, completion status, and timestamps. It is designed to work within the context
-/// of a checklist and is used to track and update task state dynamically through the production service.
+/// Manages the state of a specific check, such as its name, completion status, and the date it was last modified.
 /// </remarks>
 /// <seealso cref="Checklist"/>
-/// <seealso cref="CheckCreationInfo"/>
 [DebuggerDisplay("{Name} Completed:{IsChecked}")]
 public class Check
 {
     public required string Id { get; init; }
     
-    [OptionalJsonField(true)] public required Checklist Checklist { get; init; }
+    [OptionalJsonField(true)] 
+    public required Checklist Checklist { get; init; }
     
     public required string Name { get; set; }
 
@@ -43,15 +41,10 @@ public class Check
 }
 
 /// <summary>
-/// Represents the information required to create a new check entry.
+/// Encapsulates the information required to create or initialize a check.
 /// </summary>
-/// <remarks>
-/// This class is used as a data transfer object to encapsulate the necessary properties
-/// for creating a check within a checklist. It is primarily used in conjunction with methods
-/// that perform check creation in the production service layer.
-/// </remarks>
 /// <seealso cref="Check"/>
-/// <seealso cref="Checklist"/>
+/// <seealso cref="ChecklistCreationInfo"/>
 [DebuggerDisplay("{Name} Completed:{IsChecked}")]
 public class CheckCreationInfo
 {

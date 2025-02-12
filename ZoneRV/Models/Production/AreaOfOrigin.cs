@@ -7,7 +7,7 @@ namespace ZoneRV.Models.Production;
 /// <summary>
 /// Represents the area of origin associated with a production process or entity.
 /// </summary>
-[DebuggerDisplay("{Name}")]
+[DebuggerDisplay("{Name}:{Line.Name}")]
 [Table("AreaOfOrigin")]
 public class AreaOfOrigin
 {

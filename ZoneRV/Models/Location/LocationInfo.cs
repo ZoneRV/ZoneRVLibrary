@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Diagnostics;
 using ZoneRV.Serialization;
 
 namespace ZoneRV.Models.Location;
@@ -8,7 +7,7 @@ namespace ZoneRV.Models.Location;
 /// Represents location-specific information, including historical movements and current position.
 /// Provides utilities to track and retrieve location change data over time.
 /// </summary>
-[DebuggerDisplay("{CurrentLocation}")]
+[DebuggerDisplay("{CurrentLocation}:{_line.Name} - {_locationHistory.Count} locations")]
 public class LocationInfo : IEnumerable<(DateTimeOffset moveDate, OrderedLineLocation lineLocation)>
 {
     [OptionalJsonField] private List<(DateTimeOffset moveDate, OrderedLineLocation lineLocation)> _locationHistory;
@@ -28,20 +27,22 @@ public class LocationInfo : IEnumerable<(DateTimeOffset moveDate, OrderedLineLoc
     }
 
     /// <summary>
-    /// Gets the current location of the entity, determined by the most recent move date
-    /// in the location history. If no location history exists, it defaults to the pre-production location.
+    /// Gets the current location of the entity if available.
+    /// Returns the most recent location based on the movement history,
+    /// or null if no location data exists.
     /// </summary>
-    /// <value>
-    /// The latest <see cref="WorkspaceLocation"/> based on the move date in the history or
-    /// a default pre-production location if the history is empty.
-    /// </value>
     public OrderedLineLocation? CurrentLocation =>
         _locationHistory.Count == 0 ? null : _locationHistory.MaxBy(x => x.moveDate).lineLocation;
 
-    /// <exception cref="ArgumentException">Location info already contains location.</exception>
-    /// <exception cref="ArgumentException">Non-bay locations Cannot be added as a location change.</exception>
-    /// <exception cref="ArgumentException">Locations from different production lines cant be added to one van.</exception>
-    /// <exception cref="ArgumentException">Location information already contains a location move for a date.</exception>
+    /// <summary>
+    /// Validates the provided position changes to ensure they can be added to the location history.
+    /// </summary>
+    /// <param name="changes">The list of position changes, each containing a date and an OrderedLineLocation, to validate.</param>
+    /// <returns>True if all position changes are valid.</returns>
+    /// <exception cref="ArgumentException">Thrown when a location in the changes already exists in the location history.</exception>
+    /// <exception cref="ArgumentException">Thrown when a non-bay location is included in the changes.</exception>
+    /// <exception cref="ArgumentException">Thrown when the changes include locations from multiple production lines.</exception>
+    /// <exception cref="ArgumentException">Thrown when a position change date in the changes already exists in the location history.</exception>
     private bool CheckPositionChangesValid(List<(DateTimeOffset date, OrderedLineLocation lineLocation)> changes)
     {
         foreach (var change in changes)
@@ -49,7 +50,7 @@ public class LocationInfo : IEnumerable<(DateTimeOffset moveDate, OrderedLineLoc
             if (_locationHistory.Any(x => x.lineLocation == change.lineLocation))
                 throw new ArgumentException("Location already exists", nameof(change.lineLocation));
 
-            if (change.lineLocation.Location.LocationType != ProductionLocationType.Bay )
+            if (change.lineLocation.Location.LocationType is not ProductionLocationType.Bay )
                 throw new ArgumentException("Non bay locations Cannot be added as a location change.",
                     nameof(change.lineLocation.Location.LocationType));
 
@@ -67,14 +68,11 @@ public class LocationInfo : IEnumerable<(DateTimeOffset moveDate, OrderedLineLoc
     }
 
     /// <summary>
-    /// Adds a position change to the location history.
+    /// Adds a new position change to the location history if the change is valid.
     /// </summary>
     /// <param name="date">The date of the position change.</param>
-    /// <param name="location">The location to be added.</param>
-    /// <exception cref="ArgumentException">Thrown when the location information already contains the specified location.</exception>
-    /// <exception cref="ArgumentException">Thrown when a non-bay location is added as a position change, unless it is pre or post-production.</exception>
-    /// <exception cref="ArgumentException">Thrown when trying to add locations from different production lines.</exception>
-    /// <exception cref="ArgumentException">Thrown when a position change already exists for the specified date.</exception>
+    /// <param name="location">The new OrderedLineLocation associated with the position change.</param>
+    /// <exception cref="ArgumentException">Thrown if the position change is invalid based on validation rules.</exception>
     public void AddPositionChange(DateTimeOffset date, OrderedLineLocation location)
     {
         if (CheckPositionChangesValid([(date, lineLocation: location)]))
@@ -85,14 +83,10 @@ public class LocationInfo : IEnumerable<(DateTimeOffset moveDate, OrderedLineLoc
     }
 
     /// <summary>
-    /// Adds a range of position changes to the location history. Ensures the changes are valid before adding them
-    /// and reorders the history based on the movement dates.
+    /// Adds a range of position changes to the location history and orders the history by move date after insertion.
     /// </summary>
-    /// <param name="changes">The list of position changes, each containing a date and a location, to be added to the history.</param>
-    /// <exception cref="ArgumentException">Location info already contains location.</exception>
-    /// <exception cref="ArgumentException">Non-bay locations cannot be added as a location change.</exception>
-    /// <exception cref="ArgumentException">Locations from different production lines cannot be added to one van.</exception>
-    /// <exception cref="ArgumentException">Location information already contains a location move for a date.</exception>
+    /// <param name="changes">The list of position changes, each containing a move date and an OrderedLineLocation, to be added to the location history.</param>
+    /// <exception cref="ArgumentException">Thrown when the position changes are invalid, such as containing duplicate move dates, non-bay locations, or locations from different production lines.</exception>
     public void AddPositionChangeRange(List<(DateTimeOffset date, OrderedLineLocation lineLocation)> changes)
     {
         if (CheckPositionChangesValid(changes))
@@ -103,10 +97,10 @@ public class LocationInfo : IEnumerable<(DateTimeOffset moveDate, OrderedLineLoc
     }
 
     /// <summary>
-    /// Retrieves the location corresponding to the specified date from the location history.
+    /// Retrieves the position associated with a specific date from the location history.
     /// </summary>
-    /// <param name="date">The date for which the location is to be retrieved.</param>
-    /// <returns>The location associated with the specified date. If the date is earlier than the first movement in the history, returns the pre-production location.</returns>
+    /// <param name="date">The date to find the corresponding position for.</param>
+    /// <returns>The OrderedLineLocation if a position is found for the provided date; otherwise, null if no position exists or the date is earlier than the first recorded move date.</returns>
     public OrderedLineLocation? GetPositionFromDate(DateTimeOffset date)
     {
         if (_locationHistory.Count == 0 || date < _locationHistory.First().moveDate)
@@ -116,11 +110,10 @@ public class LocationInfo : IEnumerable<(DateTimeOffset moveDate, OrderedLineLoc
     }
 
     /// <summary>
-    /// Retrieves the date range during which a specified location was active.
+    /// Retrieves the date range during which the specified location was active.
     /// </summary>
-    /// <param name="position">The location to retrieve the active date range for.</param>
-    /// <returns>A tuple containing the start date and, if available, the end date during which the location was active.
-    /// Returns <c>null</c> if the location is not present in the location history.</returns>
+    /// <param name="position">The location to find the date range for.</param>
+    /// <returns>A tuple containing the start date and the end date (or null if no end date exists) when the location was active, or null if the location is not found in the history.</returns>
     public (DateTimeOffset start, DateTimeOffset? end)? GetDateRange(OrderedLineLocation position)
     {
         if (_locationHistory.All(x => x.lineLocation != position))

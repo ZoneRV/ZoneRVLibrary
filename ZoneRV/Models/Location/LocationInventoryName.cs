@@ -3,7 +3,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ZoneRV.Models.Location;
 
-
+/// <summary>
+/// Represents a custom inventory name associated with a specific ordered line location and service.
+/// </summary>
+[DebuggerDisplay("{LineLocation.Location.Name} - {CustomName}:{ServiceType}")]
 [Table("LocationInventoryName")]
 public class LocationInventoryName
 {

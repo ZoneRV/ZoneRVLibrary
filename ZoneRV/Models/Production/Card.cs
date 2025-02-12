@@ -115,6 +115,6 @@ public abstract class CardCreationInfo
     public required string                      Url                   { get; init; }
     public required DateTimeOffset?             CardStatusLastUpdated { get; set; }
     public          List<ChecklistCreationInfo> ChecklistInfos        { get; init; } = [];
-    public          List<CommentInfo>           CommentInfos          { get; init; } = [];
-    public          List<AttachmentInfo> AttachmentInfos { get; init; } = [];
+    public          List<CommentCreationInfo>           CommentInfos          { get; init; } = [];
+    public          List<AttachmentCreationInfo> AttachmentInfos { get; init; } = [];
 }

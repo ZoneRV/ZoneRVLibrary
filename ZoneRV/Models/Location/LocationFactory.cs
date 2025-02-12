@@ -1,13 +1,12 @@
-﻿using System.Collections;
-using System.Linq.Expressions;
-using System.Collections.Concurrent;
-using System.Data;
-using System.Diagnostics.CodeAnalysis;
-using Mysqlx.Crud;
+﻿using System.Data;
 
 namespace ZoneRV.Models.Location;
 
-
+/// <summary>
+/// Factory class responsible for creating and managing location objects such as
+/// WorkspaceLocation and OrderedLineLocation within production workspaces and lines.
+/// </summary>
+[DebuggerDisplay(null)]
 public class LocationFactory
 {
     private readonly string _serviceType;

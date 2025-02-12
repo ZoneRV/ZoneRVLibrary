@@ -170,7 +170,7 @@ public class TestProductionService : IProductionService
             for (int i = 0; i < yellowCardCount; i++)
             {
                 var yellowCardInfo =
-                    new YellowCardInfo()
+                    new YellowCardCreationInfo()
                     {
                         AttachmentInfos = [],
                         CardStatus =
@@ -198,7 +198,7 @@ public class TestProductionService : IProductionService
     {
         for (int j = 0; j < _faker.Random.Int(0, 5); j++)
         {
-            card.AttachmentInfos.Add(new AttachmentInfo()
+            card.AttachmentInfos.Add(new AttachmentCreationInfo()
             {
                 Id  = (_id++).ToString(),
                 Url = _faker.Image.PlaceholderUrl(100, 100)
@@ -240,7 +240,7 @@ public class TestProductionService : IProductionService
 
         for (int i = 0; i < _faker.Random.Int(0, 10); i++)
         {
-            card.CommentInfos.Add(new CommentInfo()
+            card.CommentInfos.Add(new CommentCreationInfo()
             {
                 AuthorId = _faker.PickRandom(Users.Keys),
                 Content = _faker.Rant.Review(model.Name),

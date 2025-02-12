@@ -1,9 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using ZoneRV.Serialization;
 
 namespace ZoneRV.Models.Location;
 
+/// <summary>
+/// Represents a location within a production line, with a specified order.
+/// </summary>
+[DebuggerDisplay("{Location.Name}:{Line.Name} order: {Order}")]
 public class OrderedLineLocation : IEquatable<OrderedLineLocation>
 {
     [Key, Required] public int Id { get; init; }

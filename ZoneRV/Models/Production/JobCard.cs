@@ -3,15 +3,16 @@
 namespace ZoneRV.Models.Production;
 
 /// <summary>
-/// Represents a job card in the production system, inheriting from the <see cref="Card"/> base class.
-/// A job card encapsulates the details and state necessary to track a specific job within the production workflow.
+/// Represents a production job card containing task and location-specific details
+/// associated with a sales order in the production system.
 /// </summary>
 /// <remarks>
-/// The <see cref="JobCard"/> class includes properties and methods to manage job-related states such as location, due status,
-/// task time, and remaining task time. It extends the basic functionality of <see cref="Card"/> by introducing logic
-/// specific to production workflows, particularly with regard to task tracking and scheduling.
+/// A <see cref="JobCard"/> is derived from the <see cref="Card"/> base class and includes
+/// properties such as location, task time, and due status. It determines task progress
+/// and calculates any remaining task time. Job cards are also connected to ordered line
+/// locations to track their association with production workflows.
 /// </remarks>
-[DebuggerDisplay("{Name} - {SalesOrder.Name}")]
+[DebuggerDisplay("{SalesOrder.Name}:{Name}")]
 public class JobCard : Card
 {
     public override CardType Type
@@ -45,7 +46,7 @@ public class JobCard : Card
     }
 
 
-    private TimeSpan _taskTime { get; set; }
+    private TimeSpan _taskTime;
     
     /// <summary>
     /// Default value of 10 minutes
@@ -62,14 +63,13 @@ public class JobCard : Card
 }
 
 /// <summary>
-/// Represents detailed information required to create a Job Card in the production system.
-/// This class is a specialized implementation of the <see cref="CardCreationInfo"/> base class,
-/// providing additional properties specific to job-related tasks.
+/// Provides details required for creating a <see cref="JobCard"/>, including
+/// essential configuration such as task duration and unique identification.
 /// </summary>
 /// <remarks>
-/// A <see cref="JobCardCreationInfo"/> includes all the foundational card creation details,
-/// such as status, identification, name, URL, as well as a mandatory property for specifying
-/// the time required to complete the associated task.
+/// This class extends <see cref="CardCreationInfo"/> and encapsulates additional
+/// information specific to job card creation, such as the time allocated for tasks.
+/// Used during the generation of job cards in production workflows.
 /// </remarks>
 [DebuggerDisplay("{Name}")]
 public class JobCardCreationInfo : CardCreationInfo

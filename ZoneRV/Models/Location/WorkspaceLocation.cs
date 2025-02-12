@@ -4,7 +4,10 @@ using ZoneRV.Serialization;
 
 namespace ZoneRV.Models.Location;
 
-[DebuggerDisplay("{Line} - {Name}")]
+/// <summary>
+/// Represents a location within a production workspace.
+/// </summary>
+[DebuggerDisplay("{Name}")]
 [Table("WorkspaceLocation")]
 public class WorkspaceLocation : IEquatable<WorkspaceLocation>
 {

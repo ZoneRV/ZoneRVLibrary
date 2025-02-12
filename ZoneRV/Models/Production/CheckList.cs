@@ -3,25 +3,25 @@
 namespace ZoneRV.Models.Production;
 
 /// <summary>
-/// Represents a checklist composed of multiple checks, tracking their completion status.
+/// Represents a checklist that contains multiple checks associated with a card.
 /// </summary>
 /// <remarks>
-/// The Checklist class models a collection of individual checks associated with a specific card.
-/// It provides functionality for calculating the summary statistics regarding the completion
-/// status of the associated checks, such as the number of completed, uncompleted checks, and the
-/// overall completion rate. This class is central in managing and persisting checklist-related
-/// data within production environments.
+/// This class provides properties to manage and evaluate a checklist, including
+/// its ID, name, associated card, and a collection of checks. It also includes
+/// calculated properties for obtaining the count of completed and uncompleted checks
+/// as well as the completion rate.
 /// </remarks>
 /// <seealso cref="Check"/>
 /// <seealso cref="Card"/>
-[DebuggerDisplay("{Name}: {CompletedChecks}/{UncompletedChecks}")]
+[DebuggerDisplay("{Card.SalesOrder.Name}:{Card.Name}:{Name} {CompletedChecks}/{UncompletedChecks}")]
 public class Checklist
 {
     public required string Id { get; init; }
 
     public required string Name { get; set; }
     
-    [OptionalJsonField(true)] public required Card Card { get; init; }
+    [OptionalJsonField(true)] 
+    public required Card Card { get; init; }
     
     public required List<Check> Checks { get; init; } = [];
     
@@ -33,16 +33,14 @@ public class Checklist
 }
 
 /// <summary>
-/// Represents the information required to create a new checklist.
+/// Contains the necessary information for creating or initializing a checklist.
 /// </summary>
 /// <remarks>
-/// This class serves as a data transfer object, encapsulating the necessary properties
-/// to create a checklist. It includes the Checklist ID, name, and an optional collection of
-/// check creation information. Typically utilized in scenarios where checklist creation is
-/// required within the service layer or data initialization processes.
+/// This class holds an identifier, a name, and a collection of check creation details.
+/// It serves as a data transfer object for building or representing checklists.
 /// </remarks>
-/// <seealso cref="Checklist"/>
 /// <seealso cref="CheckCreationInfo"/>
+/// <seealso cref="Checklist"/>
 [DebuggerDisplay("{Name}")]
 public class ChecklistCreationInfo
 {
