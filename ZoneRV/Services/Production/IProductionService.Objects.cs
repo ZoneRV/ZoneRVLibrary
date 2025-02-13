@@ -143,6 +143,32 @@ public abstract partial class IProductionService
         }
     }
 
+    public abstract Task<ChecklistCreationInfo> GetChecklistFromSource(string checklistId);
+
+    public bool TryGetCardFromId(string cardId, [NotNullWhen(true)] out Card? card)
+    {
+        if(JobCards.TryGetValue(cardId, out var jobCard))
+        {
+            card = jobCard;
+            return true;
+        }
+                    
+        if(RedCards.TryGetValue(cardId, out var redCard))
+        {
+            card = redCard;
+            return true;
+        }
+                    
+        if(YellowCards.TryGetValue(cardId, out var yellowCard))
+        {
+            card = yellowCard;
+            return true;
+        }
+
+        card = null;
+        return false;
+    }
+
     protected JobCard BuildJobCard(SalesOrder salesOrder, JobCardCreationInfo info, AreaOfOrigin? areaOfOrigin, OrderedLineLocation location)
     {
         var jobcard = new JobCard(salesOrder, info, areaOfOrigin, location);

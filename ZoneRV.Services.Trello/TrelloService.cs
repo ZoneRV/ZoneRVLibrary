@@ -31,7 +31,7 @@ public class TrelloService : IProductionService
     
     protected override string ServiceTypeName { get => "trello"; }
     
-    private TrelloClient TrelloClient     { get; }
+    internal TrelloClient TrelloClient     { get; }
     private Member?      TrelloMember     { get; set; }
     private string       TrelloApiKey     { get; }
     private string       TrelloUserToken  { get; }
@@ -39,7 +39,7 @@ public class TrelloService : IProductionService
     private string       ProHoDashboardId { get; }
 
     public override int MaxDegreeOfParallelism { get; protected set; } = 3;
-    
+
     public TrelloService(IServiceScopeFactory scopeFactory, IConfiguration configuration) : base(scopeFactory, configuration)
     {
         _scopeFactory = scopeFactory;
@@ -373,6 +373,14 @@ public class TrelloService : IProductionService
 
             return van;
         }
+    }
+    
+    public override async Task<ChecklistCreationInfo> GetChecklistFromSource(string checklistId)
+    {
+        var checklist = await TrelloClient.GetChecklistAsync(checklistId);
+        var actions =  await TrelloClient.GetActionsOnCardAsync(checklist.CardId);
+
+        return checklist.ToChecklistInfo(actions.ToCachedTrelloActions());
     }
     
     private async Task<List<CachedTrelloAction>> GetTrelloActionsWithCache(string id, CancellationToken cancellationToken = default, List<string>? actionFilters = null)

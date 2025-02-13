@@ -21,7 +21,7 @@ public class Checklist
     public required string Name { get; set; }
     
     [OptionalJsonField(true)] 
-    public required Card Card { get; init; }
+    public required Card Card { get; set; }
     
     public required List<Check> Checks { get; init; } = [];
     

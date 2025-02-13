@@ -52,6 +52,7 @@ public class VanNameRegexTests
     [InlineData("(exp010)", "exp", "010", "exp010")]
     [InlineData("(exp010",  "exp", "010", "exp010")]
     [InlineData("exp010)",  "exp", "010", "exp010")]
+    [InlineData("exp#010)",  "exp", "010", "exp010")]
     
     [InlineData("zss100 and zss100 should still return zss100",              "zss", "100", "zss100")]
     [InlineData("this is zpp100r, so amazing we just had to build it twice", "zpp", "100r", "zpp100r")]

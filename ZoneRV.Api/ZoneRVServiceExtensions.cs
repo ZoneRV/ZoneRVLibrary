@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Web.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 using ZoneRV.DBContexts;
 using ZoneRV.Services.Production;
@@ -29,7 +30,7 @@ public static class ZoneRVServiceExtensions
                     .LogTo(Log.Logger.Debug, LogLevel.Information));
         
         services.AddSingleton<IProductionService, TrelloService>();
-
+        
         return services;
     }
 }

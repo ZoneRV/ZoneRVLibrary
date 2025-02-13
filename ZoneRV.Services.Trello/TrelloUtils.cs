@@ -1,17 +1,18 @@
-﻿using System.Collections;
-using Serilog;
+﻿using Serilog;
 using TrelloDotNet.Model;
 using TrelloDotNet.Model.Actions;
+using TrelloDotNet.Model.Webhook;
 using ZoneRV.Models;
 using ZoneRV.Models.Enums;
 using ZoneRV.Models.Production;
+using ZoneRV.Services.Production;
 using ZoneRV.Services.Trello.Models;
 using Attachment = TrelloDotNet.Model.Attachment;
 using Checklist = TrelloDotNet.Model.Checklist;
 
 namespace ZoneRV.Services.Trello;
 
-public static class TrelloUtils
+internal  static class TrelloUtils
 {
     internal static CachedTrelloAction ToCachedAction(this TrelloAction action)
     {
@@ -150,16 +151,22 @@ public static class TrelloUtils
         };
     }
 
+    internal static CheckUpdatedData ToCheckUpdatedData(this WebhookAction args, EntityUpdateType updateType)
+        => new CheckUpdatedData(args.Date, args.Data.CheckItem.Id, args.Data.Checklist.Id, updateType, args.Data.CheckItem.Name, args.Data.CheckItem.State is ChecklistItemState.Complete);
+
+    internal static ChecklistUpdatedData ToChecklistUpdatedData(this WebhookAction args, EntityUpdateType updateType)
+        => new ChecklistUpdatedData(args.Date, args.Data.Checklist.Id, args.Data.Card.Id, updateType, args.Data.Checklist.Name);
+
     internal static IEnumerable<CachedTrelloAction> ToCachedTrelloActions(this IEnumerable<TrelloAction> actions)
         => actions.Select(x => x.ToCachedAction());
     
-    public static readonly string[] RedCardListNames =
+    internal  static readonly string[] RedCardListNames =
         ["RED CARDS TO BE ACTIONED", "RED FLAG CARDS COMPLETED", "RED FLAG CARDS COMPLETEDI\u2076", "Design Issues"];
 
-    public static readonly string[] YellowCardListNames =
+    internal  static readonly string[] YellowCardListNames =
         ["Yellow Cards___________ (Due to out of stock parts!)"];
 
-    public static readonly string[] IgnoredRedAndYellowCardNames =
+    internal  static readonly string[] IgnoredRedAndYellowCardNames =
     [
         "IMPORTANT STEP's ON - How to raise a red card",
         "STEPS TO CLOSE OUT A RED CARD WHEN COMPLETED",
@@ -170,7 +177,7 @@ public static class TrelloUtils
         ">>RED CARDS COMPLETED<<"
     ];
 
-    public static readonly string[] IgnoredJobListsNames =
+    internal  static readonly string[] IgnoredJobListsNames =
     [
         "PLANS AND SPECS",
         "COMPLIANCE CERTIFICATES",
@@ -191,13 +198,13 @@ public static class TrelloUtils
         "SIGN-OFFs"
     ];
     
-    public static CardType GetCardType(TrelloDotNet.Model.Card card, IEnumerable<CustomField> customFields)
+    internal static CardType GetCardType(TrelloDotNet.Model.Card card, IEnumerable<CustomField> customFields)
     {
         if (RedCardListNames.Contains(card.List.Name) && !IgnoredRedAndYellowCardNames.Contains(card.Name))
         {
-            var yellowFileds = customFields.Where(x => x.Name == "Yellow Card Issue");
+            var yellowFields = customFields.Where(x => x.Name == "Yellow Card Issue");
 
-            if (card.CustomFieldItems.Any(x => yellowFileds.Any(f => f.Id == x.CustomFieldId)))
+            if (card.CustomFieldItems.Any(x => yellowFields.Any(f => f.Id == x.CustomFieldId)))
                 return CardType.YellowCard;
 
             else
@@ -230,8 +237,8 @@ public static class TrelloUtils
         return TimeSpan.FromMinutes(double.Parse(fieldValue));
     }
 
-    public static CardStatus ToCardStatus(TrelloDotNet.Model.Card card, IEnumerable<CustomField> customFields,
-        IEnumerable<CachedTrelloAction> customFieldActions, out DateTimeOffset? dateLastUpdated)
+    internal  static CardStatus ToCardStatus(TrelloDotNet.Model.Card card, IEnumerable<CustomField> customFields,
+                                             IEnumerable<CachedTrelloAction> customFieldActions, out DateTimeOffset? dateLastUpdated)
     {
         dateLastUpdated = null;
 

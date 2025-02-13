@@ -1,15 +1,15 @@
+using System.Threading.Channels;
 using Figgle;
 using MartinCostello.OpenApi;
 using Microsoft.AspNetCore.ResponseCompression;
-using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using ZoneRV.Api;
-using ZoneRV.DBContexts;
 using ZoneRV.Services.Production;
 using Scalar.AspNetCore;
 using ZoneRV.Api.SignalR;
 using ZoneRV.Serialization;
+using ZoneRV.Services.Channels.ProductionWebhook;
 using ZoneRV.Services.Test;
 
 try
@@ -74,14 +74,6 @@ try
 
     builder.Services.AddSerilog();
     Log.Logger.Information("Starting Api on {machine}", Environment.MachineName);
-
-    builder.Services.AddControllers()
-           .AddNewtonsoftJson((options) =>
-            {
-                options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-                options.SerializerSettings.Converters.Add(new StringEnumConverter(new CamelCaseNamingStrategy()));
-                options.SerializerSettings.Converters.Add(new LocationInfoJsonConverter());
-            });
     
     builder.Services.AddSignalR(options =>
     {
@@ -92,12 +84,20 @@ try
     {
         options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "application/octet-stream" });
     });
+
+    var productionUpdateChannel =
+        Channel.CreateUnbounded<BaseUpdate>(new UnboundedChannelOptions()
+        {
+            AllowSynchronousContinuations = false, SingleReader = true, SingleWriter = false
+        });
+
+    builder.Services.AddSingleton(productionUpdateChannel);
     
     builder.Services.AddOpenApi();
 
     builder.Services.AddOpenApiExtensions((options) =>
     {
-        //options.AddXmlComments<Program>();
+        options.AddXmlComments<Program>();
     });
     
     if(!bool.TryParse(builder.Configuration["useTestProductionService"], out var useTest) || !useTest)
@@ -111,6 +111,16 @@ try
         
         builder.Services.AddTestProductionService(false, string.IsNullOrEmpty(seedString) ? null : int.Parse(seedString));
     }
+
+    builder.Services.AddSingleton<ProductionChannelConsumer>();
+
+    builder.Services.AddControllers()
+           .AddNewtonsoftJson((options) =>
+            {
+                options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                options.SerializerSettings.Converters.Add(new StringEnumConverter(new CamelCaseNamingStrategy()));
+                options.SerializerSettings.Converters.Add(new LocationInfoJsonConverter());
+            });
 
     var app = builder.Build();
 
