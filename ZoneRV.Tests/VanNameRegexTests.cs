@@ -53,6 +53,8 @@ public class VanNameRegexTests
     [InlineData("(exp010",  "exp", "010", "exp010")]
     [InlineData("exp010)",  "exp", "010", "exp010")]
     [InlineData("exp#010)",  "exp", "010", "exp010")]
+    [InlineData("exp_010)",  "exp", "010", "exp010")]
+    [InlineData("exp/010)",  "exp", "010", "exp010")]
     
     [InlineData("zss100 and zss100 should still return zss100",              "zss", "100", "zss100")]
     [InlineData("this is zpp100r, so amazing we just had to build it twice", "zpp", "100r", "zpp100r")]
@@ -74,6 +76,8 @@ public class VanNameRegexTests
     
     [Theory]
     [InlineData("zsp100 and zpp401")]
+    [InlineData("zsps100")]
+    [InlineData("zsp5123")]
     public void ShouldReturnFalse(string input)
     {
         Assert.False(_nameMatcher.TryGetSingleName(input, out _));
